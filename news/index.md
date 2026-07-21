@@ -2,8 +2,32 @@
 
 ## greta 0.6.0
 
+CRAN release: 2026-07-20
+
 ### Changes
 
+- Add warmup information to the MCMC print method
+  ([\#652](https://github.com/greta-dev/greta/issues/652), resolved by
+  [\#755](https://github.com/greta-dev/greta/issues/755)).
+- Cap TensorFlow’s internal CPU threadpool inside vignette builds (via
+  `TF_NUM_INTRAOP_THREADS` and `TF_NUM_INTEROP_THREADS`) so CRAN’s
+  CPU/elapsed timing on vignette rebuilds stays under the two-core limit
+  ([\#796](https://github.com/greta-dev/greta/issues/796)).
+- greta now also caps TensorFlow’s CPU thread pools at 2 when running
+  under `R CMD check` (detected via the `_R_CHECK_LIMIT_CORES_`
+  environment variable), so checks on CRAN machines respect the two-core
+  limit ([\#796](https://github.com/greta-dev/greta/issues/796)).
+- Reshaping a greta array with `dim<-` now keeps the `?` placeholder
+  display for unknown values instead of showing `NA`
+  ([\#582](https://github.com/greta-dev/greta/issues/582)).
+- Resolve issues with the TensorFlow version in DESCRIPTION: greta no
+  longer requires `== 2.16.0` and now accepts `>= 2.16.0`.
+- The `n_cores` argument now defaults to 2 cores and `chains` defaults
+  to 2 chains; when the number of cores requested exceeds the number
+  detected, the number detected is used.
+- Use `.batch_size` instead of `batch_size` internally, to avoid rare
+  name clash errors
+  ([\#634](https://github.com/greta-dev/greta/issues/634)).
 - [`as.unknowns()`](https://greta-dev.github.io/greta/reference/as.unknowns.md)
   now handles plain numeric vectors (and `dim<-` being set to `NULL`),
   fixing an
@@ -11,43 +35,26 @@
   error “no applicable method for ‘as.unknowns’” that surfaced when
   re-building vignettes under R-devel
   ([\#582](https://github.com/greta-dev/greta/issues/582)).
-- `log.greta_array()` function warns if user uses the `base` arg, as it
-  was unused, ([\#597](https://github.com/greta-dev/greta/issues/597)).
+- [`greta_notes_tf_num_error()`](https://greta-dev.github.io/greta/reference/stash-notes.md)
+  now emits its note with
+  [`message()`](https://rdrr.io/r/base/message.html) rather than
+  [`cat()`](https://rdrr.io/r/base/cat.html), so it can be silenced with
+  [`suppressMessages()`](https://rdrr.io/r/base/message.html) and is
+  written to the message stream.
+- [`greta_sitrep()`](https://greta-dev.github.io/greta/reference/greta_sitrep.md)
+  gains a `verbosity` argument with three levels of detail: “minimal”
+  (default), “detailed”, and “quiet”
+  ([\#612](https://github.com/greta-dev/greta/issues/612), resolved by
+  [\#679](https://github.com/greta-dev/greta/issues/679)).
+- `log.greta_array()` now warns when the `base` argument is supplied, as
+  it was being ignored
+  ([\#597](https://github.com/greta-dev/greta/issues/597)).
 - [`outer()`](https://greta-dev.github.io/greta/reference/overloaded.md)
   (and `%o%`) now works with greta arrays when `FUN = "*"`, instead of
   silently returning a base array of `NA`s; base R’s `"*"` fast path
   used [`as.vector()`](https://rdrr.io/r/base/vector.html), which
   dropped the greta operation
   ([\#582](https://github.com/greta-dev/greta/issues/582)).
-- Reshaping a greta array with `dim<-` now keeps the `?` placeholder
-  display for unknown values instead of showing `NA`
-  ([\#582](https://github.com/greta-dev/greta/issues/582)).
-- Add warmup information to MCMC print method
-  ([\#652](https://github.com/greta-dev/greta/issues/652), resolved by
-  [\#755](https://github.com/greta-dev/greta/issues/755)).
-- Add more options to level of detail in
-  [`greta_sitrep()`](https://greta-dev.github.io/greta/reference/greta_sitrep.md)
-  with “verbosity” argument. There are three levels, “minimal”
-  (default), “detailed”, and “quiet”.
-  ([\#612](https://github.com/greta-dev/greta/issues/612), resolved by
-  [\#679](https://github.com/greta-dev/greta/issues/679)).
-- Use `.batch_size` instead of `batch_size` internally, to avoid rare
-  name clash errors
-  ([\#634](https://github.com/greta-dev/greta/issues/634)).
-- Resolve issues with Tensorflow version in DESCRIPTION (no longer can
-  specify == 2.16.0, must be \>= 2.16.0).
-- When the number of cores requested exceeds the number of cores
-  detected, then the number of cores detected will be used.
-- Ensure `n_cores` arg defaults to 2 cores, and `chains` defaults to 2
-  chains.
-- Cap TensorFlow’s internal CPU threadpool inside vignette builds (via
-  `TF_NUM_INTRAOP_THREADS` and `TF_NUM_INTEROP_THREADS`) so CRAN’s
-  CPU/elapsed timing on vignette rebuild stays under the two-core limit
-  ([\#796](https://github.com/greta-dev/greta/issues/796)).
-- greta now also caps TensorFlow’s CPU thread pools at 2 when running
-  under `R CMD check` (detected via the `_R_CHECK_LIMIT_CORES_`
-  environment variable), so checks on CRAN machines respect the two-core
-  limit ([\#796](https://github.com/greta-dev/greta/issues/796)).
 
 #### Installation and dependencies
 
@@ -86,8 +93,8 @@
   [`remove_greta_env()`](https://greta-dev.github.io/greta/reference/deprecated-installers.md),
   [`remove_miniconda()`](https://greta-dev.github.io/greta/reference/deprecated-installers.md),
   and
-  [`remove_reticulate_uv_cache()`](https://greta-dev.github.io/greta/reference/deprecated-installers.md),
-  are now superceded by
+  [`remove_reticulate_uv_cache()`](https://greta-dev.github.io/greta/reference/deprecated-installers.md)
+  are now superseded by
   [`greta_remove()`](https://greta-dev.github.io/greta/reference/greta_remove.md)
   ([\#814](https://github.com/greta-dev/greta/issues/814)).
 - [`greta_remove()`](https://greta-dev.github.io/greta/reference/greta_remove.md)
@@ -96,12 +103,6 @@
   nudges you to restart R if you try to use greta again without
   restarting, instead of silently failing or falsely reporting the
   removed environment as still available.
-- [`reinstall_greta_env()`](https://greta-dev.github.io/greta/reference/deprecated-installers.md),
-  and
-  [`reinstall_miniconda()`](https://greta-dev.github.io/greta/reference/deprecated-installers.md)
-  are now deprecated in favour of
-  [`reinstall_greta_deps()`](https://greta-dev.github.io/greta/reference/install_greta_deps.md)
-  ([\#814](https://github.com/greta-dev/greta/issues/814)).
 - [`greta_set_deps()`](https://greta-dev.github.io/greta/reference/greta_set_deps.md)
   persistently chooses which TensorFlow, TensorFlow Probability, and
   Python versions greta uses; the managed (uv) environment installs them
@@ -149,6 +150,15 @@
   remains for installing a conda environment (for example, for offline
   use), which you can then select with `greta_set_python("conda")`
   ([\#801](https://github.com/greta-dev/greta/issues/801)).
+- [`install_greta_deps()`](https://greta-dev.github.io/greta/reference/install_greta_deps.md)
+  now restores the `warning.length` option when it exits, instead of
+  leaving its own value in place for the rest of the session.
+- [`reinstall_greta_env()`](https://greta-dev.github.io/greta/reference/deprecated-installers.md)
+  and
+  [`reinstall_miniconda()`](https://greta-dev.github.io/greta/reference/deprecated-installers.md)
+  are now deprecated in favour of
+  [`reinstall_greta_deps()`](https://greta-dev.github.io/greta/reference/install_greta_deps.md)
+  ([\#814](https://github.com/greta-dev/greta/issues/814)).
 - [`remove_greta_env()`](https://greta-dev.github.io/greta/reference/deprecated-installers.md),
   [`remove_miniconda()`](https://greta-dev.github.io/greta/reference/deprecated-installers.md),
   and

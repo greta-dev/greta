@@ -63,6 +63,11 @@ and <a href="transforms.html">transforms</a>.</p>
 
 
     <div class="section level2">
+    <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
+    <p>A <code>greta_array</code>, with the function applied elementwise or as
+appropriate for the function called.</p>
+    </div>
+    <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>TensorFlow only enables rounding to integers, so <code><a href="https://rdrr.io/r/base/Round.html" class="external-link">round()</a></code> will
 error if <code>digits</code> is set to anything other than <code>0</code>.</p>
@@ -132,7 +137,7 @@ precision than R's equivalent.</p>
 <span> <span class="fu"><a href="../reference/overloaded.html">chol2inv</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span><span class="op">)</span></span>
 <span> <span class="fu"><a href="../reference/overloaded.html">cov2cor</a></span><span class="op">(</span><span class="va">V</span><span class="op">)</span></span>
 <span> <span class="fu"><a href="https://rdrr.io/r/base/solve.html" class="external-link">solve</a></span><span class="op">(</span><span class="va">a</span>, <span class="va">b</span>, <span class="va">...</span><span class="op">)</span></span>
-<span> <span class="fu"><a href="https://rdrr.io/r/base/kronecker.html" class="external-link">kronecker</a></span><span class="op">(</span><span class="va">X</span>, <span class="va">Y</span>, FUN <span class="op">=</span> <span class="fu"><a href="../reference/extract-replace-combine.html">c</a></span><span class="op">(</span><span class="st">'*'</span>, <span class="st">'/'</span>, <span class="st">'+'</span>, <span class="st">'-'</span><span class="op">)</span><span class="op">)</span></span>
+<span> <span class="fu"><a href="https://rdrr.io/r/base/kronecker.html" class="external-link">kronecker</a></span><span class="op">(</span><span class="va">X</span>, <span class="va">Y</span>, FUN <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'*'</span>, <span class="st">'/'</span>, <span class="st">'+'</span>, <span class="st">'-'</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span> <span class="co"># reducing operations</span></span>
 <span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">...</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
@@ -154,10 +159,10 @@ precision than R's equivalent.</p>
 <span></span>
 <span> <span class="co"># miscellaneous operations</span></span>
 <span> <span class="fu"><a href="https://rdrr.io/r/base/aperm.html" class="external-link">aperm</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">perm</span><span class="op">)</span></span>
-<span> <span class="fu"><a href="../reference/overloaded.html">apply</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">MARGIN</span>, FUN <span class="op">=</span> <span class="fu"><a href="../reference/extract-replace-combine.html">c</a></span><span class="op">(</span><span class="st">"sum"</span>, <span class="st">"max"</span>, <span class="st">"mean"</span>, <span class="st">"min"</span>,</span>
+<span> <span class="fu"><a href="../reference/overloaded.html">apply</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">MARGIN</span>, FUN <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"sum"</span>, <span class="st">"max"</span>, <span class="st">"mean"</span>, <span class="st">"min"</span>,</span>
 <span>                          <span class="st">"prod"</span>, <span class="st">"cumsum"</span>, <span class="st">"cumprod"</span><span class="op">)</span><span class="op">)</span></span>
-<span> <span class="fu"><a href="../reference/overloaded.html">sweep</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">MARGIN</span>, <span class="va">STATS</span>, FUN <span class="op">=</span> <span class="fu"><a href="../reference/extract-replace-combine.html">c</a></span><span class="op">(</span><span class="st">'-'</span>, <span class="st">'+'</span>, <span class="st">'/'</span>, <span class="st">'*'</span><span class="op">)</span><span class="op">)</span></span>
-<span> <span class="fu"><a href="../reference/overloaded.html">tapply</a></span><span class="op">(</span><span class="va">X</span>, <span class="va">INDEX</span>, FUN <span class="op">=</span> <span class="fu"><a href="../reference/extract-replace-combine.html">c</a></span><span class="op">(</span><span class="st">"sum"</span>, <span class="st">"max"</span>, <span class="st">"mean"</span>, <span class="st">"min"</span>, <span class="st">"prod"</span><span class="op">)</span>, <span class="va">...</span><span class="op">)</span></span>
+<span> <span class="fu"><a href="../reference/overloaded.html">sweep</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">MARGIN</span>, <span class="va">STATS</span>, FUN <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'-'</span>, <span class="st">'+'</span>, <span class="st">'/'</span>, <span class="st">'*'</span><span class="op">)</span><span class="op">)</span></span>
+<span> <span class="fu"><a href="../reference/overloaded.html">tapply</a></span><span class="op">(</span><span class="va">X</span>, <span class="va">INDEX</span>, FUN <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"sum"</span>, <span class="st">"max"</span>, <span class="st">"mean"</span>, <span class="st">"min"</span>, <span class="st">"prod"</span><span class="op">)</span>, <span class="va">...</span><span class="op">)</span></span>
 <span></span></code></pre></div>
 
     </div>

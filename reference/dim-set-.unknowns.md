@@ -18,3 +18,7 @@ dim(x) <- value
 - value:
 
   values that are being set set
+
+## Value
+
+The object `x`, of class `unknowns`, with its dimensions updated.

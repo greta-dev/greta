@@ -83,6 +83,10 @@ transform to a constrained value</p></dd>
 
 </dl></div>
     <div class="section level2">
+    <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
+    <p>A <code>greta_array</code> with the transformation applied.</p>
+    </div>
+    <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>greta does not allow you to state the transformation/link on the
 left hand side of an assignment, as is common in the BUGS and STAN
@@ -116,7 +120,7 @@ used in machine learning.</p>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># transform from 10x3 to 10x4, where rows are a complete set of</span></span></span>
 <span class="r-in"><span><span class="co"># probabilities</span></span></span>
-<span class="r-in"><span><span class="va">x2</span> <span class="op">&lt;-</span> <span class="fu"><a href="distributions.html">normal</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">3</span>, dim <span class="op">=</span> <span class="fu"><a href="extract-replace-combine.html">c</a></span><span class="op">(</span><span class="fl">10</span>, <span class="fl">3</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">x2</span> <span class="op">&lt;-</span> <span class="fu"><a href="distributions.html">normal</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">3</span>, dim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">10</span>, <span class="fl">3</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">z</span> <span class="op">&lt;-</span> <span class="fu">imultilogit</span><span class="op">(</span><span class="va">x2</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
 </code></pre></div>

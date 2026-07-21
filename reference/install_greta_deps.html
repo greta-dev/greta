@@ -78,14 +78,14 @@ now what we recommend. This has changed from where we would previously use
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">install_greta_deps</span><span class="op">(</span></span>
 <span>  deps <span class="op">=</span> <span class="fu"><a href="greta_deps_spec.html">greta_deps_spec</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  timeout <span class="op">=</span> <span class="fl">5</span>,</span>
-<span>  restart <span class="op">=</span> <span class="fu"><a href="extract-replace-combine.html">c</a></span><span class="op">(</span><span class="st">"ask"</span>, <span class="st">"force"</span>, <span class="st">"no"</span><span class="op">)</span>,</span>
+<span>  restart <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"ask"</span>, <span class="st">"force"</span>, <span class="st">"no"</span><span class="op">)</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">reinstall_greta_deps</span><span class="op">(</span></span>
 <span>  deps <span class="op">=</span> <span class="fu"><a href="greta_deps_spec.html">greta_deps_spec</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  timeout <span class="op">=</span> <span class="fl">5</span>,</span>
-<span>  restart <span class="op">=</span> <span class="fu"><a href="extract-replace-combine.html">c</a></span><span class="op">(</span><span class="st">"ask"</span>, <span class="st">"force"</span>, <span class="st">"no"</span><span class="op">)</span>,</span>
+<span>  restart <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"ask"</span>, <span class="st">"force"</span>, <span class="st">"no"</span><span class="op">)</span>,</span>
 <span>  ask <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/interactive.html" class="external-link">interactive</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -130,6 +130,11 @@ confirmation before removing the existing greta conda environment.
 Defaults to <code><a href="https://rdrr.io/r/base/interactive.html" class="external-link">interactive()</a></code>.</p></dd>
 
 </dl></div>
+    <div class="section level2">
+    <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
+    <p>Invisibly returns <code>NULL</code>; called for its side effect of
+installing greta's Python dependencies into a conda environment.</p>
+    </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>This function, <code>install_greta_deps()</code>, is an alternative installation

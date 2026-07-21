@@ -17,3 +17,14 @@ is.greta_array(x, ...)
 - ...:
 
   extra args (currently not used)
+
+## Value
+
+A single logical value.
+
+## Examples
+
+``` r
+is.greta_array(1)
+#> [1] FALSE
+```

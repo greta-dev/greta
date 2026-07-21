@@ -17,3 +17,7 @@ as.greta_model(x, ...)
 - ...:
 
   extra arguments - not used.
+
+## Value
+
+A `greta_model` object.

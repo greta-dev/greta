@@ -15,3 +15,16 @@ gpu_only()
 
 cpu_only()
 ```
+
+## Value
+
+A single character string, `"GPU"` or `"CPU"`.
+
+## Examples
+
+``` r
+gpu_only()
+#> [1] "GPU"
+cpu_only()
+#> [1] "CPU"
+```

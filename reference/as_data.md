@@ -15,6 +15,10 @@ as_data(x)
 
   an R object that can be coerced to a greta_array (see details).
 
+## Value
+
+A data `greta_array` object.
+
 ## Details
 
 `as_data()` can currently convert R objects to greta_arrays if they are

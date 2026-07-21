@@ -9,10 +9,15 @@ up during greta use.
 greta_notes_tf_num_error()
 ```
 
+## Value
+
+Invisibly returns `NULL`; called for its side effect of printing the
+stored message.
+
 ## Examples
 
 ``` r
 if (FALSE) { # \dontrun{
-greta_notes_tf_error()
+greta_notes_tf_num_error()
 } # }
 ```

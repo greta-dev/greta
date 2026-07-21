@@ -6,6 +6,11 @@ implemented to transform greta arrays. Also see
 and
 [transforms](https://greta-dev.github.io/greta/reference/transforms.md).
 
+## Value
+
+A `greta_array`, with the function applied elementwise or as appropriate
+for the function called.
+
 ## Details
 
 TensorFlow only enables rounding to integers, so

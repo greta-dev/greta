@@ -322,7 +322,7 @@ distribution(attitude$rating) <- normal(mu, sd)
 A simple, one-variable Bayesian linear regression model using a
 horseshoe prior. The horseshoe, just as the LASSO, can be used when the
 slopes are assumed to be sparse. According to the original
-[publication](http://proceedings.mlr.press/v5/carvalho09a/carvalho09a.pdf):
+[publication](https://proceedings.mlr.press/v5/carvalho09a/carvalho09a.pdf):
 \> its flat, Cauchy-like tails allow strong signals to remain large
 \[…\] \> a posteriori. Yet its infinitely tall spike at the origin
 provides \> severe shrinkage for the zero elements
@@ -1197,7 +1197,7 @@ distribution(final_observation) <- bernoulli(chi[final_obs[not_seen_last]])
      * Cormack-Jolly-Seber Model
      * 
      * following section 1.2.1 of:
-     * http://www.maths.otago.ac.nz/home/resources/theses/PhD_Matthew_Schofield.pdf
+     * https://www.maths.otago.ac.nz/home/resources/theses/PhD_Matthew_Schofield.pdf
      *
      */
     data {

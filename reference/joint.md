@@ -24,6 +24,10 @@ joint(..., dim = NULL)
   vector of positive integers. The final dimension of the greta array
   returned will be determined by the number of component distributions
 
+## Value
+
+A variable `greta_array` following the joint distribution.
+
 ## Details
 
 The component probability distributions must all be either continuous or

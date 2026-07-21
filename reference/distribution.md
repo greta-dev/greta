@@ -23,6 +23,12 @@ distribution(greta_array)
   a greta array with a distribution (see
   [`distributions()`](https://greta-dev.github.io/greta/reference/distributions.md))
 
+## Value
+
+`distribution<-` returns `greta_array` (invisibly), the data greta array
+with the distribution assigned. `distribution()` returns the
+`greta_array` if it has a distribution, or `NULL` if it doesn't.
+
 ## Details
 
 The extract method returns the greta array if it has a distribution, or

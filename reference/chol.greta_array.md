@@ -27,3 +27,8 @@ chol(x, ..., force_cholesky = FALSE)
   uses [`chol()`](https://rdrr.io/r/base/chol.html) to be slow. Default
   is TRUE. Can change to FALSE, but may encounter issues in
   <https://github.com/greta-dev/greta/issues/585>.
+
+## Value
+
+An upper-triangular `greta_array` representing the Cholesky factor of
+`x`.

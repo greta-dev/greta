@@ -21,3 +21,10 @@ is.greta_mcmc_list(x, ...)
 ## Value
 
 logical TRUE/FALSE
+
+## Examples
+
+``` r
+is.greta_mcmc_list(1)
+#> [1] FALSE
+```

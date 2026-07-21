@@ -101,6 +101,10 @@ between -1 and 1).</p></dd>
 
 </dl></div>
     <div class="section level2">
+    <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
+    <p>A variable <code>greta_array</code> satisfying the requested constraints.</p>
+    </div>
+    <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p><code>lower</code> and <code>upper</code> must be fixed, they cannot be greta
 arrays. This ensures these values can always be transformed to a continuous
@@ -124,7 +128,7 @@ Passing in a scalar value for <code>dim</code> therefore results in a row-vector
 <span class="r-in"><span><span class="va">b</span> <span class="op">&lt;-</span> <span class="fu">variable</span><span class="op">(</span>lower <span class="op">=</span> <span class="fl">0</span>, dim <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># a 2x2x2 variable bounded between 0 and 1</span></span></span>
-<span class="r-in"><span><span class="va">c</span> <span class="op">&lt;-</span> <span class="fu">variable</span><span class="op">(</span>lower <span class="op">=</span> <span class="fl">0</span>, upper <span class="op">=</span> <span class="fl">1</span>, dim <span class="op">=</span> <span class="fu"><a href="extract-replace-combine.html">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">2</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">c</span> <span class="op">&lt;-</span> <span class="fu">variable</span><span class="op">(</span>lower <span class="op">=</span> <span class="fl">0</span>, upper <span class="op">=</span> <span class="fl">1</span>, dim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">2</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># create a variable, with lower and upper defined by greta arrays</span></span></span>
 <span class="r-in"><span><span class="va">min</span> <span class="op">&lt;-</span> <span class="fu"><a href="as_data.html">as_data</a></span><span class="op">(</span><span class="va">iris</span><span class="op">$</span><span class="va">Sepal.Length</span><span class="op">)</span></span></span>
@@ -143,9 +147,9 @@ Passing in a scalar value for <code>dim</code> therefore results in a row-vector
 <span class="r-in"><span><span class="va">f</span> <span class="op">&lt;-</span> <span class="fu">simplex_variable</span><span class="op">(</span><span class="fl">4</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># a 4D simplex on the final dimension</span></span></span>
-<span class="r-in"><span><span class="va">g</span> <span class="op">&lt;-</span> <span class="fu">simplex_variable</span><span class="op">(</span>dim <span class="op">=</span> <span class="fu"><a href="extract-replace-combine.html">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">3</span>, <span class="fl">4</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">g</span> <span class="op">&lt;-</span> <span class="fu">simplex_variable</span><span class="op">(</span>dim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">3</span>, <span class="fl">4</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="co"># a 2D variable with each element higher than the one in the cell to the left</span></span></span>
-<span class="r-in"><span><span class="va">h</span> <span class="op">&lt;-</span> <span class="fu">ordered_variable</span><span class="op">(</span>dim <span class="op">=</span> <span class="fu"><a href="extract-replace-combine.html">c</a></span><span class="op">(</span><span class="fl">3</span>, <span class="fl">4</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">h</span> <span class="op">&lt;-</span> <span class="fu">ordered_variable</span><span class="op">(</span>dim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">3</span>, <span class="fl">4</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># more constraints can be added with monotonic transformations, e.g. an</span></span></span>
 <span class="r-in"><span><span class="co"># ordered positive variable</span></span></span>

@@ -193,7 +193,7 @@ x_node$tf
 
           assign(tf_name, batched_tensor, envir = tfe)
         }
-    <environment: 0x9db706040>
+    <environment: 0x89a63cc48>
 
 Because R6 objects are pass-by-reference (rather than pass-by-value),
 the dag accumulates all of the defined tensors, rather than being
@@ -235,7 +235,7 @@ x_node$define_tf
             self$tf(dag)
           }
         }
-    <environment: 0x9db70dd58>
+    <environment: 0x89a63b310>
 
 ## variables and free states
 
@@ -263,7 +263,7 @@ a_node$tf_from_free
           tf_bijector <- self$create_tf_bijector()
           tf_bijector$forward(x)
         }
-    <environment: 0x9e3420970>
+    <environment: 0x8a14a4468>
 
 ## distributions
 
@@ -314,7 +314,7 @@ b_node$distribution$tf
           # assign the distribution object constructor function to the environment
           assign(dag$tf_name(self), self$tf_distrib, envir = dag$tf_environment)
         }
-    <environment: 0x9e7fc2740>
+    <environment: 0x8933e5bd0>
 
 If the distribution was truncated, the log density is normalised using
 the cumulative distribution function.
@@ -353,7 +353,7 @@ model$dag$log_density
 
           res
         }
-    <environment: 0x9e97f85b8>
+    <environment: 0x89267ebd8>
 
 ``` r
 
@@ -414,4 +414,4 @@ model$dag$generate_log_prob_function
             result
           }
         }
-    <environment: 0x9e97f85b8>
+    <environment: 0x89267ebd8>

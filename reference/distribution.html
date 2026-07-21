@@ -80,6 +80,12 @@ already have a probability distribution assigned</p></dd>
 
 </dl></div>
     <div class="section level2">
+    <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
+    <p><code>distribution&lt;-</code> returns <code>greta_array</code> (invisibly), the data
+greta array with the distribution assigned. <code>distribution()</code> returns
+the <code>greta_array</code> if it has a distribution, or <code>NULL</code> if it doesn't.</p>
+    </div>
+    <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>The extract method returns the greta array if it has a distribution,
 or <code>NULL</code> if it doesn't. It has no real use-case, but is included for

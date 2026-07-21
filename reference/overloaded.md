@@ -69,6 +69,11 @@ diag(x = 1, nrow, ncol)
 
   arguments as in original documentation
 
+## Value
+
+An object of the same type as the base R equivalent (typically a
+`greta_array`).
+
 ## Details
 
 Note that, since R 3.1, the LINPACK argument is defunct and silently

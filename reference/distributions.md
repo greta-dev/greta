@@ -122,6 +122,11 @@ dirichlet_multinomial(size, alpha, n_realisations = NULL, dimension = NULL)
 
   the dimension of a multivariate distribution
 
+## Value
+
+A variable `greta_array` following the specified probability
+distribution.
+
 ## Details
 
 The discrete probability distributions (`bernoulli`, `binomial`,

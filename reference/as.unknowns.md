@@ -13,3 +13,7 @@ as.unknowns(x)
 - x:
 
   object to convert to "unknowns" class
+
+## Value
+
+An object of class `unknowns`.

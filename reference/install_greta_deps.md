@@ -67,6 +67,11 @@ reinstall_greta_deps(
   before removing the existing greta conda environment. Defaults to
   [`interactive()`](https://rdrr.io/r/base/interactive.html).
 
+## Value
+
+Invisibly returns `NULL`; called for its side effect of installing
+greta's Python dependencies into a conda environment.
+
 ## Details
 
 This function, `install_greta_deps()`, is an alternative installation

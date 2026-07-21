@@ -29,6 +29,10 @@ mixture(..., weights, dim = NULL)
   the dimensions of the greta array to be returned, either a scalar or a
   vector of positive integers.
 
+## Value
+
+A variable `greta_array` following the mixture distribution.
+
 ## Details
 
 The `weights` are rescaled to sum to one along the first dimension, and

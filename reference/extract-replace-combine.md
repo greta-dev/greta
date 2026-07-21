@@ -3,15 +3,68 @@
 Generic methods to extract and replace elements of greta arrays, or to
 combine greta arrays.
 
+## Usage
+
+``` r
+# S3 method for class 'greta_array'
+x[...]
+
+# S3 method for class 'greta_array'
+x[...] <- value
+
+# S3 method for class 'greta_array'
+cbind(...)
+
+# S3 method for class 'greta_array'
+rbind(...)
+
+# S3 method for class 'greta_array'
+c(...)
+
+# S3 method for class 'greta_array'
+rep(x, ...)
+
+# S3 method for class 'greta_array'
+dim(x)
+
+# S3 method for class 'greta_array'
+length(x)
+
+# S3 method for class 'greta_array'
+dim(x) <- value
+
+# S3 method for class 'greta_array'
+head(x, n = 6L, ...)
+
+# S3 method for class 'greta_array'
+tail(x, n = 6L, ...)
+
+# S3 method for class 'greta_array'
+diag(x = 1, nrow, ncol)
+```
+
 ## Arguments
 
 - x:
 
   a greta array
 
-- i, j:
+- ...:
 
-  indices specifying elements to extract or replace
+  either further indices specifying elements to extract or replace (`i`,
+  `j` for `[`), or multiple greta arrays to combine
+  ([`cbind()`](https://rdrr.io/r/base/cbind.html),
+  [`rbind()`](https://rdrr.io/r/base/cbind.html) &
+  [`c()`](https://rdrr.io/r/base/c.html)), or additional arguments
+  ([`rep()`](https://rdrr.io/r/base/rep.html),
+  [`head()`](https://rdrr.io/r/utils/head.html),
+  [`tail()`](https://rdrr.io/r/utils/head.html)). Generic arguments such
+  as `drop` and `recursive` are accepted but ignored for greta arrays.
+
+- value:
+
+  for `[<-` a greta array to replace elements, for `dim<-` either NULL
+  or a numeric vector of dimensions
 
 - n:
 
@@ -24,22 +77,10 @@ combine greta arrays.
   optional dimensions for the resulting greta array when x is not a
   matrix.
 
-- value:
+## Value
 
-  for `[<-` a greta array to replace elements, for `dim<-` either NULL
-  or a numeric vector of dimensions
-
-- ...:
-
-  either further indices specifying elements to extract or replace
-  (`[`), or multiple greta arrays to combine (`cbind()`, `rbind()` &
-  `c()`), or additional arguments (`rep()`,
-  [`head()`](https://rdrr.io/r/utils/head.html),
-  [`tail()`](https://rdrr.io/r/utils/head.html))
-
-- drop, recursive:
-
-  generic arguments that are ignored for greta arrays
+A `greta_array`, with elements extracted, replaced, or combined as
+appropriate for the method called.
 
 ## Details
 
@@ -55,8 +96,9 @@ changed to print a vector rather than maintain the array structure. The
 `greta` package supports both methods, and will do so based on which
 version of R you are using.
 
-## Usage
+## Syntax
 
+These methods can be used with greta arrays as follows:
 
     # extract
     x[i]

@@ -17,6 +17,10 @@ chol2symm(x)
   a square, upper triangular matrix representing the Cholesky factor of
   a symmetric, positive definite square matrix
 
+## Value
+
+A symmetric, positive-definite matrix or `greta_array`.
+
 ## Examples
 
 ``` r

@@ -86,6 +86,10 @@ or a vector of positive integers.</p></dd>
 
 </dl></div>
     <div class="section level2">
+    <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
+    <p>A variable <code>greta_array</code> following the mixture distribution.</p>
+    </div>
+    <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>The <code>weights</code> are rescaled to sum to one along the first
 dimension, and are then used as the mixing weights of the distribution.
@@ -110,13 +114,13 @@ discrete, and must have the same dimensions.</p>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># simulate a mixture of poisson random variables and try to recover the</span></span></span>
 <span class="r-in"><span><span class="co"># parameters with a Bayesian model</span></span></span>
-<span class="r-in"><span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="extract-replace-combine.html">c</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/stats/Poisson.html" class="external-link">rpois</a></span><span class="op">(</span><span class="fl">800</span>, <span class="fl">3</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/stats/Poisson.html" class="external-link">rpois</a></span><span class="op">(</span><span class="fl">200</span>, <span class="fl">10</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">weights</span> <span class="op">&lt;-</span> <span class="fu"><a href="distributions.html">uniform</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span>, dim <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">rates</span> <span class="op">&lt;-</span> <span class="fu"><a href="distributions.html">normal</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">10</span>, truncation <span class="op">=</span> <span class="fu"><a href="extract-replace-combine.html">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="cn">Inf</span><span class="op">)</span>, dim <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">rates</span> <span class="op">&lt;-</span> <span class="fu"><a href="distributions.html">normal</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">10</span>, truncation <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="cn">Inf</span><span class="op">)</span>, dim <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="distribution.html">distribution</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu">mixture</span><span class="op">(</span><span class="fu"><a href="distributions.html">poisson</a></span><span class="op">(</span><span class="va">rates</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>  <span class="fu"><a href="distributions.html">poisson</a></span><span class="op">(</span><span class="va">rates</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>  weights <span class="op">=</span> <span class="va">weights</span></span></span>
@@ -135,8 +139,8 @@ discrete, and must have the same dimensions.</p>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># weights can also be an array, giving different mixing weights</span></span></span>
 <span class="r-in"><span><span class="co"># for each observation (first dimension must be number of components)</span></span></span>
-<span class="r-in"><span><span class="va">dim</span> <span class="op">&lt;-</span> <span class="fu"><a href="extract-replace-combine.html">c</a></span><span class="op">(</span><span class="fl">5</span>, <span class="fl">4</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">weights</span> <span class="op">&lt;-</span> <span class="fu"><a href="distributions.html">uniform</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span>, dim <span class="op">=</span> <span class="fu"><a href="extract-replace-combine.html">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="va">dim</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">dim</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">5</span>, <span class="fl">4</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">weights</span> <span class="op">&lt;-</span> <span class="fu"><a href="distributions.html">uniform</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span>, dim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="va">dim</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">b</span> <span class="op">&lt;-</span> <span class="fu">mixture</span><span class="op">(</span><span class="fu"><a href="distributions.html">normal</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1</span>, dim <span class="op">=</span> <span class="va">dim</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>  <span class="fu"><a href="distributions.html">normal</a></span><span class="op">(</span><span class="op">-</span><span class="fl">1</span>, <span class="fl">1</span>, dim <span class="op">=</span> <span class="va">dim</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>  weights <span class="op">=</span> <span class="va">weights</span></span></span>

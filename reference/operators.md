@@ -7,6 +7,10 @@ Also see
 and
 [transforms](https://greta-dev.github.io/greta/reference/transforms.md).
 
+## Value
+
+A `greta_array`, the result of applying the operator.
+
 ## Details
 
 greta's operators are used just like R's the standard arithmetic,

@@ -29,6 +29,10 @@ imultilogit(x)
   a real-valued (i.e. values ranging from -Inf to Inf) greta array to
   transform to a constrained value
 
+## Value
+
+A `greta_array` with the transformation applied.
+
 ## Details
 
 greta does not allow you to state the transformation/link on the left

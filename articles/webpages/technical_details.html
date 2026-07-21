@@ -242,7 +242,7 @@ a name determined by the dag object.</p>
 
       assign(tf_name, batched_tensor, envir = tfe)
     }
-&lt;environment: 0x9db706040&gt;</code></pre>
+&lt;environment: 0x89a63cc48&gt;</code></pre>
 <p>Because R6 objects are pass-by-reference (rather than pass-by-value),
 the dag accumulates all of the defined tensors, rather than being
 re-written each time. Similarly, because nodes are R6 objects and know
@@ -279,7 +279,7 @@ for their parents when defining their own tensor.</p>
         self$tf(dag)
       }
     }
-&lt;environment: 0x9db70dd58&gt;</code></pre>
+&lt;environment: 0x89a63b310&gt;</code></pre>
 </div>
 </div>
 <div class="section level2">
@@ -302,7 +302,7 @@ interest.</p>
       tf_bijector &lt;- self$create_tf_bijector()
       tf_bijector$forward(x)
     }
-&lt;environment: 0x9e3420970&gt;</code></pre>
+&lt;environment: 0x8a14a4468&gt;</code></pre>
 </div>
 <div class="section level2">
 <h2 id="distributions">distributions<a class="anchor" aria-label="anchor" href="#distributions"></a>
@@ -337,7 +337,7 @@ their parameters.</p>
       # assign the distribution object constructor function to the environment
       assign(dag$tf_name(self), self$tf_distrib, envir = dag$tf_environment)
     }
-&lt;environment: 0x9e7fc2740&gt;</code></pre>
+&lt;environment: 0x8933e5bd0&gt;</code></pre>
 <p>If the distribution was truncated, the log density is normalised
 using the cumulative distribution function.</p>
 </div>
@@ -367,7 +367,7 @@ the joint density and gradient.</p>
 
       res
     }
-&lt;environment: 0x9e97f85b8&gt;</code></pre>
+&lt;environment: 0x89267ebd8&gt;</code></pre>
 <div class="sourceCode" id="cb38"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">model</span><span class="op">$</span><span class="va">dag</span><span class="op">$</span><span class="va">gradients</span></span></code></pre></div>
 <pre><code><span><span class="cn">NULL</span></span></code></pre>
@@ -420,7 +420,7 @@ method:</p>
         result
       }
     }
-&lt;environment: 0x9e97f85b8&gt;</code></pre>
+&lt;environment: 0x89267ebd8&gt;</code></pre>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

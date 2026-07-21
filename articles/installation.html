@@ -100,9 +100,9 @@
 <span><span class="co">#&gt;     %*%, %o%, apply, backsolve, beta, chol2inv, colMeans, colSums,</span></span>
 <span><span class="co">#&gt;     diag, eigen, forwardsolve, gamma, identity, outer, rowMeans,</span></span>
 <span><span class="co">#&gt;     rowSums, sweep, tapply</span></span></code></pre></div>
-<p>The greta R package requires Google’s <a href="">TensorFlow</a> and
-<a href="">TensorFlow Probability</a> python modules in order to work.
-This vignette discusses how to install these.</p>
+<p>The greta R package requires Google’s <a href="https://www.tensorflow.org/" class="external-link">TensorFlow</a> and <a href="https://www.tensorflow.org/probability" class="external-link">TensorFlow Probability</a>
+python modules in order to work. This vignette discusses how to install
+these.</p>
 <div class="section level2">
 <h2 id="quick-start">Quick start<a class="anchor" aria-label="anchor" href="#quick-start"></a>
 </h2>
@@ -565,7 +565,7 @@ environment:</p>
 <span><span class="op">)</span></span>
 <span><span class="fu">reticulate</span><span class="fu">::</span><span class="fu"><a href="https://rstudio.github.io/reticulate/reference/conda-tools.html" class="external-link">conda_install</a></span><span class="op">(</span></span>
 <span>  envname <span class="op">=</span> <span class="st">"greta-env-tf2"</span>,</span>
-<span>  packages <span class="op">=</span> <span class="fu"><a href="../reference/extract-replace-combine.html">c</a></span><span class="op">(</span></span>
+<span>  packages <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
 <span>    <span class="st">"tensorflow-probability==0.23.0"</span>,</span>
 <span>    <span class="st">"tensorflow==2.15.1"</span></span>
 <span>  <span class="op">)</span></span>

@@ -282,30 +282,30 @@ summary(draws)
     ##    plus standard error of the mean:
     ## 
     ##                                  Mean     SD Naive SE Time-series SE
-    ## avg_effect                    5.87678 5.4426  0.08606        0.10830
-    ## avg_stddev                   13.40841 7.0857  0.11203        0.27954
-    ## school_effects_standard[1,1]  0.67411 0.7820  0.01236        0.01495
-    ## school_effects_standard[2,1]  0.09282 0.6927  0.01095        0.01316
-    ## school_effects_standard[3,1] -0.25475 0.8356  0.01321        0.01656
-    ## school_effects_standard[4,1]  0.03570 0.7181  0.01135        0.01406
-    ## school_effects_standard[5,1] -0.31800 0.6664  0.01054        0.01285
-    ## school_effects_standard[6,1] -0.20596 0.7279  0.01151        0.01475
-    ## school_effects_standard[7,1]  0.51233 0.7026  0.01111        0.01389
-    ## school_effects_standard[8,1]  0.16901 0.8416  0.01331        0.01527
+    ## avg_effect                    5.89908 5.5558  0.08785        0.11112
+    ## avg_stddev                   13.43137 7.4654  0.11804        0.29182
+    ## school_effects_standard[1,1]  0.65988 0.8007  0.01266        0.01574
+    ## school_effects_standard[2,1]  0.08458 0.7227  0.01143        0.01356
+    ## school_effects_standard[3,1] -0.22175 0.8363  0.01322        0.01595
+    ## school_effects_standard[4,1]  0.01954 0.7266  0.01149        0.01403
+    ## school_effects_standard[5,1] -0.30424 0.6937  0.01097        0.01306
+    ## school_effects_standard[6,1] -0.21868 0.7233  0.01144        0.01376
+    ## school_effects_standard[7,1]  0.53469 0.7025  0.01111        0.01242
+    ## school_effects_standard[8,1]  0.15830 0.8270  0.01308        0.01543
     ## 
     ## 2. Quantiles for each variable:
     ## 
     ##                                 2.5%     25%      50%     75%   97.5%
-    ## avg_effect                   -5.4189  2.3251  6.07327  9.6079 16.2865
-    ## avg_stddev                    4.1059  8.6478 11.96866 16.6080 30.7303
-    ## school_effects_standard[1,1] -0.8176  0.1569  0.67572  1.1813  2.2028
-    ## school_effects_standard[2,1] -1.3271 -0.3637  0.10055  0.5608  1.4417
-    ## school_effects_standard[3,1] -1.9717 -0.7758 -0.25225  0.2931  1.3550
-    ## school_effects_standard[4,1] -1.4121 -0.4139  0.03141  0.4949  1.4325
-    ## school_effects_standard[5,1] -1.7014 -0.7323 -0.31240  0.1113  0.9982
-    ## school_effects_standard[6,1] -1.6594 -0.6642 -0.21959  0.2563  1.2561
-    ## school_effects_standard[7,1] -0.8839  0.0685  0.51469  0.9672  1.8789
-    ## school_effects_standard[8,1] -1.5167 -0.3868  0.15325  0.7181  1.8697
+    ## avg_effect                   -5.3597  2.3935  5.80555  9.6195 16.8513
+    ## avg_stddev                    4.1107  8.2612 11.77339 16.4969 32.8692
+    ## school_effects_standard[1,1] -0.9512  0.1418  0.64987  1.1902  2.2400
+    ## school_effects_standard[2,1] -1.3627 -0.3394  0.07619  0.5269  1.5458
+    ## school_effects_standard[3,1] -1.9217 -0.7666 -0.23813  0.3355  1.4283
+    ## school_effects_standard[4,1] -1.4680 -0.4355  0.04488  0.5026  1.4031
+    ## school_effects_standard[5,1] -1.7607 -0.7222 -0.29217  0.1389  0.9911
+    ## school_effects_standard[6,1] -1.6736 -0.6778 -0.22276  0.2326  1.2192
+    ## school_effects_standard[7,1] -0.8299  0.1079  0.51365  0.9727  1.9941
+    ## school_effects_standard[8,1] -1.4978 -0.3988  0.17231  0.6910  1.7920
 
 ``` r
 
@@ -406,8 +406,7 @@ posterior_summaries <-
     ## # Auto named with `tibble::lst()`: tibble::lst(mean, median)
     ## 
     ## # Using lambdas list(~ mean(., trim = .2), ~ median(., na.rm = TRUE))
-    ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
-    ## generated.
+    ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was generated.
 
 ``` r
 
@@ -432,8 +431,7 @@ population_parameters <-
     ## # Auto named with `tibble::lst()`: tibble::lst(mean, median)
     ## 
     ## # Using lambdas list(~ mean(., trim = .2), ~ median(., na.rm = TRUE))
-    ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
-    ## generated.
+    ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was generated.
 
 ``` r
 
@@ -456,7 +454,7 @@ plot of chunk schools-edward2
 sessionInfo()
 ```
 
-    ## R version 4.6.0 (2026-04-24)
+    ## R version 4.6.1 (2026-06-24)
     ## Platform: aarch64-apple-darwin23
     ## Running under: macOS Tahoe 26.5.1
     ## 
@@ -467,7 +465,7 @@ sessionInfo()
     ## locale:
     ## [1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
     ## 
-    ## time zone: Australia/Melbourne
+    ## time zone: Australia/Hobart
     ## tzcode source: internal
     ## 
     ## attached base packages:
@@ -484,18 +482,18 @@ sessionInfo()
     ##  [4] S7_0.2.2             fastmap_1.2.0        tensorA_0.36.2.1    
     ##  [7] digest_0.6.39        timechange_0.4.0     lifecycle_1.0.5     
     ## [10] rsvg_2.7.0           processx_3.9.0       magrittr_2.0.5      
-    ## [13] posterior_1.7.0      compiler_4.6.0       rlang_1.2.0         
-    ## [16] progress_1.2.3       tools_4.6.0          yaml_2.3.12         
-    ## [19] igraph_2.3.2         askpass_1.2.1        prettyunits_1.2.0   
+    ## [13] posterior_1.7.0      compiler_4.6.1       rlang_1.3.0         
+    ## [16] progress_1.2.3       tools_4.6.1          yaml_2.3.12         
+    ## [19] igraph_2.3.3         askpass_1.2.1        prettyunits_1.2.0   
     ## [22] labeling_0.4.3       htmlwidgets_1.6.4    curl_7.1.0          
     ## [25] reticulate_1.46.0    plyr_1.8.9           RColorBrewer_1.1-3  
-    ## [28] abind_1.4-8          withr_3.0.2          sys_3.4.3           
-    ## [31] grid_4.6.0           future_1.70.0        globals_0.19.1      
-    ## [34] scales_1.4.0         MASS_7.3-65          cli_3.6.6           
+    ## [28] abind_1.4-8          withr_3.0.3          sys_3.4.3           
+    ## [31] grid_4.6.1           future_1.70.0        globals_0.19.1      
+    ## [34] scales_1.4.0         MASS_7.3-66          cli_3.6.6           
     ## [37] DiagrammeR_1.0.12    crayon_1.5.3         DiagrammeRsvg_0.1   
-    ## [40] generics_0.1.4       otel_0.2.0           rstudioapi_0.18.0   
+    ## [40] generics_0.1.4       otel_0.2.0           rstudioapi_0.19.0   
     ## [43] reshape2_1.4.5       tzdb_0.5.0           tfruns_1.5.4        
-    ## [46] visNetwork_2.1.4     parallel_4.6.0       base64enc_0.1-6     
+    ## [46] visNetwork_2.1.4     parallel_4.6.1       base64enc_0.1-6     
     ## [49] vctrs_0.7.3          V8_8.2.0             Matrix_1.7-5        
     ## [52] jsonlite_2.0.0       callr_3.8.0          hms_1.1.4           
     ## [55] listenv_0.10.1       credentials_2.0.3    glue_1.8.1          
@@ -503,6 +501,6 @@ sessionInfo()
     ## [61] stringi_1.8.7        gtable_0.3.6         pillar_1.11.1       
     ## [64] htmltools_0.5.9      openssl_2.4.1        R6_2.6.1            
     ## [67] evaluate_1.0.5       lattice_0.22-9       png_0.1-9           
-    ## [70] backports_1.5.1      tfautograph_0.3.2    Rcpp_1.1.1-1.1      
+    ## [70] backports_1.5.1      tfautograph_0.3.2    Rcpp_1.1.2          
     ## [73] coda_0.19-4.1        checkmate_2.3.4      whisker_0.4.1       
-    ## [76] xfun_0.58            pkgconfig_2.0.3
+    ## [76] xfun_0.60            pkgconfig_2.0.3

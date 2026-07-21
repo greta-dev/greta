@@ -14,3 +14,7 @@ dim(x)
 - x:
 
   greta node class
+
+## Value
+
+An integer vector of the node's dimensions.

@@ -38,6 +38,10 @@ ordered_variable(dim)
   matrix (diagonal elements equalling 1, off-diagonal elements between
   -1 and 1).
 
+## Value
+
+A variable `greta_array` satisfying the requested constraints.
+
 ## Details
 
 `lower` and `upper` must be fixed, they cannot be greta arrays. This

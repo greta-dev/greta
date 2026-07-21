@@ -16,10 +16,9 @@ library(greta)
 ```
 
 The greta R package requires Google’s
-[TensorFlow](https://greta-dev.github.io/greta/articles/) and
-[TensorFlow Probability](https://greta-dev.github.io/greta/articles/)
-python modules in order to work. This vignette discusses how to install
-these.
+[TensorFlow](https://www.tensorflow.org/) and [TensorFlow
+Probability](https://www.tensorflow.org/probability) python modules in
+order to work. This vignette discusses how to install these.
 
 ## Quick start
 
