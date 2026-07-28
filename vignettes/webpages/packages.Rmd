@@ -1,0 +1,93 @@
+---
+title: "packages"
+output:
+  html_document:
+    css: greta.css
+    toc: no
+    theme: lumen
+---
+
+<style type="text/css">
+body{
+  font-size: 18px;
+}
+</style>
+
+greta is one package, but it is also a small family of them.
+
+The core package gives you the modelling language. The extension packages add
+particular kinds of model on top of it, and they all work with the same greta
+arrays, the same `model()`, and the same `mcmc()`.
+
+### greta
+
+The core package. Write a statistical model in R code, then fit it with MCMC.
+
+```r
+install.packages("greta")
+```
+
+[Go to docs...](https://greta-dev.github.io/greta/)
+
+## Extension packages
+
+These are not loaded with `library(greta)`, so you will need to load each one
+with its own call to `library()`.
+
+### greta.gp
+
+Gaussian processes. Create and combine kernels, then use them to define either
+full rank or sparse Gaussian processes.
+
+```r
+install.packages("greta.gp")
+```
+
+[Go to docs...](https://greta-dev.github.io/greta.gp/)
+
+### greta.gam
+
+Generalised additive models. Use mgcv's smoother functions and formula syntax
+to define smooth terms, then write your own likelihood around them.
+
+Returning to CRAN. In the meantime, install it from GitHub.
+
+```r
+pak::pak("greta-dev/greta.gam")
+```
+
+[Go to docs...](https://greta-dev.github.io/greta.gam/)
+
+### greta.dynamics
+
+Dynamical systems. Analyse transition matrices by iterating them to a stable
+state, and solve ordinary differential equations.
+
+```r
+install.packages("greta.dynamics")
+```
+
+[Go to docs...](https://greta-dev.github.io/greta.dynamics/)
+
+### greta.distributions
+
+Extra probability distributions that are not shipped with greta itself. Zero
+inflated Poisson and negative binomial, discrete normal and lognormal,
+conditional Bernoulli, and ordered logit.
+
+On its way to CRAN. In the meantime, install it from GitHub.
+
+```r
+pak::pak("greta-dev/greta.distributions")
+```
+
+[Go to docs...](https://greta-dev.github.io/greta.distributions/)
+
+## Writing your own extension
+
+If you want to build a package on top of greta, the internals are documented,
+and the extension packages above are all reasonable things to read for a worked
+example.
+
+Have a look at [`?greta::internals`](https://greta-dev.github.io/greta/reference/internals.html),
+and at the [contribute](contribute.html) page.

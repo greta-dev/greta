@@ -26,7 +26,7 @@ home:
 
 navbar:
   structure:
-    left: [installation, get-started, reference, examples, analyses, more, news, faq]
+    left: [installation, get-started, reference, examples, analyses, packages, more, blog, news, faq]
     right: [search, forum, github]
   components:
     installation:
@@ -59,6 +59,12 @@ navbar:
           href: articles/webpages/software.html
         - text: contribute to greta
           href: articles/webpages/contribute.html
+    packages:
+      text: packages
+      href: articles/webpages/packages.html
+    blog:
+      text: blog
+      href: https://greta-dev.github.io/greta.blog/
     faq:
       text: FAQ
       href: articles/faq.html
@@ -164,6 +170,7 @@ articles:
       - analyses/election_88
   - title: More
     contents:
+      - webpages/packages
       - webpages/why_greta
       - webpages/technical_details
       - webpages/software
