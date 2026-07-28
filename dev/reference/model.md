@@ -57,9 +57,9 @@ plot(x, y, colour = "#996bc7", ...)
 `model` - a `greta_model` object.
 
 `plot` - a
-[`DiagrammeR::grViz()`](https://rdrr.io/pkg/DiagrammeR/man/grViz.html)
+[`DiagrammeR::grViz()`](https://rich-iannone.github.io/DiagrammeR/reference/grViz.html)
 object, with the
-[`DiagrammeR::dgr_graph()`](https://rdrr.io/pkg/DiagrammeR/man/create_graph.html)
+[`DiagrammeR::dgr_graph()`](https://rich-iannone.github.io/DiagrammeR/reference/create_graph.html)
 object used to create it as an attribute `"dgr_graph"`.
 
 ## Details

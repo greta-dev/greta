@@ -719,7 +719,7 @@ Sampling a simple model now takes ~10s, rather than ~2m (\>10x speedup).
 
 - [`plot.greta_model()`](https://greta-dev.github.io/greta/dev/reference/model.md)
   now returns a
-  [`DiagrammeR::grViz`](https://rdrr.io/pkg/DiagrammeR/man/grViz.html)
+  [`DiagrammeR::grViz`](https://rich-iannone.github.io/DiagrammeR/reference/grViz.html)
   object (thanks to [@flyaflya](https://github.com/flyaflya)). This is
   less modifiable, but renders the plot more much consistently across
   different environments and notebook types. The `DiagrammeR`
