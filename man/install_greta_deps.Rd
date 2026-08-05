@@ -22,8 +22,8 @@ reinstall_greta_deps(
 \arguments{
 \item{deps}{object created with \code{\link[=greta_deps_spec]{greta_deps_spec()}} where you
 specify python, TensorFlow (TF), and TensorFlow Probability (TFP) versions.
-By default these are TF 2.15.1, TFP
-0.23.0, and Python 3.11.
+By default these are TF 2.21.0, TFP
+0.25.0, and Python 3.12.
 \code{\link[=greta_deps_spec]{greta_deps_spec()}} checks that the TF version is one greta supports;
 compatible TFP and Python versions are resolved at install time. See
 ?\code{\link[=greta_deps_spec]{greta_deps_spec()}} for more information, and the data object
@@ -62,8 +62,8 @@ now what we recommend. This has changed from where we would previously use
 \details{
 This function, \code{install_greta_deps()}, is an alternative installation
 workflow. The default versions of the python modules are: TensorFlow
-2.15.1, TensorFlow Probability
-0.23.0, and Python 3.11.
+2.21.0, TensorFlow Probability
+0.25.0, and Python 3.12.
 These Python modules will be installed into a conda environment named
 "greta-env-tf2".
 

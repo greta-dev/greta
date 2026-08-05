@@ -25,8 +25,8 @@ conda environment.
 }
 
 Most users never need this: greta's defaults (TensorFlow
-2.15.1, TensorFlow Probability
-0.23.0, Python 3.11) are the
+2.21.0, TensorFlow Probability
+0.25.0, Python 3.12) are the
 newest versions greta supports.
 
 To clear the stored versions and return to the defaults, use

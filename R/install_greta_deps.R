@@ -260,13 +260,13 @@ restart_or_not <- function(restart) {
 # In the future, if we update greta default versions, we can just do that in
 # two places - here, and in `greta_deps_spec()`.
 greta_deps_default <- list(
-  tf = "2.15.1",
-  tfp = "0.23.0",
-  python = "3.11",
+  tf = "2.21.0",
+  tfp = "0.25.0",
+  python = "3.12",
   tf_min = "2.15.0",
   tfp_min = "0.23.0",
   python_min = "3.9",
-  python_range = ">=3.9,<=3.11"
+  python_range = ">=3.9,<=3.12"
 )
 
 #' Specify python dependencies for greta
@@ -274,8 +274,8 @@ greta_deps_default <- list(
 #' A helper function for specifying versions of Tensorflow (TF), Tensorflow
 #' Probability (TFP), and Python. Defaulting to `r greta_deps_default$tf`,
 #' `r greta_deps_default$tfp`, and `r greta_deps_default$python`, respectively.
-#' greta checks it supports the TF version (greta does not support TF 2.16 or
-#' later, which ship Keras 3); compatible TFP and Python versions are resolved
+#' greta checks it supports the TF version (versions newer than greta has been
+#' tested against are rejected); compatible TFP and Python versions are resolved
 #' at install time by uv (or, for a conda environment, by conda/pip). The
 #' `greta_deps_tf_tfp` dataset lists known-good combinations of TF, TFP, and
 #' Python; inspect it with `View(greta_deps_tf_tfp)`.
@@ -308,14 +308,14 @@ greta_deps_default <- list(
 #'   tfp_version = "0.22.1",
 #'   python_version = "3.10"
 #'   )
-#' # this will fail: greta does not support TF 2.16+ (Keras 3)
+#' # this will fail: greta has not been tested above the version it pins
 #' \dontrun{
-#' greta_deps_spec(tf_version = "2.16.0")
+#' greta_deps_spec(tf_version = "2.99.0")
 #'   }
 greta_deps_spec <- function(
-  tf_version = "2.15.1",
-  tfp_version = "0.23.0",
-  python_version = "3.11"
+  tf_version = "2.21.0",
+  tfp_version = "0.25.0",
+  python_version = "3.12"
 ) {
   deps_obj <- new_greta_deps_spec(
     tf_version = tf_version,
@@ -346,8 +346,11 @@ new_greta_deps_spec <- function(tf_version, tfp_version, python_version) {
 # Translate the canonical (or a requested) TF/TFP version into reticulate
 # py_require() arguments for the uv environment (see apply_greta_python_plan()).
 # Defaults derive from greta_deps_default; greta_deps_spec()'s matching literal
-# defaults are enforced by the consistency test in test_greta_deps_spec.R. greta
-# does not support TF 2.16+, which ships Keras 3 (#675).
+# defaults are enforced by the consistency test in test_greta_deps_spec.R.
+#
+# TensorFlow Probability imports `tf_keras` unconditionally, so without the
+# tf-keras package TFP fails at import with ModuleNotFoundError. greta does not
+# set TF_USE_LEGACY_KERAS, so `tf$keras` remains Keras 3.
 
 greta_py_require_args <- function(
   tf_version = greta_deps_default$tf,
@@ -359,7 +362,8 @@ greta_py_require_args <- function(
   list(
     packages = c(
       paste0("tensorflow==", tf_minor, ".*"),
-      paste0("tensorflow_probability==", tfp_minor, ".*")
+      paste0("tensorflow_probability==", tfp_minor, ".*"),
+      paste0("tf-keras==", tf_minor, ".*")
     ),
     python_version = python_version %||% greta_deps_default$python_range
   )
@@ -427,12 +431,10 @@ greta_deps_receipt <- function() {
   )
 }
 
-# greta supports TensorFlow only up to the version in greta_deps_default$tf (the
-# newest version greta is known to work with). Later versions are not supported
-# -- in particular TF 2.16 ships Keras 3, which breaks greta (#675). This is the
-# only version constraint greta enforces itself; compatible TensorFlow
-# Probability and Python versions are resolved by uv (or, for a conda
-# environment, by conda/pip).
+# greta supports TensorFlow only up to the version in greta_deps_default$tf, the
+# newest version greta is tested against. This is the only version constraint
+# greta enforces itself; compatible TensorFlow Probability and Python versions
+# are resolved by uv (or, for a conda environment, by conda/pip).
 
 check_greta_tf_supported <- function(deps, call = rlang::caller_env()) {
   greta_tf_version_max <- greta_deps_default$tf
@@ -445,8 +447,8 @@ check_greta_tf_supported <- function(deps, call = rlang::caller_env()) {
         "{.pkg greta} supports TensorFlow up to version \\
         {.val {greta_tf_version_max}}.",
         "x" = "The provided version was {.val {deps$tf_version}}.",
-        "i" = "Later versions are not yet supported (TensorFlow 2.16 ships \\
-        Keras 3, which breaks greta); see {.url {gh_issue}}.",
+        "i" = "Later versions have not been tested with greta; see \\
+        {.url {gh_issue}}.",
         "i" = "greta resolves compatible TensorFlow Probability and Python \\
         versions automatically."
       ),

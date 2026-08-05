@@ -322,12 +322,10 @@ greta_uv_cache_status <- function(
 }
 
 # For the managed backend, auto-enable uv's offline mode when the uv cache is
-# already populated (#814). greta pins *frozen* ranges for the managed
-# backend (TensorFlow 2.15.*, TensorFlow Probability 0.23.*); TF 2.16+ ships
-# Keras 3, which greta does not support, so no newer match will ever appear.
-# That makes a cache-only resolve safe: uv never needs to reach PyPI once the
-# environment is installed, so greta can start on an offline / air-gapped
-# machine.
+# already populated (#814). greta pins the managed backend to a single minor
+# version of TensorFlow and TensorFlow Probability, so an installed environment
+# already satisfies the spec: uv never needs to reach PyPI again, and greta can
+# start on an offline / air-gapped machine.
 maybe_enable_uv_offline <- function(cache_status = greta_uv_cache_status()) {
   # respect the user: if UV_OFFLINE is already set to anything, leave it alone
   existing <- Sys.getenv("UV_OFFLINE", unset = NA)
