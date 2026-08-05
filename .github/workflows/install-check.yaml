@@ -1,0 +1,63 @@
+# Does greta actually install and run, on each TensorFlow version it accepts?
+#
+# This replaces the hand-maintained `greta_deps_tf_tfp` table. A version is
+# supported if its job is green, which cannot go stale the way a dataset can.
+#
+# Weekly rather than per-push: each job builds a Python environment from
+# scratch, and the conda jobs download over a gigabyte. Scheduled workflows only
+# run on the default branch, so use workflow_dispatch to try a branch.
+#
+# A red cell is a result, not a flake to be tolerated. Either the version is
+# fixable, or `check_greta_tf_supported()` should stop accepting it.
+
+on:
+  schedule:
+    - cron: '0 5 * * Mon'
+  workflow_dispatch:
+
+name: install-check
+
+jobs:
+  install-check:
+    name: ${{ matrix.os }}, tf-${{ matrix.tf }}, ${{ matrix.backend }}
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # every TF version greta accepts, on one OS, via uv
+          - { os: 'ubuntu-latest', tf: '2.16.0', backend: 'uv' }
+          - { os: 'ubuntu-latest', tf: '2.17.0', backend: 'uv' }
+          - { os: 'ubuntu-latest', tf: '2.18.0', backend: 'uv' }
+          - { os: 'ubuntu-latest', tf: '2.19.0', backend: 'uv' }
+          - { os: 'ubuntu-latest', tf: '2.20.0', backend: 'uv' }
+          - { os: 'ubuntu-latest', tf: 'default', backend: 'uv' }
+          # the default version everywhere, so OS-specific breakage shows up
+          - { os: 'macOS-latest', tf: 'default', backend: 'uv' }
+          - { os: 'windows-latest', tf: 'default', backend: 'uv' }
+          # the conda path, which has no other CI coverage
+          - { os: 'ubuntu-latest', tf: 'default', backend: 'conda' }
+          - { os: 'macOS-latest', tf: 'default', backend: 'conda' }
+          - { os: 'windows-latest', tf: 'default', backend: 'conda' }
+
+    runs-on: ${{ matrix.os }}
+
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      GRETA_TF_VERSION: ${{ matrix.tf }}
+      GRETA_BACKEND: ${{ matrix.backend }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          r-version: 'release'
+          use-public-rspm: true
+
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          extra-packages: local::. rstudio/reticulate
+
+      - name: Install and exercise greta
+        run: Rscript .github/scripts/install-check.R
