@@ -149,8 +149,9 @@ tf_optimiser <- R6Class(
 
         # Compiled because tape/gradient/apply as separate eager calls cost
         # four R->Python round trips per iteration: that version benchmarked
-        # 1.65x slower than Keras 2's minimize(), where this one is 2.3x
-        # faster (small linear regression, macOS arm64).
+        # 1.65x slower than Keras 2's minimize(), where this one is roughly
+        # twice as fast. Numbers, method and caveats in
+        # https://github.com/greta-dev/greta/issues/823
         step <- tensorflow::tf_function(function() {
           with(tf$GradientTape() %as% tape, {
             objective_value <- objective()
