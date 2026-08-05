@@ -85,3 +85,31 @@ test_that("version pins agree across spec defaults, uv pins, and TF ceiling", {
     compareVersion(greta_deps_default$tfp, greta_deps_default$tfp_min) >= 0
   )
 })
+
+test_that("the python range only contains versions the TF pin has wheels for", {
+  # TensorFlow drops old Pythons as it goes -- 2.21 dropped cp39 -- and uv fails
+  # with "no solution" if it picks one the pinned TF has no wheel for. That is
+  # not a greta error message, and it only surfaces on whichever platform uv
+  # happens to choose the unsupported version, so it is worth catching here.
+  #
+  # This cannot check PyPI. It pins the floor that TF 2.21 requires, so raising
+  # the TF pin forces someone to revisit it.
+  range_floor <- sub("^>=([0-9.]+),.*$", "\\1", greta_deps_default$python_range)
+  range_ceiling <- sub(
+    "^.*<=([0-9.]+)$",
+    "\\1",
+    greta_deps_default$python_range
+  )
+
+  expect_gte(numeric_version(range_floor), numeric_version("3.10"))
+
+  # the version greta installs has to be inside the range it asks uv for
+  expect_gte(
+    numeric_version(greta_deps_default$python),
+    numeric_version(range_floor)
+  )
+  expect_lte(
+    numeric_version(greta_deps_default$python),
+    numeric_version(range_ceiling)
+  )
+})

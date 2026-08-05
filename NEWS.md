@@ -2,6 +2,7 @@
 
 * greta now uses the Keras 3 optimiser API and so works with TensorFlow 2.16 and later; the Keras 2 `tf.keras.optimizers.legacy` API it previously used does not exist in Keras 3, where every one of greta's Keras optimisers would fail to construct (#633).
 * greta's default dependency versions are now TensorFlow 2.21.0, TensorFlow Probability 0.25.0, and Python 3.12, up from TensorFlow 2.15.1, TensorFlow Probability 0.23.0, and Python 3.11 (#633).
+* greta now asks for Python 3.10 or later rather than 3.9 or later, because TensorFlow 2.21 publishes no wheels for Python 3.9; leaving the floor at 3.9 let the resolver pick a Python that TensorFlow could not install against, which broke installation on Windows (#633).
 * greta now installs TensorFlow Probability's `tf` extra (`tensorflow-probability[tf]`), so the `tf-keras` package it imports unconditionally is resolved from TFP's own declaration rather than pinned by greta; pinning it to TensorFlow's minor series made TensorFlow 2.17 and 2.18 impossible to install, as `tf-keras` has no release for either (#633).
 * `adamax()` now defaults to a `learning_rate` of 0.1, up from 0.001, which was too small to reach the optimum of even a five-parameter model within 2000 iterations (#633).
 * `greta_deps_spec()` now accepts TensorFlow 2.16 and later, which ship Keras 3; it still rejects versions newer than the one greta is tested against (#633).

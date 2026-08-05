@@ -266,7 +266,11 @@ greta_deps_default <- list(
   tf_min = "2.15.0",
   tfp_min = "0.23.0",
   python_min = "3.9",
-  python_range = ">=3.9,<=3.12"
+  # The floor has to be a Python the pinned TensorFlow publishes wheels for, or
+  # uv can resolve a Python that no TensorFlow will install against and fails
+  # with "no solution". TensorFlow dropped cp39 at 2.21, so a floor of 3.9 broke
+  # installation wherever uv chose 3.9 -- Windows, in practice.
+  python_range = ">=3.10,<=3.12"
 )
 
 #' Specify python dependencies for greta
