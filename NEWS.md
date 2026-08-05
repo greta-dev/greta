@@ -5,8 +5,8 @@
 * greta now installs the `tf-keras` Python package alongside TensorFlow Probability, which imports it unconditionally and fails at import without it (#633).
 * `greta_deps_spec()` now accepts TensorFlow 2.16 and later, which ship Keras 3; it still rejects versions newer than the one greta is tested against (#633).
 * `lkj_correlation()` and `wishart()` draws taken with a fixed `seed` now differ from previous versions, because TensorFlow Probability 0.25.0 changed how it samples them; the distributions themselves are unchanged (#633).
-* `nadam()` now takes slightly more iterations to reach the same answer, because Keras 3 implements Nadam differently to the Keras 2 optimiser greta used before; it took 11 more iterations on the benchmark model in #823 (#633).
-* `opt()` with a Keras optimiser (such as `adam()` or `gradient_descent()`) is faster, as the gradient step is now compiled with `tf_function()` rather than making several R to Python calls per iteration; this measured at roughly twice as fast on a small linear regression, with benchmarks and caveats recorded in #823 (#633).
+* `nadam()` now takes slightly more iterations to reach the same answer, because Keras 3 implements Nadam differently to the Keras 2 optimiser greta used before; it took 11 more iterations to reach the same answer on a small linear regression (#633).
+* `opt()` with a Keras optimiser (such as `adam()` or `gradient_descent()`) is faster, as the gradient step is now compiled with `tf_function()` rather than making several R to Python calls per iteration; this measured at roughly twice as fast on a small linear regression (#633).
 
 # greta 0.6.0
 
