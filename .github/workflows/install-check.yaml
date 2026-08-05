@@ -77,11 +77,14 @@ jobs:
           r-version: 'release'
           use-public-rspm: true
 
-      # CRAN reticulate, not the development version: this checks what users
-      # actually install
+      # Development reticulate, temporarily. On CRAN reticulate 1.46.0 the
+      # Windows uv job fails before uv downloads a Python, while R-CMD-check --
+      # which pins rstudio/reticulate -- passes on the same runner. This is
+      # here to confirm reticulate is the difference. An installation check
+      # should test what users install, so it goes back to CRAN once we know.
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
-          extra-packages: local::.
+          extra-packages: local::. rstudio/reticulate
 
       # A separate R session, because greta_set_python() only takes effect on
       # the next load. Doing this in the same session as the exercise runs it
