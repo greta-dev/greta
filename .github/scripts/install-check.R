@@ -20,10 +20,11 @@ if (!identical(tf_version, "default")) {
   greta_set_deps(greta_deps_spec(tf_version = tf_version))
 }
 
-if (identical(backend, "conda")) {
-  install_greta_deps(timeout = 45)
-  greta_set_python("conda")
-}
+# The conda environment is built and selected by an earlier workflow step, in
+# its own R session. greta_set_python() stores a preference that only takes
+# effect on the next load, so installing and exercising in one session silently
+# runs against uv instead -- which passes wherever uv works, and reports a
+# backend that was never tested.
 
 set.seed(2026)
 x <- rnorm(30, mean = 2, sd = 0.5)
@@ -36,7 +37,20 @@ distribution(x) <- normal(mu, sigma)
 # on its own, which need not be the one greta goes on to use.
 m <- model(mu, sigma)
 
+python_path <- reticulate::py_config()$python
+
+# Fail rather than report a green for a backend that was never exercised.
+using_conda <- grepl("greta-env-tf2", python_path, fixed = TRUE)
+if (identical(backend, "conda") && !using_conda) {
+  stop("asked for the conda backend, but python is ", python_path, call. = FALSE)
+}
+if (identical(backend, "uv") && using_conda) {
+  stop("asked for the uv backend, but python is ", python_path, call. = FALSE)
+}
+
 cat("--- resolved stack ---\n")
+cat("backend   :", backend, "\n")
+cat("python at :", python_path, "\n")
 cat("python    :", as.character(reticulate::py_config()$version), "\n")
 cat("tensorflow:", as.character(tensorflow::tf$`__version__`), "\n")
 cat("tfp       :", as.character(

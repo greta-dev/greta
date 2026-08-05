@@ -83,7 +83,14 @@ jobs:
         with:
           extra-packages: local::.
 
-      - name: Install and exercise greta
+      # A separate R session, because greta_set_python() only takes effect on
+      # the next load. Doing this in the same session as the exercise runs it
+      # against uv instead, and passes wherever uv happens to work.
+      - name: Build the conda environment
+        if: matrix.backend == 'conda'
+        run: Rscript .github/scripts/install-conda.R
+
+      - name: Exercise greta
         run: Rscript .github/scripts/install-check.R
 
   newer-tensorflow-available:
