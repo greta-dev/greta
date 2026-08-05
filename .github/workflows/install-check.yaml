@@ -10,8 +10,11 @@
 # scratch, and the conda jobs download over a gigabyte. Saturday, so a failure
 # is waiting to be read on Monday.
 #
-# Scheduled workflows only run on the default branch, so use workflow_dispatch
-# to try a branch.
+# Both `schedule` and `workflow_dispatch` require this file to be on the default
+# branch before GitHub will run it -- dispatch is not a way to try a workflow
+# that has never been merged. The pull_request trigger is, and it is filtered to
+# the files that can actually break an install, so ordinary pull requests do not
+# pay for eleven Python environments.
 #
 # A red cell is a result, not a flake to be tolerated. Either the version is
 # fixable, or `check_greta_tf_supported()` should stop accepting it.
@@ -20,6 +23,17 @@ on:
   schedule:
     - cron: '0 5 * * Sat'
   workflow_dispatch:
+  pull_request:
+    paths:
+      - 'R/install_greta_deps.R'
+      - 'R/greta_install_python_deps.R'
+      - 'R/greta_install_miniconda.R'
+      - 'R/install_tensorflow.R'
+      - 'R/new_install_process.R'
+      - 'R/python_backend.R'
+      - 'R/reinstallers.R'
+      - '.github/workflows/install-check.yaml'
+      - '.github/scripts/install-check.R'
 
 name: install-check
 
