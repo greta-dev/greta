@@ -76,13 +76,13 @@ On a machine that's ready to go, you'll see something like this:
 
 ```
 #> ℹ checking if python available
-#> ✔ python (v3.11) available
+#> ✔ python (v3.12) available
 #>
 #> ℹ checking if TensorFlow available
-#> ✔ TensorFlow (v2.15.1) available
+#> ✔ TensorFlow (v2.21.0) available
 #>
 #> ℹ checking if TensorFlow Probability available
-#> ✔ TensorFlow Probability (v0.23.0) available
+#> ✔ TensorFlow Probability (v0.25.0) available
 #>
 #> ℹ greta conda environment: not used (managed (uv) environment active)
 #>
@@ -486,13 +486,14 @@ Work through these in order. Most problems are one of the first two.
 reticulate::install_miniconda()
 reticulate::conda_create(
   envname = "greta-env-tf2",
-  python_version = "3.11"
+  python_version = "3.12"
 )
 reticulate::conda_install(
   envname = "greta-env-tf2",
   packages = c(
-    "tensorflow-probability==0.23.0",
-    "tensorflow==2.15.1"
+    "tensorflow-probability==0.25.0",
+    "tensorflow==2.21.0",
+    "tf-keras==2.21.0"
   )
 )
 ```
