@@ -23,9 +23,14 @@ test_that("opt converges with TF optimisers", {
   opt_df <- opt_df_run(optimisers, m, x)
   tidied_opt <- tidy_optimisers(opt_df, tolerance = 1e-2)
 
-  expect_true(all(tidied_opt$convergence == 0))
-  expect_true(all(tidied_opt$iterations <= 200))
-  expect_true(all(tidied_opt$close_to_truth))
+  # one expectation per optimiser: asserting over all of them at once reports
+  # only that something failed, and the suite has eight to choose from
+  for (i in seq_len(nrow(tidied_opt))) {
+    optimiser <- tidied_opt$opt[[i]]
+    expect_equal(tidied_opt$convergence[[i]], 0, label = optimiser)
+    expect_lte(tidied_opt$iterations[[i]], 200, label = optimiser)
+    expect_lt(max(tidied_opt$par_x_diff[[i]]), 1e-2, label = optimiser)
+  }
 })
 
 test_that("opt gives appropriate warning with deprecated optimisers in TFP", {
