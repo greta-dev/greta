@@ -64,13 +64,12 @@ test_that("version pins agree across spec defaults, uv pins, and TF ceiling", {
   py_req <- greta_py_require_args()
   tf_minor <- sub("\\.[^.]*$", "", greta_deps_default$tf)
   tfp_minor <- sub("\\.[^.]*$", "", greta_deps_default$tfp)
-  # tf-keras rides along because TFP imports it unconditionally
+  # the [tf] extra pulls tf-keras, which TFP imports unconditionally
   expect_identical(
     py_req$packages,
     c(
       paste0("tensorflow==", tf_minor, ".*"),
-      paste0("tensorflow_probability==", tfp_minor, ".*"),
-      paste0("tf-keras==", tf_minor, ".*")
+      paste0("tensorflow_probability[tf]==", tfp_minor, ".*")
     )
   )
   expect_identical(py_req$python_version, greta_deps_default$python_range)

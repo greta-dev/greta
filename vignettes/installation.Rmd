@@ -491,9 +491,8 @@ reticulate::conda_create(
 reticulate::conda_install(
   envname = "greta-env-tf2",
   packages = c(
-    "tensorflow-probability==0.25.0",
-    "tensorflow==2.21.0",
-    "tf-keras==2.21.0"
+    "tensorflow-probability[tf]==0.25.0",
+    "tensorflow==2.21.0"
   )
 )
 ```

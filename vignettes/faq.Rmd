@@ -86,8 +86,7 @@ reticulate::py_install(
   packages = c(
     "numpy",
     "tensorflow==2.21.0",
-    "tensorflow-probability==0.25.0",
-    "tf-keras==2.21.0"
+    "tensorflow-probability[tf]==0.25.0"
   ),
   envname = "greta-env-tf2",
   pip = TRUE

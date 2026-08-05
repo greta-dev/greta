@@ -14,11 +14,10 @@ greta_install_python_deps <- function(timeout = 5, deps = greta_deps_spec()) {
         envname = "greta-env-tf2",
         method = "conda"
       )
-      # TensorFlow Probability imports `tf_keras` unconditionally, so without
-      # the tf-keras package TFP fails at import with ModuleNotFoundError.
-      tfp_packages <- c(
-        glue::glue("tensorflow-probability=={deps$tfp_version}"),
-        glue::glue("tf-keras=={deps$tf_version}")
+      # The `tf` extra pulls tf-keras, which TFP imports unconditionally and
+      # fails at import without.
+      tfp_packages <- glue::glue(
+        "tensorflow-probability[tf]=={deps$tfp_version}"
       )
       cli::cli_progress_step(
         msg = "Installing TFP (v{deps$tfp_version})",

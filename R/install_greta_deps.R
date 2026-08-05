@@ -348,9 +348,12 @@ new_greta_deps_spec <- function(tf_version, tfp_version, python_version) {
 # Defaults derive from greta_deps_default; greta_deps_spec()'s matching literal
 # defaults are enforced by the consistency test in test_greta_deps_spec.R.
 #
-# TensorFlow Probability imports `tf_keras` unconditionally, so without the
-# tf-keras package TFP fails at import with ModuleNotFoundError. greta does not
-# set TF_USE_LEGACY_KERAS, so `tf$keras` remains Keras 3.
+# TensorFlow Probability needs tf-keras, which it imports unconditionally. Its
+# `tf` extra declares that (`tf-keras>=2.16`), so asking for the extra lets the
+# resolver pick a version rather than greta guessing one -- greta previously
+# pinned tf-keras to TensorFlow's minor series, which has no release for TF 2.17
+# or 2.18 and so could not be installed at all. greta does not set
+# TF_USE_LEGACY_KERAS, so `tf$keras` remains Keras 3.
 
 greta_py_require_args <- function(
   tf_version = greta_deps_default$tf,
@@ -362,8 +365,7 @@ greta_py_require_args <- function(
   list(
     packages = c(
       paste0("tensorflow==", tf_minor, ".*"),
-      paste0("tensorflow_probability==", tfp_minor, ".*"),
-      paste0("tf-keras==", tf_minor, ".*")
+      paste0("tensorflow_probability[tf]==", tfp_minor, ".*")
     ),
     python_version = python_version %||% greta_deps_default$python_range
   )
