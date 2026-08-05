@@ -14,7 +14,9 @@ test_that("opt converges with TF optimisers", {
     adadelta,
     adagrad,
     adam,
+    adamax,
     ftrl,
+    nadam,
     rms_prop
   )
 

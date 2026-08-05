@@ -475,7 +475,7 @@ adam <- function(
 #' @export
 #'
 adamax <- function(
-  learning_rate = 0.001,
+  learning_rate = 0.1,
   beta_1 = 0.9,
   beta_2 = 0.999,
   epsilon = 1e-07
@@ -582,7 +582,7 @@ proximal_adagrad <- function(
 #' @export
 #'
 nadam <- function(
-  learning_rate = 0.001,
+  learning_rate = 0.1,
   beta_1 = 0.9,
   beta_2 = 0.999,
   epsilon = 1e-07
