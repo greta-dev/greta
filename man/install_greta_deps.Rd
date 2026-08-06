@@ -26,8 +26,7 @@ By default these are TF 2.21.0, TFP
 0.25.0, and Python 3.12.
 \code{\link[=greta_deps_spec]{greta_deps_spec()}} checks that the TF version is one greta supports;
 compatible TFP and Python versions are resolved at install time. See
-?\code{\link[=greta_deps_spec]{greta_deps_spec()}} for more information, and the data object
-\code{greta_deps_tf_tfp} for known-good combinations. If you have stored a
+?\code{\link[=greta_deps_spec]{greta_deps_spec()}} for more information. If you have stored a
 preference with \code{\link[=greta_set_deps]{greta_set_deps()}}, it is used when \code{deps} is not
 supplied.}
 
@@ -100,9 +99,11 @@ Dependencies" vignette and \code{\link[=greta_set_python]{greta_set_python()}}.
 If you don't want to use conda or the "greta-env-tf2" conda environment, you
 can install versions that you like, e.g., using \code{\link[reticulate:py_install]{reticulate::py_install()}}.
 If you want to see which versions of TF, TFP, and Python work with each
-other (at least according to information from tensorflows website), see the
-data \code{greta_deps_tf_tfp}, which is provided with greta. Managing your own
-installation is not always straightforward, so proceed with caution.
+other, greta installs and runs against a range of them weekly, and the
+results are at
+\url{https://github.com/greta-dev/greta/actions/workflows/install-check.yaml}.
+Managing your own installation is not always straightforward, so proceed
+with caution.
 }
 \examples{
 \dontrun{

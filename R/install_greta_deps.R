@@ -33,8 +33,7 @@
 #'   `r greta_deps_default$tfp`, and Python `r greta_deps_default$python`.
 #'   [greta_deps_spec()] checks that the TF version is one greta supports;
 #'   compatible TFP and Python versions are resolved at install time. See
-#'   ?[greta_deps_spec()] for more information, and the data object
-#'   `greta_deps_tf_tfp` for known-good combinations. If you have stored a
+#'   ?[greta_deps_spec()] for more information. If you have stored a
 #'   preference with [greta_set_deps()], it is used when `deps` is not
 #'   supplied.
 #'
@@ -74,9 +73,11 @@
 #'  If you don't want to use conda or the "greta-env-tf2" conda environment, you
 #'  can install versions that you like, e.g., using [reticulate::py_install()].
 #'  If you want to see which versions of TF, TFP, and Python work with each
-#'  other (at least according to information from tensorflows website), see the
-#'  data `greta_deps_tf_tfp`, which is provided with greta. Managing your own
-#'  installation is not always straightforward, so proceed with caution.
+#'  other, greta installs and runs against a range of them weekly, and the
+#'  results are at
+#'  <https://github.com/greta-dev/greta/actions/workflows/install-check.yaml>.
+#'  Managing your own installation is not always straightforward, so proceed
+#'  with caution.
 #'
 #'
 #' @name install_greta_deps
@@ -266,10 +267,14 @@ greta_deps_default <- list(
   tf_min = "2.15.0",
   tfp_min = "0.23.0",
   python_min = "3.9",
-  # The floor has to be a Python the pinned TensorFlow publishes wheels for, or
-  # uv can resolve a Python that no TensorFlow will install against and fails
-  # with "no solution". TensorFlow dropped cp39 at 2.21, so a floor of 3.9 broke
-  # installation wherever uv chose 3.9 -- Windows, in practice.
+  # python_min and python_range disagree on purpose, because they answer
+  # different questions. python_min is the oldest Python greta_sitrep() will
+  # accept in an environment that already exists: someone running Python 3.9
+  # with TensorFlow 2.15 has a working setup, and warning them about it would be
+  # wrong. python_range is what greta asks uv to install now, so it has to be a
+  # Python the *pinned* TensorFlow publishes wheels for -- TensorFlow dropped
+  # cp39 at 2.21, and leaving the floor at 3.9 let uv resolve a Python that no
+  # TensorFlow would install against, which broke installation on Windows.
   python_range = ">=3.10,<=3.12"
 )
 
@@ -280,9 +285,9 @@ greta_deps_default <- list(
 #' `r greta_deps_default$tfp`, and `r greta_deps_default$python`, respectively.
 #' greta checks it supports the TF version (versions newer than greta has been
 #' tested against are rejected); compatible TFP and Python versions are resolved
-#' at install time by uv (or, for a conda environment, by conda/pip). The
-#' `greta_deps_tf_tfp` dataset lists known-good combinations of TF, TFP, and
-#' Python; inspect it with `View(greta_deps_tf_tfp)`.
+#' at install time by uv (or, for a conda environment, by conda/pip). For which
+#' combinations currently install and run, see the weekly checks at
+#' <https://github.com/greta-dev/greta/actions/workflows/install-check.yaml>.
 #'
 #' Calling `greta_deps_spec()` with no arguments returns greta's current
 #' default (recommended) versions, and is the supported way to query them -
