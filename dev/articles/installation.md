@@ -79,13 +79,13 @@ greta_sitrep()
 On a machine that’s ready to go, you’ll see something like this:
 
     #> ℹ checking if python available
-    #> ✔ python (v3.11) available
+    #> ✔ python (v3.12) available
     #>
     #> ℹ checking if TensorFlow available
-    #> ✔ TensorFlow (v2.15.1) available
+    #> ✔ TensorFlow (v2.21.0) available
     #>
     #> ℹ checking if TensorFlow Probability available
-    #> ✔ TensorFlow Probability (v0.23.0) available
+    #> ✔ TensorFlow Probability (v0.25.0) available
     #>
     #> ℹ greta conda environment: not used (managed (uv) environment active)
     #>
@@ -131,8 +131,8 @@ By default, greta manages this for you using
 [`uv`](https://docs.astral.sh/uv/), a fast Python package installer, via
 the reticulate package. The first time it’s needed, reticulate uses `uv`
 to create a private, isolated Python environment containing just the
-packages greta needs (currently Python 3.11, TensorFlow 2.15.1, and
-TensorFlow Probability 0.23.0). It lives in its own cache directory,
+packages greta needs (currently Python 3.12, TensorFlow 2.21.0, and
+TensorFlow Probability 0.25.0). It lives in its own cache directory,
 away from any other Python you might have – so greta can’t interfere
 with, or be broken by, Python you use for other things.
 
@@ -276,7 +276,7 @@ afterwards to confirm.
 ### I need specific dependency versions
 
 Most users never need to think about this: greta’s defaults (TensorFlow
-2.15.1, TensorFlow Probability 0.23.0, Python 3.11) are the newest
+2.21.0, TensorFlow Probability 0.25.0, Python 3.12) are the newest
 versions greta supports, and are used automatically. Reach for this if
 you need a different, specific combination – for example to match an
 existing institutional setup, or an offline machine someone else
@@ -294,20 +294,17 @@ greta_deps_spec(
 )
 ```
 
-If you specify versions of TF, TFP, and Python that are not compatible
-with each other,
 [`greta_deps_spec()`](https://greta-dev.github.io/greta/dev/reference/greta_deps_spec.md)
-errors before installation begins and suggests alternatives. The
-combinations greta knows about are recorded in the `greta_deps_tf_tfp`
-dataset, which we built from
-<https://www.tensorflow.org/install/source#tested_build_configurations>,
-<https://www.tensorflow.org/install/source_windows#tested_build_configurations>,
-and the TFP release notes. Inspect it with:
+checks that the TensorFlow version is one greta supports. Compatible TFP
+and Python versions are left to uv (or conda) to work out at install
+time, so an incompatible combination shows up as a resolver error during
+installation rather than being rejected up front.
 
-``` r
-
-View(greta_deps_tf_tfp)
-```
+greta checks a range of TensorFlow versions every week, on Linux, macOS
+and Windows. Each run lists the combinations it tried and reports the
+Python, TensorFlow and TensorFlow Probability versions each one resolved
+to. Open the most recent run from
+<https://github.com/greta-dev/greta/actions/workflows/install-check.yaml>.
 
 To persist a version choice, store it with
 [`greta_set_deps()`](https://greta-dev.github.io/greta/dev/reference/greta_set_deps.md).
@@ -353,8 +350,8 @@ one when you:
 [`install_greta_deps()`](https://greta-dev.github.io/greta/dev/reference/install_greta_deps.md)
 builds a conda environment named `greta-env-tf2`, installing TensorFlow
 and TensorFlow Probability into it. By default it uses the same versions
-as the managed environment (TensorFlow 2.15.1, TensorFlow Probability
-0.23.0, Python 3.11), or your stored
+as the managed environment (TensorFlow 2.21.0, TensorFlow Probability
+0.25.0, Python 3.12), or your stored
 [`greta_set_deps()`](https://greta-dev.github.io/greta/dev/reference/greta_set_deps.md)
 choice if you’ve made one:
 
@@ -574,13 +571,13 @@ install the Python modules yourself into a conda environment:
 reticulate::install_miniconda()
 reticulate::conda_create(
   envname = "greta-env-tf2",
-  python_version = "3.11"
+  python_version = "3.12"
 )
 reticulate::conda_install(
   envname = "greta-env-tf2",
   packages = c(
-    "tensorflow-probability==0.23.0",
-    "tensorflow==2.15.1"
+    "tensorflow-probability[tf]==0.25.0",
+    "tensorflow==2.21.0"
   )
 )
 ```

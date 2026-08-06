@@ -81,13 +81,13 @@ following:
 reticulate::install_miniconda()
 reticulate::conda_create(
   envname = "greta-env-tf2",
-  python_version = "3.11"
+  python_version = "3.12"
 )
 reticulate::py_install(
   packages = c(
     "numpy",
-    "tensorflow==2.15.1",
-    "tensorflow-probability==0.23.0"
+    "tensorflow==2.21.0",
+    "tensorflow-probability[tf]==0.25.0"
   ),
   envname = "greta-env-tf2",
   pip = TRUE

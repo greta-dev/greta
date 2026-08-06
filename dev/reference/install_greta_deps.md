@@ -33,14 +33,13 @@ reinstall_greta_deps(
   object created with
   [`greta_deps_spec()`](https://greta-dev.github.io/greta/dev/reference/greta_deps_spec.md)
   where you specify python, TensorFlow (TF), and TensorFlow Probability
-  (TFP) versions. By default these are TF 2.15.1, TFP 0.23.0, and Python
-  3.11.
+  (TFP) versions. By default these are TF 2.21.0, TFP 0.25.0, and Python
+  3.12.
   [`greta_deps_spec()`](https://greta-dev.github.io/greta/dev/reference/greta_deps_spec.md)
   checks that the TF version is one greta supports; compatible TFP and
   Python versions are resolved at install time. See
   ?[`greta_deps_spec()`](https://greta-dev.github.io/greta/dev/reference/greta_deps_spec.md)
-  for more information, and the data object `greta_deps_tf_tfp` for
-  known-good combinations. If you have stored a preference with
+  for more information. If you have stored a preference with
   [`greta_set_deps()`](https://greta-dev.github.io/greta/dev/reference/greta_set_deps.md),
   it is used when `deps` is not supplied.
 
@@ -76,7 +75,7 @@ greta's Python dependencies into a conda environment.
 
 This function, `install_greta_deps()`, is an alternative installation
 workflow. The default versions of the python modules are: TensorFlow
-2.15.1, TensorFlow Probability 0.23.0, and Python 3.11. These Python
+2.21.0, TensorFlow Probability 0.25.0, and Python 3.12. These Python
 modules will be installed into a conda environment named
 "greta-env-tf2".
 
@@ -118,11 +117,12 @@ environment variable to its Python before loading greta). See the
 If you don't want to use conda or the "greta-env-tf2" conda environment,
 you can install versions that you like, e.g., using
 [`reticulate::py_install()`](https://rstudio.github.io/reticulate/reference/py_install.html).
-If you want to see which versions of TF, TFP, and Python work with each
-other (at least according to information from tensorflows website), see
-the data `greta_deps_tf_tfp`, which is provided with greta. Managing
-your own installation is not always straightforward, so proceed with
-caution.
+greta installs and runs against a range of TensorFlow versions weekly,
+on Linux, macOS and Windows. Each run lists the combinations it tried
+and the versions each resolved to; open the most recent one from
+<https://github.com/greta-dev/greta/actions/workflows/install-check.yaml>.
+Managing your own installation is not always straightforward, so proceed
+with caution.
 
 ## Examples
 

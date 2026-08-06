@@ -99,12 +99,11 @@ now what we recommend. This has changed from where we would previously use
 <dl><dt id="arg-deps">deps<a class="anchor" aria-label="anchor" href="#arg-deps"></a></dt>
 <dd><p>object created with <code><a href="greta_deps_spec.html">greta_deps_spec()</a></code> where you
 specify python, TensorFlow (TF), and TensorFlow Probability (TFP) versions.
-By default these are TF 2.15.1, TFP
-0.23.0, and Python 3.11.
+By default these are TF 2.21.0, TFP
+0.25.0, and Python 3.12.
 <code><a href="greta_deps_spec.html">greta_deps_spec()</a></code> checks that the TF version is one greta supports;
 compatible TFP and Python versions are resolved at install time. See
-?<code><a href="greta_deps_spec.html">greta_deps_spec()</a></code> for more information, and the data object
-<code>greta_deps_tf_tfp</code> for known-good combinations. If you have stored a
+?<code><a href="greta_deps_spec.html">greta_deps_spec()</a></code> for more information. If you have stored a
 preference with <code><a href="greta_set_deps.html">greta_set_deps()</a></code>, it is used when <code>deps</code> is not
 supplied.</p></dd>
 
@@ -141,8 +140,8 @@ installing greta's Python dependencies into a conda environment.</p>
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>This function, <code>install_greta_deps()</code>, is an alternative installation
 workflow. The default versions of the python modules are: TensorFlow
-2.15.1, TensorFlow Probability
-0.23.0, and Python 3.11.
+2.21.0, TensorFlow Probability
+0.25.0, and Python 3.12.
 These Python modules will be installed into a conda environment named
 "greta-env-tf2".</p>
 <p>It can be useful to identify installation notes, warnings, or errors that
@@ -174,10 +173,12 @@ variable to its Python before loading greta). See the "Installing
 Dependencies" vignette and <code><a href="greta_set_python.html">greta_set_python()</a></code>.</p>
 <p>If you don't want to use conda or the "greta-env-tf2" conda environment, you
 can install versions that you like, e.g., using <code><a href="https://rstudio.github.io/reticulate/reference/py_install.html" class="external-link">reticulate::py_install()</a></code>.
-If you want to see which versions of TF, TFP, and Python work with each
-other (at least according to information from tensorflows website), see the
-data <code>greta_deps_tf_tfp</code>, which is provided with greta. Managing your own
-installation is not always straightforward, so proceed with caution.</p>
+greta installs and runs against a range of TensorFlow versions weekly, on
+Linux, macOS and Windows. Each run lists the combinations it tried and the
+versions each resolved to; open the most recent one from
+<a href="https://github.com/greta-dev/greta/actions/workflows/install-check.yaml" class="external-link">https://github.com/greta-dev/greta/actions/workflows/install-check.yaml</a>.
+Managing your own installation is not always straightforward, so proceed
+with caution.</p>
     </div>
 
     <div class="section level2">

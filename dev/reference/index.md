@@ -227,7 +227,7 @@ Functions for managing installation of dependencies
 - [`greta_sitrep()`](https://greta-dev.github.io/greta/dev/reference/greta_sitrep.md)
   : Greta Situation Report
 - [`greta_deps_tf_tfp`](https://greta-dev.github.io/greta/dev/reference/greta_deps_tf_tfp.md)
-  : Suggested valid Python dependencies for greta
+  **\[deprecated\]** : Suggested valid Python dependencies for greta
 - [`greta_install_miniconda()`](https://greta-dev.github.io/greta/dev/reference/greta_install_miniconda.md)
   : Installs miniconda
 - [`install_greta_deps()`](https://greta-dev.github.io/greta/dev/reference/install_greta_deps.md)

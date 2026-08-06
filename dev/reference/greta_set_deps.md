@@ -12,8 +12,8 @@ for that). The stored versions are used by:
 - [`install_greta_deps()`](https://greta-dev.github.io/greta/dev/reference/install_greta_deps.md),
   as its default `deps` argument when building a conda environment.
 
-Most users never need this: greta's defaults (TensorFlow 2.15.1,
-TensorFlow Probability 0.23.0, Python 3.11) are the newest versions
+Most users never need this: greta's defaults (TensorFlow 2.21.0,
+TensorFlow Probability 0.25.0, Python 3.12) are the newest versions
 greta supports.
 
 To clear the stored versions and return to the defaults, use
