@@ -2,11 +2,14 @@
 
     Code
       check_tf_version("error")
+    Message
+      i Working out why Python could not be loaded, this may take a moment.
     Condition
       Error in `check_tf_version()`:
       ! x greta could not load Python, TensorFlow, and TensorFlow Probability.
       i Run `greta::greta_sitrep()` to check your installation.
       i For help, including offline or conda installs, see the installation vignette (`vignette(greta::installation)`), or install a conda environment with `install_greta_deps()`.
+      i What Python and uv reported is in `greta::open_greta_install_log()`.
 
 ---
 

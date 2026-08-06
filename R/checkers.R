@@ -85,6 +85,60 @@ check_tf_version <- function(
       cli_msg <- c(cli_msg[1], reported, cli_msg[-1])
     }
 
+    # Python failing to load at all is the one case where greta has nothing
+    # useful to report: reticulate says only "Installation of Python not found",
+    # while uv's explanation went to the terminal unrecorded. That is worth a
+    # subprocess to recover -- but only when the user is actually blocked, since
+    # check_tf_version() also runs with alert = "none" behind test skips.
+    # !isTRUE() rather than isFALSE(): anything that is not exactly TRUE counts
+    # as a failure here, including NA or NULL from a check that misbehaved.
+    # isFALSE(NA) is FALSE, which would read as "did not fail".
+    python_failed <- !isTRUE(checks$Python)
+    worth_diagnosing <- python_failed && identical(alert, "error")
+
+    if (worth_diagnosing) {
+      cli::cli_inform(
+        c(
+          "i" = "Working out why Python could not be loaded, this may take a \\
+          moment."
+        )
+      )
+      diagnose_python_load()
+      logfile <- sys_get_env("GRETA_INSTALLATION_LOG") %||%
+        greta_default_logfile()
+      # Silently: write_greta_install_log() narrates itself with progress steps
+      # and elapsed times, which belong to an install the user asked for, not to
+      # the middle of an error they did not.
+      #
+      # The reason is kept rather than collapsed to FALSE. Discarding it is the
+      # habit this whole change exists to correct, and the logfile is where the
+      # explanation was meant to go -- so failing to write it is worth saying,
+      # instead of leaving the user with no pointer and no idea one was intended.
+      log_written <- tryCatch(
+        {
+          suppressMessages(write_greta_install_log(path = logfile))
+          check_result(TRUE)
+        },
+        error = function(e) check_result(FALSE, conditionMessage(e))
+      )
+
+      if (isTRUE(log_written)) {
+        cli_msg <- c(
+          cli_msg,
+          "i" = "What Python and uv reported is in \\
+          {.run greta::open_greta_install_log()}."
+        )
+      } else {
+        cli_msg <- c(
+          cli_msg,
+          "i" = paste0(
+            "greta could not write its logfile: ",
+            cli_escape(check_reason(log_written))
+          )
+        )
+      }
+    }
+
     # a removal earlier this session may have deleted the environment greta
     # is still pointing at; flag that before the generic hints
     if (isTRUE(greta_stash$deps_removed_this_session)) {
