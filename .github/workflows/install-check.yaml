@@ -68,6 +68,11 @@ jobs:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
       GRETA_TF_VERSION: ${{ matrix.tf }}
       GRETA_BACKEND: ${{ matrix.backend }}
+      # reticulate 1.46.0 cannot bootstrap uv on Windows when R inherits a
+      # PowerShell 7 PSModulePath, which the pwsh setup steps leave behind.
+      # Fixed in reticulate's development version; clearing this avoids a
+      # CI-only failure without pinning a reticulate users do not have.
+      PSModulePath: ''
 
     steps:
       - uses: actions/checkout@v4
@@ -77,14 +82,13 @@ jobs:
           r-version: 'release'
           use-public-rspm: true
 
-      # Development reticulate, temporarily. On CRAN reticulate 1.46.0 the
-      # Windows uv job fails before uv downloads a Python, while R-CMD-check --
-      # which pins rstudio/reticulate -- passes on the same runner. This is
-      # here to confirm reticulate is the difference. An installation check
-      # should test what users install, so it goes back to CRAN once we know.
+      # CRAN reticulate, not the development version: this checks what users
+      # actually install. Pinning rstudio/reticulate here would hide exactly
+      # the class of bug this workflow exists to find -- R-CMD-check pins it,
+      # and that is why greta's Windows uv path looked healthy for years.
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
-          extra-packages: local::. rstudio/reticulate
+          extra-packages: local::.
 
       # A separate R session, because greta_set_python() only takes effect on
       # the next load. Doing this in the same session as the exercise runs it
