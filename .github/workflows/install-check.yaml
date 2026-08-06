@@ -68,10 +68,10 @@ jobs:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
       GRETA_TF_VERSION: ${{ matrix.tf }}
       GRETA_BACKEND: ${{ matrix.backend }}
-      # reticulate 1.46.0 cannot bootstrap uv on Windows when R inherits a
-      # PowerShell 7 PSModulePath, which the pwsh setup steps leave behind.
-      # Fixed in reticulate's development version; clearing this avoids a
-      # CI-only failure without pinning a reticulate users do not have.
+      # reticulate's changelog names an inherited PowerShell 7 PSModulePath as
+      # the cause of its Windows uv bootstrap failure. Clearing it did not fix
+      # the job on CRAN reticulate, so this is kept as one known contributor
+      # rather than the explanation.
       PSModulePath: ''
 
     steps:
@@ -82,13 +82,18 @@ jobs:
           r-version: 'release'
           use-public-rspm: true
 
-      # CRAN reticulate, not the development version: this checks what users
-      # actually install. Pinning rstudio/reticulate here would hide exactly
-      # the class of bug this workflow exists to find -- R-CMD-check pins it,
-      # and that is why greta's Windows uv path looked healthy for years.
+      # Development reticulate, because CRAN 1.46.0 cannot bootstrap uv on
+      # Windows and the fix is unreleased. Clearing PSModulePath -- the trigger
+      # reticulate's changelog names -- was not enough, so the cause is not
+      # fully understood.
+      #
+      # This is a compromise and it costs something: pinning a reticulate users
+      # cannot install is how greta's Windows uv path looked healthy for years
+      # while being broken. Go back to CRAN once reticulate releases, and check
+      # then whether Windows still passes.
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
-          extra-packages: local::.
+          extra-packages: local::. rstudio/reticulate
 
       # A separate R session, because greta_set_python() only takes effect on
       # the next load. Doing this in the same session as the exercise runs it
