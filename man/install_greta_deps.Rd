@@ -98,9 +98,9 @@ Dependencies" vignette and \code{\link[=greta_set_python]{greta_set_python()}}.
 
 If you don't want to use conda or the "greta-env-tf2" conda environment, you
 can install versions that you like, e.g., using \code{\link[reticulate:py_install]{reticulate::py_install()}}.
-If you want to see which versions of TF, TFP, and Python work with each
-other, greta installs and runs against a range of them weekly, and the
-results are at
+greta installs and runs against a range of TensorFlow versions weekly, on
+Linux, macOS and Windows. Each run lists the combinations it tried and the
+versions each resolved to; open the most recent one from
 \url{https://github.com/greta-dev/greta/actions/workflows/install-check.yaml}.
 Managing your own installation is not always straightforward, so proceed
 with caution.

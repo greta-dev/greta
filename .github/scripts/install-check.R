@@ -48,15 +48,20 @@ if (identical(backend, "uv") && using_conda) {
   stop("asked for the uv backend, but python is ", python_path, call. = FALSE)
 }
 
+resolved_python <- as.character(reticulate::py_config()$version)
+resolved_tf <- as.character(tensorflow::tf$`__version__`)
+resolved_tfp <- as.character(
+  reticulate::import("tensorflow_probability")$`__version__`
+)
+has_tf_keras <- reticulate::py_module_available("tf_keras")
+
 cat("--- resolved stack ---\n")
 cat("backend   :", backend, "\n")
 cat("python at :", python_path, "\n")
-cat("python    :", as.character(reticulate::py_config()$version), "\n")
-cat("tensorflow:", as.character(tensorflow::tf$`__version__`), "\n")
-cat("tfp       :", as.character(
-  reticulate::import("tensorflow_probability")$`__version__`
-), "\n")
-cat("tf_keras  :", reticulate::py_module_available("tf_keras"), "\n")
+cat("python    :", resolved_python, "\n")
+cat("tensorflow:", resolved_tf, "\n")
+cat("tfp       :", resolved_tfp, "\n")
+cat("tf_keras  :", has_tf_keras, "\n")
 
 cat("--- exercising greta ---\n")
 
@@ -71,3 +76,27 @@ draws <- mcmc(m, n_samples = 100, warmup = 100, chains = 2, verbose = FALSE)
 cat("mcmc draws:", nrow(as.matrix(draws)), "\n")
 
 cat("--- ok ---\n")
+
+# Write the resolved stack to the run page, so the answer to "does this
+# combination work" is readable without opening a job log. GitHub renders one
+# summary per job, so this is a row per combination rather than a single table.
+summary_file <- Sys.getenv("GITHUB_STEP_SUMMARY")
+if (nzchar(summary_file)) {
+  summary_lines <- c(
+    sprintf(
+      "### %s, TensorFlow %s, %s backend: works",
+      Sys.getenv("RUNNER_OS", "unknown"),
+      tf_version,
+      backend
+    ),
+    "",
+    "| resolved | version |",
+    "|---|---|",
+    sprintf("| Python | %s |", resolved_python),
+    sprintf("| TensorFlow | %s |", resolved_tf),
+    sprintf("| TensorFlow Probability | %s |", resolved_tfp),
+    sprintf("| tf-keras present | %s |", has_tf_keras),
+    ""
+  )
+  cat(paste(summary_lines, collapse = "\n"), file = summary_file, append = TRUE)
+}

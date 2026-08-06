@@ -72,9 +72,9 @@
 #'
 #'  If you don't want to use conda or the "greta-env-tf2" conda environment, you
 #'  can install versions that you like, e.g., using [reticulate::py_install()].
-#'  If you want to see which versions of TF, TFP, and Python work with each
-#'  other, greta installs and runs against a range of them weekly, and the
-#'  results are at
+#'  greta installs and runs against a range of TensorFlow versions weekly, on
+#'  Linux, macOS and Windows. Each run lists the combinations it tried and the
+#'  versions each resolved to; open the most recent one from
 #'  <https://github.com/greta-dev/greta/actions/workflows/install-check.yaml>.
 #'  Managing your own installation is not always straightforward, so proceed
 #'  with caution.
@@ -285,9 +285,10 @@ greta_deps_default <- list(
 #' `r greta_deps_default$tfp`, and `r greta_deps_default$python`, respectively.
 #' greta checks it supports the TF version (versions newer than greta has been
 #' tested against are rejected); compatible TFP and Python versions are resolved
-#' at install time by uv (or, for a conda environment, by conda/pip). For which
-#' combinations currently install and run, see the weekly checks at
-#' <https://github.com/greta-dev/greta/actions/workflows/install-check.yaml>.
+#' at install time by uv (or, for a conda environment, by conda/pip). greta
+#' checks a range of TensorFlow versions weekly; open the most recent run from
+#' <https://github.com/greta-dev/greta/actions/workflows/install-check.yaml>
+#' to see which combinations were tried and what each resolved to.
 #'
 #' Calling `greta_deps_spec()` with no arguments returns greta's current
 #' default (recommended) versions, and is the supported way to query them -

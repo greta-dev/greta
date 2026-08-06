@@ -8,9 +8,10 @@
 #' at TensorFlow 2.15.1 -- well behind the versions greta now installs -- so
 #' consulting it gives the wrong answer about what works.
 #'
-#' For which combinations currently install and run, see the checks greta runs
-#' weekly across Linux, macOS and Windows:
-#' <https://github.com/greta-dev/greta/actions/workflows/install-check.yaml>.
+#' greta instead checks a range of TensorFlow versions weekly, on Linux, macOS
+#' and Windows. Open the most recent run from
+#' <https://github.com/greta-dev/greta/actions/workflows/install-check.yaml> to
+#' see which combinations were tried and what each resolved to.
 #'
 #' @details
 #' This is a dataset that contains suggested valid versions of Tensorflow (TF),

@@ -29,9 +29,10 @@ Probability (TFP), and Python. Defaulting to 2.21.0,
 0.25.0, and 3.12, respectively.
 greta checks it supports the TF version (versions newer than greta has been
 tested against are rejected); compatible TFP and Python versions are resolved
-at install time by uv (or, for a conda environment, by conda/pip). For which
-combinations currently install and run, see the weekly checks at
-\url{https://github.com/greta-dev/greta/actions/workflows/install-check.yaml}.
+at install time by uv (or, for a conda environment, by conda/pip). greta
+checks a range of TensorFlow versions weekly; open the most recent run from
+\url{https://github.com/greta-dev/greta/actions/workflows/install-check.yaml}
+to see which combinations were tried and what each resolved to.
 }
 \details{
 Calling \code{greta_deps_spec()} with no arguments returns greta's current

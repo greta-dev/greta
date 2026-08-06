@@ -270,8 +270,10 @@ Compatible TFP and Python versions are left to uv (or conda) to work out at
 install time, so an incompatible combination shows up as a resolver error
 during installation rather than being rejected up front.
 
-To see which combinations currently install and run, greta checks a range of
-TensorFlow versions on Linux, macOS and Windows every week:
+greta checks a range of TensorFlow versions every week, on Linux, macOS and
+Windows. Each run lists the combinations it tried and reports the Python,
+TensorFlow and TensorFlow Probability versions each one resolved to. Open the
+most recent run from
 <https://github.com/greta-dev/greta/actions/workflows/install-check.yaml>.
 
 To persist a version choice, store it with `greta_set_deps()`. The stored
