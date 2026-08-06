@@ -4,13 +4,13 @@
       check_tf_version("error")
     Condition
       Error in `check_tf_version()`:
-      ! x greta could not load Python with TensorFlow and TensorFlow Probability.
+      ! x greta could not load Python, TensorFlow, and TensorFlow Probability.
       i Run `greta::greta_sitrep()` to check your installation.
       i For help, including offline or conda installs, see the installation vignette (`vignette(greta::installation)`), or install a conda environment with `install_greta_deps()`.
 
 ---
 
-    x greta could not load Python with TensorFlow and TensorFlow Probability.
+    x greta could not load Python, TensorFlow, and TensorFlow Probability.
     i Run `greta::greta_sitrep()` to check your installation.
     i For help, including offline or conda installs, see the installation vignette (`vignette(greta::installation)`), or install a conda environment with `install_greta_deps()`.
 
@@ -19,7 +19,7 @@
     Code
       check_tf_version("message")
     Message
-      x greta could not load Python with TensorFlow and TensorFlow Probability.
+      x greta could not load Python, TensorFlow, and TensorFlow Probability.
       i Run `greta::greta_sitrep()` to check your installation.
       i For help, including offline or conda installs, see the installation vignette (`vignette(greta::installation)`), or install a conda environment with `install_greta_deps()`.
 
@@ -33,43 +33,43 @@
       
     Condition
       Error in `check_tf_version()`:
-      ! x greta could not load Python with TensorFlow and TensorFlow Probability.
+      ! x greta could not load TensorFlow Probability.
       i Run `greta::greta_sitrep()` to check your installation.
       i For help, including offline or conda installs, see the installation vignette (`vignette(greta::installation)`), or install a conda environment with `install_greta_deps()`.
 
 # greta_sitrep warns when have_python, _tf, or _tfp is FALSE
 
-    x greta could not load Python with TensorFlow and TensorFlow Probability.
+    x greta could not load Python and TensorFlow.
     i Run `greta::greta_sitrep()` to check your installation.
     i For help, including offline or conda installs, see the installation vignette (`vignette(greta::installation)`), or install a conda environment with `install_greta_deps()`.
 
 ---
 
-    x greta could not load Python with TensorFlow and TensorFlow Probability.
+    x greta could not load Python, TensorFlow, and TensorFlow Probability.
     i Run `greta::greta_sitrep()` to check your installation.
     i For help, including offline or conda installs, see the installation vignette (`vignette(greta::installation)`), or install a conda environment with `install_greta_deps()`.
 
 ---
 
-    x greta could not load Python with TensorFlow and TensorFlow Probability.
+    x greta could not load TensorFlow.
     i Run `greta::greta_sitrep()` to check your installation.
     i For help, including offline or conda installs, see the installation vignette (`vignette(greta::installation)`), or install a conda environment with `install_greta_deps()`.
 
 ---
 
-    x greta could not load Python with TensorFlow and TensorFlow Probability.
+    x greta could not load Python and TensorFlow Probability.
     i Run `greta::greta_sitrep()` to check your installation.
     i For help, including offline or conda installs, see the installation vignette (`vignette(greta::installation)`), or install a conda environment with `install_greta_deps()`.
 
 ---
 
-    x greta could not load Python with TensorFlow and TensorFlow Probability.
+    x greta could not load Python and TensorFlow.
     i Run `greta::greta_sitrep()` to check your installation.
     i For help, including offline or conda installs, see the installation vignette (`vignette(greta::installation)`), or install a conda environment with `install_greta_deps()`.
 
 ---
 
-    x greta could not load Python with TensorFlow and TensorFlow Probability.
+    x greta could not load TensorFlow Probability.
     i Run `greta::greta_sitrep()` to check your installation.
     i For help, including offline or conda installs, see the installation vignette (`vignette(greta::installation)`), or install a conda environment with `install_greta_deps()`.
 

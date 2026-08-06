@@ -28,11 +28,14 @@ check_tf_version <- function(
     )
   }
 
-  requirements_valid <- c(
-    python_exists = have_python(),
-    correct_tf = have_tf(),
-    correct_tfp = have_tfp()
+  # A list, not c(): each result carries the reason it failed as an attribute,
+  # and c() would strip it.
+  checks <- list(
+    Python = have_python(),
+    TensorFlow = have_tf(),
+    `TensorFlow Probability` = have_tfp()
   )
+  requirements_valid <- vapply(checks, isTRUE, logical(1))
 
   py_not_init <- !greta_stash$python_has_been_initialised
   requirements_valid_py_not_init <- all(requirements_valid) && py_not_init
@@ -49,14 +52,38 @@ check_tf_version <- function(
   if (!all(requirements_valid)) {
     cli_process_failed()
 
+    failed_checks <- checks[!requirements_valid]
+    failed <- names(failed_checks)
+
     cli_msg <- c(
-      "x" = "greta could not load Python with TensorFlow and TensorFlow \\
-      Probability.",
+      "x" = "greta could not load {.strong {failed}}.",
       "i" = "Run {.run greta::greta_sitrep()} to check your installation.",
       "i" = "For help, including offline or conda installs, see the \\
       installation vignette ({.vignette greta::installation}), or install a \\
       conda environment with {.fun install_greta_deps}."
     )
+
+    # Say what went wrong, not only that something did. Without this every
+    # cause -- an unresolvable Python, a missing module, an offline cache miss
+    # -- reports the same sentence, and the message that would have explained
+    # it has already been discarded.
+    #
+    # A check can fail without a reason, so drop those before extracting rather
+    # than carrying a placeholder through and filtering it out afterwards.
+    explained_checks <- Filter(
+      \(check) !is.null(check_reason(check)),
+      failed_checks
+    )
+    checks_to_explain <- length(explained_checks) > 0
+
+    if (checks_to_explain) {
+      reasons <- vapply(explained_checks, check_reason, character(1))
+      # Python and uv messages routinely contain braces, which cli would read as
+      # interpolation, so they are escaped before being handed over.
+      reported <- paste0(names(reasons), ": ", cli_escape(reasons))
+      names(reported) <- rep(">", length(reported))
+      cli_msg <- c(cli_msg[1], reported, cli_msg[-1])
+    }
 
     # a removal earlier this session may have deleted the environment greta
     # is still pointing at; flag that before the generic hints
