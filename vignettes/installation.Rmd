@@ -76,13 +76,13 @@ On a machine that's ready to go, you'll see something like this:
 
 ```
 #> ℹ checking if python available
-#> ✔ python (v3.11) available
+#> ✔ python (v3.12) available
 #>
 #> ℹ checking if TensorFlow available
-#> ✔ TensorFlow (v2.15.1) available
+#> ✔ TensorFlow (v2.21.0) available
 #>
 #> ℹ checking if TensorFlow Probability available
-#> ✔ TensorFlow Probability (v0.23.0) available
+#> ✔ TensorFlow Probability (v0.25.0) available
 #>
 #> ℹ greta conda environment: not used (managed (uv) environment active)
 #>
@@ -265,17 +265,16 @@ greta_deps_spec(
 )
 ```
 
-If you specify versions of TF, TFP, and Python that are not compatible with
-each other, `greta_deps_spec()` errors before installation begins and
-suggests alternatives. The combinations greta knows about are recorded in
-the `greta_deps_tf_tfp` dataset, which we built from
-<https://www.tensorflow.org/install/source#tested_build_configurations>,
-<https://www.tensorflow.org/install/source_windows#tested_build_configurations>,
-and the TFP release notes. Inspect it with:
+`greta_deps_spec()` checks that the TensorFlow version is one greta supports.
+Compatible TFP and Python versions are left to uv (or conda) to work out at
+install time, so an incompatible combination shows up as a resolver error
+during installation rather than being rejected up front.
 
-```{r deps-table, eval = FALSE}
-View(greta_deps_tf_tfp)
-```
+greta checks a range of TensorFlow versions every week, on Linux, macOS and
+Windows. Each run lists the combinations it tried and reports the Python,
+TensorFlow and TensorFlow Probability versions each one resolved to. Open the
+most recent run from
+<https://github.com/greta-dev/greta/actions/workflows/install-check.yaml>.
 
 To persist a version choice, store it with `greta_set_deps()`. The stored
 versions are then used by both the managed (uv) environment (installed on
@@ -486,13 +485,13 @@ Work through these in order. Most problems are one of the first two.
 reticulate::install_miniconda()
 reticulate::conda_create(
   envname = "greta-env-tf2",
-  python_version = "3.11"
+  python_version = "3.12"
 )
 reticulate::conda_install(
   envname = "greta-env-tf2",
   packages = c(
-    "tensorflow-probability==0.23.0",
-    "tensorflow==2.15.1"
+    "tensorflow-probability[tf]==0.25.0",
+    "tensorflow==2.21.0"
   )
 )
 ```

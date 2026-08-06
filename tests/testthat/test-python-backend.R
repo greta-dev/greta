@@ -525,7 +525,10 @@ test_that("stored deps versions translate to py_require() arguments", {
   )
   expect_equal(
     args$packages,
-    c("tensorflow==2.14.*", "tensorflow_probability==0.22.*")
+    c(
+      "tensorflow==2.14.*",
+      "tensorflow_probability[tf]==0.22.*"
+    )
   )
   expect_equal(args$python_version, "3.10")
 })

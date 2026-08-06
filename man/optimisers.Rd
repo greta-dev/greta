@@ -88,7 +88,7 @@ adam(
   epsilon = 1e-08
 )
 
-adamax(learning_rate = 0.001, beta_1 = 0.9, beta_2 = 0.999, epsilon = 1e-07)
+adamax(learning_rate = 0.1, beta_1 = 0.9, beta_2 = 0.999, epsilon = 1e-07)
 
 ftrl(
   learning_rate = 1,
@@ -113,7 +113,7 @@ proximal_adagrad(
   l2_regularization_strength = 0
 )
 
-nadam(learning_rate = 0.001, beta_1 = 0.9, beta_2 = 0.999, epsilon = 1e-07)
+nadam(learning_rate = 0.1, beta_1 = 0.9, beta_2 = 0.999, epsilon = 1e-07)
 
 rms_prop(
   learning_rate = 0.1,

@@ -750,7 +750,7 @@ other_install_fail_msg <- function(error_passed) {
       "{.code Sys.setenv(RETICULATE_USE_MANAGED_VENV = 'yes')}",
       "{.code library(reticulate)}",
       "{.code py_require(packages = c('tensorflow=={tf_pin}',
-                        'tensorflow-probability=={tfp_pin}'),
+                        'tensorflow-probability[tf]=={tfp_pin}'),
            python_version = '{py_pin}')}",
       "{.code py_require()}",
       "{.code py_config()}",
@@ -784,7 +784,7 @@ timeout_install_msg <- function(timeout = 5, py_error = NULL) {
         packages = c(
           'numpy',
           'tensorflow=={tf_pin}',
-          'tensorflow-probability=={tfp_pin}'
+          'tensorflow-probability[tf]=={tfp_pin}'
           ),
         envname = 'greta-env-tf2',
         pip = TRUE

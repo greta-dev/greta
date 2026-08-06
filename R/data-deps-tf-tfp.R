@@ -1,5 +1,19 @@
 #' Suggested valid Python dependencies for greta
 #'
+#' @description
+#' `r lifecycle::badge("deprecated")`
+#'
+#' This dataset is deprecated and will be removed in a future release. greta
+#' stopped validating against it in 0.6.0, and it is a fixed snapshot that stops
+#' at TensorFlow 2.15.1 -- well behind the versions greta now installs -- so
+#' consulting it gives the wrong answer about what works.
+#'
+#' greta instead checks a range of TensorFlow versions weekly, on Linux, macOS
+#' and Windows. Open the most recent run from
+#' <https://github.com/greta-dev/greta/actions/workflows/install-check.yaml> to
+#' see which combinations were tried and what each resolved to.
+#'
+#' @details
 #' This is a dataset that contains suggested valid versions of Tensorflow (TF),
 #'   Tensorflow Probability (TFP), and Python for linux, mac, and windows
 #'   machines. It was constructed from
