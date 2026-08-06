@@ -79,13 +79,13 @@
       greta_sitrep()
     Message
       i checking if python available
-      v python (v3.11) available
+      v python (v3.12) available
       
       i checking if TensorFlow available
-      v TensorFlow (v2.15.1) available
+      v TensorFlow (v2.21.0) available
       
       i checking if TensorFlow Probability available
-      v TensorFlow Probability (v0.23.0) available
+      v TensorFlow Probability (v0.25.0) available
       
       i greta conda environment: not used (managed (uv) environment active)
       * backend: "managed (uv) environment"
@@ -101,10 +101,10 @@
       v python (v3.6) available
       
       i checking if TensorFlow available
-      v TensorFlow (v2.15.1) available
+      v TensorFlow (v2.21.0) available
       
       i checking if TensorFlow Probability available
-      v TensorFlow Probability (v0.23.0) available
+      v TensorFlow Probability (v0.25.0) available
       
       i greta conda environment: not used (managed (uv) environment active)
       * backend: "managed (uv) environment"
@@ -123,7 +123,7 @@
       v TensorFlow (v2.0.0) available
       
       i checking if TensorFlow Probability available
-      v TensorFlow Probability (v0.23.0) available
+      v TensorFlow Probability (v0.25.0) available
       
       i greta conda environment: not used (managed (uv) environment active)
       * backend: "managed (uv) environment"
@@ -155,13 +155,13 @@
       greta_sitrep()
     Message
       i checking if python available
-      v python (v3.11) available
+      v python (v3.12) available
       
       i checking if TensorFlow available
-      v TensorFlow (v2.15.1) available
+      v TensorFlow (v2.21.0) available
       
       i checking if TensorFlow Probability available
-      v TensorFlow Probability (v0.23.0) available
+      v TensorFlow Probability (v0.25.0) available
       
       i greta conda environment: not used (managed (uv) environment active)
       * backend: "managed (uv) environment"
@@ -195,13 +195,13 @@
       greta_sitrep(verbosity = "minimal")
     Message
       i checking if python available
-      v python (v3.11) available
+      v python (v3.12) available
       
       i checking if TensorFlow available
-      v TensorFlow (v2.15.1) available
+      v TensorFlow (v2.21.0) available
       
       i checking if TensorFlow Probability available
-      v TensorFlow Probability (v0.23.0) available
+      v TensorFlow Probability (v0.25.0) available
       
       i greta conda environment: not used (managed (uv) environment active)
       * backend: "<backend>"

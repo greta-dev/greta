@@ -44,7 +44,7 @@
     Code
       greta_set_deps()
     Message
-      v Stored dependency versions: TensorFlow "2.15.1", TensorFlow Probability "0.23.0", Python "3.11".
+      v Stored dependency versions: TensorFlow "2.21.0", TensorFlow Probability "0.25.0", Python "3.12".
       i Restart R for this to take effect.
 
 # greta_set_deps(NULL) errors and points at greta_remove('deps')

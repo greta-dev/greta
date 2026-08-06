@@ -1,5 +1,11 @@
 set.seed(2024 - 07 - 04)
 
+# These tests snapshot draws at fixed seeds, so they move whenever TensorFlow
+# Probability changes how it samples. Whether the distributions are still
+# correct is a separate question, answered in test_iid_samples.R by comparing
+# greta's draws against stats::rWishart() and an independent LKJ
+# implementation. Check that passes before accepting a moved snapshot here.
+
 test_that("Wishart can use a choleskied Sigma", {
   skip_if_not(check_tf_version())
 
