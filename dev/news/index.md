@@ -2,6 +2,14 @@
 
 ## greta (development version)
 
+- When greta cannot load Python, TensorFlow, or TensorFlow Probability,
+  the error now names which of them failed and reports what went wrong,
+  instead of giving the same message whatever the cause. If Python
+  itself could not be loaded, greta works out why by resolving the
+  environment again in a separate R session, and records what Python and
+  uv reported in the installation logfile, which you can read with
+  [`open_greta_install_log()`](https://greta-dev.github.io/greta/dev/reference/open_greta_install_log.md)
+  ([\#825](https://github.com/greta-dev/greta/issues/825)).
 - greta now uses the Keras 3 optimiser API and so works with TensorFlow
   2.16 and later; the Keras 2 `tf.keras.optimizers.legacy` API it
   previously used does not exist in Keras 3, where every one of greta’s
