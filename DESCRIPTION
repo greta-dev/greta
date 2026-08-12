@@ -110,6 +110,7 @@ Collate:
     'extract_replace_combine.R'
     'dag_class.R'
     'data-deps-tf-tfp.R'
+    'diagnose-python-load.R'
     'greta_model_class.R'
     'progress_bar.R'
     'inference_class.R'

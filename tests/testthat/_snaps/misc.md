@@ -4,13 +4,15 @@
       check_tf_version("error")
     Condition
       Error in `check_tf_version()`:
-      ! x greta could not load Python with TensorFlow and TensorFlow Probability.
+      ! x greta could not load TensorFlow.
+      > TensorFlow: TensorFlow 0.9.0 is installed, but greta needs 2.9.0 or later
       i Run `greta::greta_sitrep()` to check your installation.
       i For help, including offline or conda installs, see the installation vignette (`vignette(greta::installation)`), or install a conda environment with `install_greta_deps()`.
 
 ---
 
-    x greta could not load Python with TensorFlow and TensorFlow Probability.
+    x greta could not load TensorFlow.
+    > TensorFlow: TensorFlow 0.9.0 is installed, but greta needs 2.9.0 or later
     i Run `greta::greta_sitrep()` to check your installation.
     i For help, including offline or conda installs, see the installation vignette (`vignette(greta::installation)`), or install a conda environment with `install_greta_deps()`.
 
@@ -19,7 +21,8 @@
     Code
       check_tf_version("message")
     Message
-      x greta could not load Python with TensorFlow and TensorFlow Probability.
+      x greta could not load TensorFlow.
+      > TensorFlow: TensorFlow 0.9.0 is installed, but greta needs 2.9.0 or later
       i Run `greta::greta_sitrep()` to check your installation.
       i For help, including offline or conda installs, see the installation vignette (`vignette(greta::installation)`), or install a conda environment with `install_greta_deps()`.
 

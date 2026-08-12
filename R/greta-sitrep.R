@@ -355,33 +355,74 @@ have_conda <- function() {
 }
 
 #' @importFrom reticulate py_available
+# A check that failed carries why. Returning a bare FALSE discards the only
+# thing a user can act on -- uv reporting no resolvable Python, a module that
+# will not import, an offline cache miss -- and leaves every cause producing the
+# same sentence. `isTRUE()` and `if ()` still work on the result, so callers that
+# only want the answer do not change.
+check_result <- function(ok, reason = NULL) {
+  structure(isTRUE(ok), reason = reason)
+}
+
+check_reason <- function(x) {
+  attr(x, "reason", exact = TRUE)
+}
+
+# cli reads `{}` as interpolation, and these messages come from Python and uv,
+# which use braces freely. Doubling them makes cli print them literally.
+cli_escape <- function(x) {
+  gsub("}", "}}", gsub("{", "{{", x, fixed = TRUE), fixed = TRUE)
+}
+
 have_python <- function() {
   tryCatch(
-    expr = reticulate::py_available(initialize = TRUE),
-    error = function(e) FALSE
+    expr = check_result(reticulate::py_available(initialize = TRUE)),
+    error = function(e) check_result(FALSE, conditionMessage(e))
   )
 }
 
 #' @importFrom reticulate py_module_available
+# Reads the version through the module rather than asking
+# py_module_available(), which reports a failure by returning FALSE and so
+# leaves nothing to explain it. Touching the module raises the underlying import
+# error instead, which is the message worth keeping.
+#
+# `get_version` is a function rather than the module itself so that reading the
+# version happens inside tryCatch(), where the error can be caught.
+have_python_module <- function(label, get_version, minimum) {
+  tryCatch(
+    {
+      version <- get_version()
+      new_enough <- utils::compareVersion(minimum, version) <= 0
+      if (new_enough) {
+        check_result(TRUE)
+      } else {
+        check_result(
+          FALSE,
+          cli::format_inline(
+            "{label} {version} is installed, but greta needs {minimum} or later"
+          )
+        )
+      }
+    },
+    error = function(e) check_result(FALSE, conditionMessage(e))
+  )
+}
+
 have_tfp <- function() {
-  is_tfp_available <- py_module_available("tensorflow_probability")
-
-  if (is_tfp_available) {
-    is_tfp_available <- utils::compareVersion("0.15.0", tfp$`__version__`) <= 0
-  }
-
-  return(is_tfp_available)
+  have_python_module(
+    label = "TensorFlow Probability",
+    get_version = \() tfp$`__version__`,
+    minimum = "0.15.0"
+  )
 }
 
 have_tf <- function() {
-  is_tf_available <- py_module_available("tensorflow")
-
-  if (is_tf_available) {
-    tf_version <- suppressMessages(tf$`__version__`)
-    is_tf_available <- utils::compareVersion("2.9.0", tf_version) <= 0
-  }
-
-  return(is_tf_available)
+  have_python_module(
+    label = "TensorFlow",
+    get_version = \() suppressMessages(tf$`__version__`),
+    minimum = "2.9.0"
+  )
 }
 
 version_tf <- function() {
