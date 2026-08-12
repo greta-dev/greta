@@ -38,6 +38,19 @@ write_greta_install_log <- function(path = greta_logfile) {
   <p>Use this logfile to explore potential issues in installation with greta</p>
   <p>Try opening this in a HTML browser and searching the text for "error" with Cmd/Ctrl+F</p>
 
+  <h2>Managed (uv) environment</h2>
+
+    <details open>
+      <summary>
+        Why Python could not be loaded
+      </summary>
+      <pre>
+        <code>
+          {{{uv_diagnosis}}}
+        </code>
+      </pre>
+    </details>
+
   <h2>Miniconda</h2>
 
     <details>
@@ -113,6 +126,12 @@ write_greta_install_log <- function(path = greta_logfile) {
 
   greta_install_data <- list(
     sys_date = Sys.time(),
+    # Written by the load path rather than the install: uv's explanation of a
+    # failed resolution is too long for an error message and belongs here.
+    uv_diagnosis = paste(
+      greta_stash$python_load_diagnosis %||% character(),
+      collapse = "\n"
+    ),
     miniconda_notes = greta_stash$miniconda_notes,
     miniconda_error = greta_stash$miniconda_error,
     conda_create_notes = greta_stash$conda_create_notes,
