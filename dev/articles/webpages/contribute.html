@@ -128,6 +128,143 @@ think you can help implement one of those (or incorporate your own
 idea), please leave a message there first so we can discuss how to do
 it, and so that we aren’t duplicating effort.</p>
 </div>
+<div class="section level3">
+<h3 id="developing-the-package">developing the package<a class="anchor" aria-label="anchor" href="#developing-the-package"></a>
+</h3>
+<p>These notes are also in <a href="https://github.com/greta-dev/greta/blob/main/CONTRIBUTING.md" class="external-link">CONTRIBUTING.md</a>,
+which is what GitHub shows you when you open a pull request.</p>
+<p>greta needs Python, TensorFlow and TensorFlow Probability, but you
+don’t have to install those yourself - the first time you use greta in a
+session it installs them via <code>uv</code>. Run
+<code><a href="../../reference/greta_sitrep.html">greta_sitrep()</a></code> to see what it picked up.</p>
+<ul>
+<li>Format with <a href="https://posit-dev.github.io/air/" class="external-link">air</a>
+(<code>air format .</code>)</li>
+<li>Use the base pipe <code>|&gt;</code> over magrittr, %&gt;%</li>
+<li>Put comments above the code they describe rather than trailing</li>
+<li>give every user-facing change a one-line bullet in
+<code>NEWS.md</code> mentioning the issue number.</li>
+<li>Tests for <code>R/thing.R</code> go in
+<code>tests/testthat/test-thing.R</code>.</li>
+<li>Re-run <code>devtools::document()</code> after changing any roxygen
+comment.</li>
+</ul>
+</div>
+<div class="section level3">
+<h3 id="exposing-internals-with-module">exposing internals with <code>module()</code><a class="anchor" aria-label="anchor" href="#exposing-internals-with-module"></a>
+</h3>
+<p>greta is designed to be extended. greta.distributions, greta.gp,
+greta.dynamics and greta.gam each add distributions or model components,
+and to do that they need greta’s internal machinery:
+<code>check_dims()</code> to validate arguments the way greta does,
+<code>distribution_node</code> to subclass, <code>op()</code> to build a
+node in the graph.</p>
+<p>Those functions can’t simply be exported. Exporting them would put
+dozens of internal names into greta’s user-facing API, each needing a
+help page, an entry in the reference index, and an implicit promise not
+to change. They aren’t for users.</p>
+<p>So greta exports exactly one object for this,
+<code>.internals</code>, holding them in a nested named tree.
+<code>module()</code> is the small helper that builds that tree. It
+takes names from the call, so
+<code>module(check_dims, check_tf_version)</code> produces
+<code>list(check_dims = check_dims, check_tf_version = check_tf_version)</code>,
+sorted by name, without writing every name twice.</p>
+<p>An extension package pulls out what it needs when it loads. For
+example, in <a href="https://github.com/greta-dev/greta.distributions/blob/main/R/internals.R" class="external-link">greta.distributions/R/internals.R</a>:</p>
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">check_dims</span> <span class="op">&lt;-</span> <span class="va">.internals</span><span class="op">$</span><span class="va">checks</span><span class="op">$</span><span class="va">check_dims</span></span>
+<span><span class="va">create_progress_bar</span> <span class="op">&lt;-</span> <span class="va">.internals</span><span class="op">$</span><span class="va">inference</span><span class="op">$</span><span class="va">progress_bar</span><span class="op">$</span><span class="va">create_progress_bar</span></span>
+<span><span class="va">distribution_node</span> <span class="op">&lt;-</span> <span class="va">.internals</span><span class="op">$</span><span class="va">nodes</span><span class="op">$</span><span class="va">node_classes</span><span class="op">$</span><span class="va">distribution_node</span></span>
+<span><span class="va">op</span> <span class="op">&lt;-</span> <span class="va">.internals</span><span class="op">$</span><span class="va">nodes</span><span class="op">$</span><span class="va">constructors</span><span class="op">$</span><span class="va">op</span></span></code></pre></div>
+<p>Every path in those lines is a <code>module()</code> call on greta’s
+side: <code>checks</code> is <code>checks_module()</code>,
+<code>nodes</code> is <code>nodes_module()</code>, and
+<code>progress_bar</code> is <code>progress_bar_module()</code> nested
+inside <code>inference_module()</code>. Adding something to a module is
+what makes it reachable from a line like these.</p>
+<p>An extension reaches into <code>.internals</code> because it is doing
+the same kind of work greta does internally, and needs the same
+tools:</p>
+<table class="table">
+<colgroup>
+<col width="50%">
+<col width="50%">
+</colgroup>
+<thead><tr class="header">
+<th>to build</th>
+<th>it needs</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td>a distribution</td>
+<td>
+<code>distribution_node</code> to subclass, <code>distrib()</code>
+to turn that class into a user-facing greta array,
+<code>check_dims()</code> to validate and broadcast argument dimensions,
+<code>fl()</code> and <code>tf_as_float()</code> to write the TensorFlow
+density at greta’s float precision</td>
+</tr>
+<tr class="even">
+<td>an operation on greta arrays</td>
+<td>
+<code>op()</code>, which builds the operation node and hands it back
+as a greta array, plus <code>as.greta_array()</code> and
+<code>get_node()</code> to move between the two representations</td>
+</tr>
+<tr class="odd">
+<td>something that runs inference</td>
+<td>
+<code>dag_class</code>, and <code>create_progress_bar()</code> to
+report progress the way greta does</td>
+</tr>
+</tbody>
+</table>
+<p>When would you add one? Not very often. It’s worth being clear about
+who does what. If you’re writing an extension package, you never call
+<code>module()</code> - you read <code>.internals</code>, as above. If
+you’re working on greta itself, adding a distribution or an operation
+doesn’t call for it either: that code <em>uses</em> the functions above,
+it doesn’t need to expose them. The trigger is narrower than either - an
+extension needs something greta already has, and it isn’t in
+<code>.internals</code> yet. In practice that arrives as a request from
+the extension side, and the fix is to add the function to the relevant
+module.</p>
+<p><code>module()</code> evaluates its arguments, so it must not run
+while a file is being sourced. Wrap it in a function taking no
+arguments, and let <code>.onLoad()</code> call it:</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">checks_module</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="fu">module</span><span class="op">(</span></span>
+<span>    <span class="va">check_tf_version</span>,</span>
+<span>    <span class="va">check_dims</span></span>
+<span>  <span class="op">)</span></span>
+<span><span class="op">}</span></span></code></pre></div>
+<p>Then add it to <code>init_internals()</code> in
+<code>R/internals.R</code>, calling it with <code>()</code>:</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">init_internals</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">stash</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="fu">module</span><span class="op">(</span></span>
+<span>    checks <span class="op">=</span> <span class="fu">checks_module</span><span class="op">(</span><span class="op">)</span>,</span>
+<span>    <span class="va">...</span></span>
+<span>  <span class="op">)</span></span>
+<span><span class="op">}</span></span></code></pre></div>
+<p>The same applies to a module nested inside another, such as
+<code>progress_bar = progress_bar_module()</code> inside
+<code>inference_module()</code>.</p>
+<p>Those parentheses are easy and expensive to lose. Writing
+<code>checks = checks_module</code> puts the function itself into
+<code>.internals</code> rather than its result. greta still loads, its
+tests still pass, and <code>R CMD check</code> still passes, because
+nothing in greta reads <code>.internals</code>. The failure surfaces in
+the extension package, when it builds:</p>
+<pre><code>Error in .internals$inference$progress_bar$create_progress_bar :
+  object of type 'closure' is not subsettable</code></pre>
+<p>That initially happened to <code>progress_bar_module()</code>, and it
+was found by building greta.distributions rather than by greta’s own
+test suite. It is why <code>tests/testthat/test-onload.R</code> asserts
+the type of every <code>.internals</code> sublist.</p>
+</div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>
 </div>

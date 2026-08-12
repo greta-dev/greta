@@ -43,6 +43,13 @@
   the wrong answer about which versions work. greta instead installs and
   runs against a range of TensorFlow versions weekly, on Linux, macOS
   and Windows ([\#633](https://github.com/greta-dev/greta/issues/633)).
+- greta no longer has a `Collate` field in `DESCRIPTION`; the code that
+  builds `greta_stash` and `.internals` now runs when the package is
+  loaded rather than when its files are sourced, so the order `R/` is
+  sourced in no longer matters and a new file needs no `@include` tag.
+  `.internals` is attached with unchanged contents, so packages that
+  read it, such as greta.gp, greta.dynamics and greta.gam, need no
+  change ([\#457](https://github.com/greta-dev/greta/issues/457)).
 - [`adamax()`](https://greta-dev.github.io/greta/dev/reference/optimisers.md)
   now defaults to a `learning_rate` of 0.1, up from 0.001, which was too
   small to reach the optimum of even a five-parameter model within 2000
