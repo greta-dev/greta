@@ -16,15 +16,12 @@ library(greta)
 tf_version <- Sys.getenv("GRETA_TF_VERSION", "default")
 backend <- Sys.getenv("GRETA_BACKEND", "uv")
 
-if (!identical(tf_version, "default")) {
-  greta_set_deps(greta_deps_spec(tf_version = tf_version))
-}
-
-# The conda environment is built and selected by an earlier workflow step, in
-# its own R session. greta_set_python() stores a preference that only takes
-# effect on the next load, so installing and exercising in one session silently
-# runs against uv instead -- which passes wherever uv works, and reports a
-# backend that was never tested.
+# The conda environment is built and selected by an earlier workflow step, and
+# the pinned dependency versions are stored by another, each in its own R
+# session. Both greta_set_python() and greta_set_deps() store preferences that
+# greta reads while loading, so setting either here would be too late: the run
+# would exercise uv wherever uv works, on greta's default versions, and report
+# the backend and version it was asked for rather than the ones it used.
 
 set.seed(2026)
 x <- rnorm(30, mean = 2, sd = 0.5)
@@ -63,6 +60,27 @@ cat("tensorflow:", resolved_tf, "\n")
 cat("tfp       :", resolved_tfp, "\n")
 cat("tf_keras  :", has_tf_keras, "\n")
 
+# Fail rather than report a green for a version that was never installed. greta
+# pins a minor series (tensorflow==2.16.*), so the patch version uv picks is its
+# choice to make and only the series is checked. Without this, a preference that
+# does not take effect looks identical to one that does: the job passes, and the
+# summary names the version it asked for.
+expected_tf <- if (identical(tf_version, "default")) {
+  greta_deps_spec()$tf_version
+} else {
+  tf_version
+}
+minor_series <- function(x) sub("\\.[^.]*$", "", x)
+if (!identical(minor_series(resolved_tf), minor_series(expected_tf))) {
+  stop(
+    "asked for TensorFlow ",
+    expected_tf,
+    ", but resolved ",
+    resolved_tf,
+    call. = FALSE
+  )
+}
+
 cat("--- exercising greta ---\n")
 
 # Whether these run at all is the question; whether they fit well is the test
@@ -83,10 +101,12 @@ cat("--- ok ---\n")
 summary_file <- Sys.getenv("GITHUB_STEP_SUMMARY")
 if (nzchar(summary_file)) {
   summary_lines <- c(
+    # the resolved version, not the requested one: the heading should name what
+    # was actually exercised, so it cannot claim a version that never installed
     sprintf(
       "### %s, TensorFlow %s, %s backend: works",
       Sys.getenv("RUNNER_OS", "unknown"),
-      tf_version,
+      resolved_tf,
       backend
     ),
     "",

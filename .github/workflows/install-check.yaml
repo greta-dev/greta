@@ -34,6 +34,7 @@ on:
       - 'R/reinstallers.R'
       - '.github/workflows/install-check.yaml'
       - '.github/scripts/install-check.R'
+      - '.github/scripts/set-deps.R'
 
 name: install-check
 
@@ -101,6 +102,14 @@ jobs:
       - name: Build the conda environment
         if: matrix.backend == 'conda'
         run: Rscript .github/scripts/install-conda.R
+
+      # Also a separate R session, and for the same reason: greta reads the
+      # stored dependency versions in .onLoad(), so a preference set after
+      # library(greta) is read too late and the cell resolves on greta's
+      # defaults instead of the version it names.
+      - name: Pin the dependency versions
+        if: matrix.tf != 'default'
+        run: Rscript .github/scripts/set-deps.R
 
       - name: Exercise greta
         run: Rscript .github/scripts/install-check.R
