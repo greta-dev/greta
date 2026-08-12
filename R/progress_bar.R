@@ -93,7 +93,9 @@ iterate_progress_bar <- function(pb, it, rejects, chains, file = NULL) {
   }
 }
 
-progress_bar_module <- module(
-  create_progress_bar,
-  iterate_progress_bar
-)
+progress_bar_module <- function() {
+  module(
+    create_progress_bar,
+    iterate_progress_bar
+  )
+}

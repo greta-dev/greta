@@ -43,21 +43,28 @@
 #'   generators.
 NULL
 
-nodes_module <- module(
-  constructors = node_constructors_module,
-  node_classes = node_classes_module,
-  distribution_classes = distribution_classes_module,
-  mixture_classes = mixture_module,
-  joint_classes = joint_module
-)
+nodes_module <- function() {
+  module(
+    constructors = node_constructors_module(),
+    node_classes = node_classes_module(),
+    distribution_classes = distribution_classes_module(),
+    mixture_classes = mixture_module(),
+    joint_classes = joint_module()
+  )
+}
 
-#' @export
-.internals <- module(
-  greta_arrays = greta_array_module,
-  nodes = nodes_module,
-  inference = inference_module,
-  tensors = tf_functions_module,
-  utils = utilities_module,
-  checks = checks_module,
-  greta_stash
-)
+# Each *_module() is a function rather than a value so that nothing is
+# evaluated while files are sourced; see .onLoad(). `stash` is passed in rather
+# than read from the namespace, so this does not depend on having been called
+# after greta_stash was attached.
+init_internals <- function(stash) {
+  module(
+    greta_arrays = greta_array_module(),
+    nodes = nodes_module(),
+    inference = inference_module(),
+    tensors = tf_functions_module(),
+    utils = utilities_module(),
+    checks = checks_module(),
+    greta_stash = stash
+  )
+}

@@ -274,11 +274,13 @@ copy_representation <- function(x, name) {
   identity(repr)
 }
 
-greta_array_module <- module(
-  as.greta_array,
-  get_node,
-  has_representation,
-  representation,
-  copy_representation,
-  unknowns = unknowns_module
-)
+greta_array_module <- function() {
+  module(
+    as.greta_array,
+    get_node,
+    has_representation,
+    representation,
+    copy_representation,
+    unknowns = unknowns_module()
+  )
+}

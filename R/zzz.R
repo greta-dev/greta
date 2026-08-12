@@ -30,10 +30,21 @@ tf <- tfp <- NULL
   # conda env are respected instead (see R/python_backend.R, #801).
   # RETICULATE_PYTHON as the user set it, captured before apply_greta_python_plan()
   # overwrites it; pending_python_plan() reads it back to predict the next restart.
-  greta_stash$reticulate_python_at_load <- Sys.getenv("RETICULATE_PYTHON")
+  #
+  # greta_stash and .internals are attached to the namespace here rather than
+  # created at the top level of a file: building either runs code, and
+  # top-level code has to be sourced in dependency order, which is what a
+  # Collate field is for. The stash is filled through a local and
+  # attached once, so nothing below depends on the binding already existing.
+  stash <- init_greta_stash()
+  stash$reticulate_python_at_load <- Sys.getenv("RETICULATE_PYTHON")
   plan <- greta_python_plan()
   apply_greta_python_plan(plan)
-  greta_stash$python_backend <- plan
+  stash$python_backend <- plan
+
+  ns <- asNamespace(pkgname)
+  assign("greta_stash", stash, envir = ns)
+  assign(".internals", init_internals(stash), envir = ns)
 
   tfp <<- reticulate::import("tensorflow_probability", delay_load = TRUE)
   tf <<- reticulate::import("tensorflow", delay_load = TRUE)

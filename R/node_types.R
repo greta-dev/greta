@@ -571,13 +571,15 @@ distribution_node <- R6Class(
 )
 
 # modules for export via .internals
-node_classes_module <- module(
-  node,
-  distribution_node,
-  data_node,
-  variable_node,
-  operation_node
-)
+node_classes_module <- function() {
+  module(
+    node,
+    distribution_node,
+    data_node,
+    variable_node,
+    operation_node
+  )
+}
 
 
 # shorthand for distribution parameter constructors
@@ -619,8 +621,10 @@ vble <- function(truncation, dim = 1, free_dim = prod(dim)) {
   )
 }
 
-node_constructors_module <- module(
-  distrib,
-  op,
-  vble
-)
+node_constructors_module <- function() {
+  module(
+    distrib,
+    op,
+    vble
+  )
+}

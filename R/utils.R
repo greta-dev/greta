@@ -277,35 +277,37 @@ has_distribution <- function(node) {
   !is.null(node$distribution)
 }
 
-misc_module <- module(
-  module,
-  member,
-  node_type,
-  tf_float,
-  fl,
-  to_shape,
-  is_scalar,
-  flatten,
-  get_seed,
-  live_pointer,
-  future_seed,
-  create_log_file,
-  bar_width,
-  record,
-  as_2d_array,
-  add_first_dim,
-  drop_first_dim,
-  tile_first_dim,
-  drop_column_dim,
-  expand_to_batch,
-  has_batch,
-  match_batches,
-  split_chains,
-  hessian_dims,
-  rhex,
-  disable_tensorflow_logging,
-  pad_vector
-)
+misc_module <- function() {
+  module(
+    module,
+    member,
+    node_type,
+    tf_float,
+    fl,
+    to_shape,
+    is_scalar,
+    flatten,
+    get_seed,
+    live_pointer,
+    future_seed,
+    create_log_file,
+    bar_width,
+    record,
+    as_2d_array,
+    add_first_dim,
+    drop_first_dim,
+    tile_first_dim,
+    drop_column_dim,
+    expand_to_batch,
+    has_batch,
+    match_batches,
+    split_chains,
+    hessian_dims,
+    rhex,
+    disable_tensorflow_logging,
+    pad_vector
+  )
+}
 
 # convert an array to a vector row-wise
 flatten_rowwise <- function(array) {
@@ -341,12 +343,14 @@ dummy_greta_array <- function(x) {
   do.call(zeros, list(dim(x)))
 }
 
-dummy_array_module <- module(
-  flatten_rowwise,
-  unflatten_rowwise,
-  dummy,
-  dummy_greta_array
-)
+dummy_array_module <- function() {
+  module(
+    flatten_rowwise,
+    unflatten_rowwise,
+    dummy,
+    dummy_greta_array
+  )
+}
 
 # given a base colour, return a function taking a value between 0 and 1 and
 # returning a colour linearly interpolated between black, the colour and white,
@@ -396,10 +400,12 @@ greta_col <- function(
   ) # 95%ish
 }
 
-colour_module <- module(
-  palettize,
-  greta_col
-)
+colour_module <- function() {
+  module(
+    palettize,
+    greta_col
+  )
+}
 
 # look in the environment specified by env, and return a named list of all greta
 # arrays in that environment
@@ -607,16 +613,18 @@ get_model_info <- function(draws) {
   model_info
 }
 
-sampler_utils_module <- module(
-  all_greta_arrays,
-  cleanly,
-  build_sampler,
-  prepare_draws,
-  unlist_tf,
-  get_indices_text,
-  flatten_trace,
-  get_model_info
-)
+sampler_utils_module <- function() {
+  module(
+    all_greta_arrays,
+    cleanly,
+    build_sampler,
+    prepare_draws,
+    unlist_tf,
+    get_indices_text,
+    flatten_trace,
+    get_model_info
+  )
+}
 
 # TF1/2 check remove?
 # Is this still needed with the new `tf_function` from TF2?
@@ -714,17 +722,19 @@ is_windows <- function() {
   identical(.Platform$OS.type, "windows")
 }
 
-greta_array_ops_module <- module(as_tf_function)
+greta_array_ops_module <- function() module(as_tf_function)
 
 
 # utilities to export via .internals
-utilities_module <- module(
-  misc = misc_module,
-  dummy_arrays = dummy_array_module,
-  greta_array_operations = greta_array_ops_module,
-  samplers = sampler_utils_module,
-  colours = colour_module
-)
+utilities_module <- function() {
+  module(
+    misc = misc_module(),
+    dummy_arrays = dummy_array_module(),
+    greta_array_operations = greta_array_ops_module(),
+    samplers = sampler_utils_module(),
+    colours = colour_module()
+  )
+}
 
 # remove empty strings
 base_remove_empty_string <- function(string) {

@@ -628,4 +628,7 @@ rms_prop <- function(
 
 #' @noRd
 #' @export
-print.optimiser <- print.sampler
+# a wrapper rather than an alias: `print.optimiser <- print.sampler` would
+# evaluate print.sampler while this file is sourced, forcing samplers.R to
+# come first
+print.optimiser <- function(x, ...) print.sampler(x, ...)

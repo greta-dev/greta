@@ -86,7 +86,9 @@ unknowns <- function(dims = c(1, 1), data = NA_real_) {
   as.unknowns(x)
 }
 
-unknowns_module <- module(
-  unknowns,
-  as.unknowns
-)
+unknowns_module <- function() {
+  module(
+    unknowns,
+    as.unknowns
+  )
+}

@@ -2188,26 +2188,28 @@ inform_if_local_parallel_multiple_samplers <- function(
 }
 
 
-checks_module <- module(
-  check_tf_version,
-  check_dims,
-  check_unit,
-  check_positive,
-  check_in_family,
-  check_future_plan,
-  check_greta_arrays,
-  check_values_list,
-  check_dependencies_satisfied,
-  check_cum_op,
-  check_future_plan,
-  check_n_cores,
-  check_positive_integer,
-  check_if_array_is_empty_list,
-  complex_error,
-  check_targets_stochastic_and_not_sampled,
-  check_dag_introduces_new_variables,
-  check_commanality_btn_dags,
-  check_finite_positive_scalar_integer,
-  check_if_greta_mcmc_list,
-  check_2d_multivariate
-)
+checks_module <- function() {
+  module(
+    check_tf_version,
+    check_dims,
+    check_unit,
+    check_positive,
+    check_in_family,
+    check_future_plan,
+    check_greta_arrays,
+    check_values_list,
+    check_dependencies_satisfied,
+    check_cum_op,
+    check_future_plan,
+    check_n_cores,
+    check_positive_integer,
+    check_if_array_is_empty_list,
+    complex_error,
+    check_targets_stochastic_and_not_sampled,
+    check_dag_introduces_new_variables,
+    check_commanality_btn_dags,
+    check_finite_positive_scalar_integer,
+    check_if_greta_mcmc_list,
+    check_2d_multivariate
+  )
+}

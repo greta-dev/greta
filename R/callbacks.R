@@ -69,4 +69,3 @@ set_progress_bar_type <- function(n_chain) {
 }
 
 # register some
-greta_stash$callbacks <- list(parallel_progress = progress_bars)
