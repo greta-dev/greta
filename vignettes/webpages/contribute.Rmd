@@ -26,3 +26,18 @@ greta is an open source project and we would welcome contributions of code, exam
 If you'd like to contribute an [example model](../example_models.html) or an [analysis case study](../analyses/eight_schools.html), please first [open an issue](https://github.com/greta-dev/greta/issues/new) to discuss it with a package maintainer. The <a href=https://github.com/greta-dev/greta/blob/master/.EDIT_WEBSITE%2Emd>.EDIT_WEBSITE.md</a> file contains details of how to prepare an example. You'll need to fork the package on GitHub, follow those instructions, and then submit a pull request to incorporate them into the main website.
 
 If you'd like to contribute to the core package, please take a look at the [issues tracker](https://github.com/greta-dev/greta/issues) which lists a number of extensions I have planned. If you think you can help implement one of those (or incorporate your own idea), please leave a message there first so we can discuss how to do it, and so that we aren't duplicating effort.
+
+### developing the package
+
+These notes are also in
+[CONTRIBUTING.md](https://github.com/greta-dev/greta/blob/main/CONTRIBUTING.md),
+which is what GitHub shows you when you open a pull request.
+
+greta needs Python, TensorFlow and TensorFlow Probability, but you don't have to install those yourself - the first time you use greta in a session it installs them via `uv`. Run `greta_sitrep()` to see what it picked up.
+
+- Format with [air](https://posit-dev.github.io/air/) (`air format .`)
+- Use the base pipe `|>` over magrittr, %>%
+- Put comments above the code they describe rather than trailing
+- give every user-facing change a one-line bullet in `NEWS.md` mentioning the issue number.
+- Tests for `R/thing.R` go in `tests/testthat/test-thing.R`. 
+- Re-run `devtools::document()` after changing any roxygen comment.

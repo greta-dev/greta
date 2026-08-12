@@ -5,16 +5,6 @@
 NULL
 
 
-# create an object stash in greta's namespace, to return traces to the user when
-# they abort a run
-greta_stash <- new.env()
-greta_stash$python_has_been_initialised <- FALSE
-greta_stash$deps_removed_this_session <- FALSE
-greta_stash$numerical_messages <- c(
-  "is not invertible",
-  "Cholesky decomposition was not successful"
-)
-
 #' @rdname inference
 #' @export
 #' @importFrom stats rnorm runif
@@ -786,4 +776,6 @@ opt <- function(
   })
 }
 
-inference_module <- module(dag_class, progress_bar = progress_bar_module)
+inference_module <- function() {
+  module(dag_class, progress_bar = progress_bar_module())
+}

@@ -153,4 +153,4 @@ joint_distribution <- R6Class(
   )
 )
 
-joint_module <- module(joint_distribution = joint_distribution)
+joint_module <- function() module(joint_distribution = joint_distribution)

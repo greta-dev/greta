@@ -1184,36 +1184,38 @@ lkj_correlation_distribution <- R6Class(
 )
 
 # module for export via .internals
-distribution_classes_module <- module(
-  uniform_distribution,
-  normal_distribution,
-  lognormal_distribution,
-  bernoulli_distribution,
-  binomial_distribution,
-  beta_binomial_distribution,
-  negative_binomial_distribution,
-  hypergeometric_distribution,
-  poisson_distribution,
-  gamma_distribution,
-  inverse_gamma_distribution,
-  weibull_distribution,
-  exponential_distribution,
-  pareto_distribution,
-  student_distribution,
-  laplace_distribution,
-  beta_distribution,
-  cauchy_distribution,
-  chi_squared_distribution,
-  logistic_distribution,
-  f_distribution,
-  multivariate_normal_distribution,
-  wishart_distribution,
-  lkj_correlation_distribution,
-  multinomial_distribution,
-  categorical_distribution,
-  dirichlet_distribution,
-  dirichlet_multinomial_distribution
-)
+distribution_classes_module <- function() {
+  module(
+    uniform_distribution,
+    normal_distribution,
+    lognormal_distribution,
+    bernoulli_distribution,
+    binomial_distribution,
+    beta_binomial_distribution,
+    negative_binomial_distribution,
+    hypergeometric_distribution,
+    poisson_distribution,
+    gamma_distribution,
+    inverse_gamma_distribution,
+    weibull_distribution,
+    exponential_distribution,
+    pareto_distribution,
+    student_distribution,
+    laplace_distribution,
+    beta_distribution,
+    cauchy_distribution,
+    chi_squared_distribution,
+    logistic_distribution,
+    f_distribution,
+    multivariate_normal_distribution,
+    wishart_distribution,
+    lkj_correlation_distribution,
+    multinomial_distribution,
+    categorical_distribution,
+    dirichlet_distribution,
+    dirichlet_multinomial_distribution
+  )
+}
 
 # export constructors
 

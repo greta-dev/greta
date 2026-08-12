@@ -281,4 +281,4 @@ mixture_distribution <- R6Class(
   )
 )
 
-mixture_module <- module(mixture_distribution = mixture_distribution)
+mixture_module <- function() module(mixture_distribution = mixture_distribution)
