@@ -1,3 +1,6 @@
+#' @include utils.R
+NULL
+
 #' @name joint
 #' @title define joint distributions
 #'

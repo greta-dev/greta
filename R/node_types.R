@@ -1,3 +1,6 @@
+#' @include utils.R node_class.R
+NULL
+
 data_node <- R6Class(
   "data_node",
   inherit = node,

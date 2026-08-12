@@ -1,3 +1,6 @@
+#' @include utils.R
+NULL
+
 #' @title Create objects of class 'unknowns' to nicely print ? valued arrays
 #' @param x object to convert to "unknowns" class
 #' @return An object of class `unknowns`.

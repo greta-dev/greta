@@ -1,3 +1,6 @@
+#' @include utils.R dag_class.R progress_bar.R
+NULL
+
 #' @name inference
 #' @title Statistical inference on greta models.
 #' @description Carry out statistical inference on greta models by

@@ -1,3 +1,6 @@
+#' @include samplers.R
+NULL
+
 # nolint start
 #' @name optimisers
 #'

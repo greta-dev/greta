@@ -1,3 +1,7 @@
+#' @include utils.R node_types.R probability_distributions.R mixture.R joint.R
+#' @include greta_array_class.R inference.R tf_functions.R checkers.R
+NULL
+
 #' @name internals
 #' @aliases .internals
 #' @title internal greta methods

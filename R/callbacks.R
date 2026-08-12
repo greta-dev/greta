@@ -1,3 +1,6 @@
+#' @include inference.R
+NULL
+
 # functions to be run whilst samplers are running in parallel
 
 #' @importFrom utils read.table

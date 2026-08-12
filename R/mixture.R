@@ -1,3 +1,6 @@
+#' @include utils.R
+NULL
+
 #' @name mixture
 #' @title mixtures of probability distributions
 #'

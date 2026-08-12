@@ -1,3 +1,6 @@
+#' @include utils.R unknowns_class.R
+NULL
+
 # define a greta_array S3 class for the objects users manipulate
 
 # nolint start

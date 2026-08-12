@@ -1,3 +1,6 @@
+#' @include utils.R
+NULL
+
 # tensorflow functions
 
 tf_log10 <- function(x) {

@@ -1,3 +1,6 @@
+#' @include utils.R
+NULL
+
 # nice progress bars for MCMC sampling
 
 #' @importFrom progress progress_bar

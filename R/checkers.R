@@ -1,3 +1,6 @@
+#' @include utils.R
+NULL
+
 # check tensorflow and tensorflow-probability are installed and have valid
 # versions. error, warn, or message if not and (if not an error) return an
 # invisible logical saying whether it is valid

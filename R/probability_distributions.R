@@ -1,3 +1,6 @@
+#' @include utils.R
+NULL
+
 uniform_distribution <- R6Class(
   "uniform_distribution",
   inherit = distribution_node,

@@ -1,3 +1,6 @@
+#' @include inference.R
+NULL
+
 greta_note_msg <- cli::format_message(
   c(
     "If you are reading this, the {.pkg greta} installation or error notes \\
