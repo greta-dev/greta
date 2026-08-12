@@ -1023,7 +1023,7 @@ opt_df_run <- function(optimisers, m, x) {
     x = optimisers,
     name = "opt",
     value = "opt_fn"
-  ) %>%
+  ) |>
     dplyr::mutate(
       result = lapply(opt_fn, possibly_run_opt, m = m),
       x_val = list(x)
@@ -1033,9 +1033,9 @@ opt_df_run <- function(optimisers, m, x) {
 }
 
 tidy_optimisers <- function(opt_df, tolerance = 1e-2) {
-  opt_df %>%
-    dplyr::select(-opt_fn) %>%
-    tidyr::unnest_wider(col = c(result)) %>%
+  opt_df |>
+    dplyr::select(-opt_fn) |>
+    tidyr::unnest_wider(col = c(result)) |>
     dplyr::mutate(
       par = unname(purrr::flatten(par)),
       par_x_diff = purrr::map2(
@@ -1049,7 +1049,7 @@ tidy_optimisers <- function(opt_df, tolerance = 1e-2) {
         par_x_diff,
         function(x) all(x < tolerance)
       )
-    ) %>%
+    ) |>
     dplyr::relocate(
       close_to_truth,
       par_x_diff,

@@ -31,7 +31,7 @@ License: Apache License 2.0
 URL: https://greta-dev.github.io/greta/, https://github.com/greta-dev/greta
 BugReports: https://github.com/greta-dev/greta/issues
 Depends:
-    R (>= 4.1.0)
+    R (>= 4.2.0)
 Imports:
     abind,
     callr,
@@ -82,10 +82,11 @@ VignetteBuilder:
     knitr
 Config/testthat/edition: 3
 Encoding: UTF-8
-Language: en-US
+Language: en-GB
 Roxygen: list(markdown = TRUE)
-SystemRequirements: Python (>= 3.7.0) with header files and shared
-    library; TensorFlow (>= v2.0.0; https://www.tensorflow.org/); TensorFlow
-    Probability (v0.8.0; https://www.tensorflow.org/probability/)
+SystemRequirements: Python (>= 3.9) with header files and shared
+    library; TensorFlow (>= v2.15.0, <= v2.21.0;
+    https://www.tensorflow.org/); TensorFlow Probability (>= v0.23.0;
+    https://www.tensorflow.org/probability/)
 LazyData: true
 Config/roxygen2/version: 8.0.0
