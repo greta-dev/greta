@@ -49,7 +49,7 @@ treatment_stddevs <- c(14.9, 10.2, 16.3, 11.0, 9.4, 11.4, 10.4, 17.6)
 
 schools <- data.frame(N = N,
                       treatment_effects = treatment_effects,
-                      treatment_stddevs = treatment_stddevs) %>%
+                      treatment_stddevs = treatment_stddevs) |>
   mutate(treatment_effects_p_stddevs = treatment_effects + treatment_stddevs,
          treatment_effects_m_stddevs = treatment_effects - treatment_stddevs)
 ```
@@ -80,8 +80,8 @@ is to plot the density distribution over the eight schools we have:
 
 ``` r
 
-schools %>%
-  gather(x, y, treatment_effects, treatment_effects_p_stddevs, treatment_effects_m_stddevs) %>%
+schools |>
+  gather(x, y, treatment_effects, treatment_effects_p_stddevs, treatment_effects_m_stddevs) |>
   ggplot(aes(x = y, color = x)) +
     geom_density(fill = "purple", alpha = 0.5) +
     scale_color_brewer(palette = "Set1") +
@@ -392,9 +392,9 @@ colnames(posterior_school_effects) <- N
 
 # Summarise and combine all chains of interest for plotting
 posterior_summaries <-
-  posterior_school_effects %>%
-  gather(key = school, value = value) %>% 
-  group_by(school) %>%
+  posterior_school_effects |>
+  gather(key = school, value = value) |> 
+  group_by(school) |>
   summarise_all(funs(mean, sd)) 
 ```
 
@@ -411,15 +411,15 @@ posterior_summaries <-
 ``` r
 
 school_summaries <- 
-  posterior_summaries %>% 
-  mutate(tool = "greta") %>%
+  posterior_summaries |> 
+  mutate(tool = "greta") |>
   rbind(edward2_school_means)
 
 population_parameters <- 
-  as.data.frame(as.matrix(draws)) %>% 
-  select(avg_effect) %>%
-  summarise_all(funs(mean, sd)) %>%
-  mutate(tool = "greta") %>%
+  as.data.frame(as.matrix(draws)) |> 
+  select(avg_effect) |>
+  summarise_all(funs(mean, sd)) |>
+  mutate(tool = "greta") |>
   rbind(edward2_pop_mean)
 ```
 

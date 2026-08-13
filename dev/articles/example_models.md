@@ -349,13 +349,13 @@ distribution(attitude$rating) <- normal(mu, sd)
 
 ------------------------------------------------------------------------
 
-### Regularized horseshoe prior
+### Regularised horseshoe prior
 
-The regularized (‘Finnish’) horseshoe (doi.org/10.1214/17-EJS1337SI)
-remedies a problem of the original horseshoe: large, unregularized
+The regularised (‘Finnish’) horseshoe (doi.org/10.1214/17-EJS1337SI)
+remedies a problem of the original horseshoe: large, unregularised
 values for the coefficients. This is especially problematic in scenarios
 where the parameters are only weakly identified by the data, as in
-logistic regression with perfectly seperable data.
+logistic regression with perfectly separable data.
 
 ``` r
 
@@ -1003,10 +1003,10 @@ An example of a logistic regression being used to estimate the
 probability of multiple species’ presences along a number of
 environmental gradients. Instead of assuming independence of species
 regression coefficients, we assume they are drawn from a shared
-distribution. We partially pool species responses. This gives us not ony
-the regression coefficients for each species but also a global average
-coefficient and a measure of variation between species responses to
-environmental gradients.
+distribution. We partially pool species responses. This gives us not
+only the regression coefficients for each species but also a global
+average coefficient and a measure of variation between species responses
+to environmental gradients.
 
 #### data
 

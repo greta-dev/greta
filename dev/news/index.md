@@ -50,6 +50,19 @@
   `.internals` is attached with unchanged contents, so packages that
   read it, such as greta.gp, greta.dynamics and greta.gam, need no
   change ([\#457](https://github.com/greta-dev/greta/issues/457)).
+- greta now requires R 4.2.0 or later, up from 4.1.0, which lets it use
+  the native pipe `|>` and the `_` placeholder in place of magrittr’s
+  `%>%` ([\#810](https://github.com/greta-dev/greta/issues/810)).
+- The `SystemRequirements` field in `DESCRIPTION` now names the versions
+  greta actually needs — Python 3.9 or later, TensorFlow 2.18.0 up to
+  2.21.0, and TensorFlow Probability 0.25.0 or later — rather than the
+  far older Python 3.7.0, TensorFlow 2.0.0 and TensorFlow Probability
+  0.8.0 it listed before, and it now records the TensorFlow ceiling that
+  greta enforces. The TensorFlow floor of 2.18.0 is what the weekly
+  install check actually passes on: 2.16 and 2.17 install but cannot
+  load TensorFlow Probability, because greta pins it to the 0.25 series
+  whatever the TensorFlow version
+  ([\#810](https://github.com/greta-dev/greta/issues/810)).
 - [`adamax()`](https://greta-dev.github.io/greta/dev/reference/optimisers.md)
   now defaults to a `learning_rate` of 0.1, up from 0.001, which was too
   small to reach the optimum of even a five-parameter model within 2000
