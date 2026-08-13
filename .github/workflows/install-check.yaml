@@ -58,10 +58,18 @@ jobs:
           # if one ever starts working, that fails, because it means the floor
           # in greta_deps_default$tf_min has become too high.
           #
-          # Nothing varies TensorFlow Probability, because there is nothing to
-          # vary: 0.25.0 (November 2024) is still the latest release. The real
-          # question is which TensorFlow versions that one frozen TFP works
-          # with, which is what this matrix answers.
+          # Nothing varies TensorFlow Probability, because for this range there
+          # is nothing to vary. 0.25.0 (November 2024) is still the latest
+          # release, and the older ones pair with TensorFlow versions greta no
+          # longer supports: greta's optimisers need the Keras 3 API, which
+          # arrives in TensorFlow 2.16, while TFP 0.24 is tested against 2.16
+          # and 0.23 against 2.15. So the question this matrix answers is which
+          # TensorFlow versions the one usable TFP works with.
+          #
+          # Note that TFP 0.25's metadata asks only for `tensorflow>=2.16`,
+          # with no upper bound, so leaving it unpinned would not resolve 2.16
+          # to an older TFP -- it would install 0.25 and fail on import, which
+          # is exactly what the 2.16 and 2.17 rows below record.
           - { os: 'ubuntu-latest', tf: '2.16.0', backend: 'uv', expected: 'unsupported' }
           - { os: 'ubuntu-latest', tf: '2.17.0', backend: 'uv', expected: 'unsupported' }
           - { os: 'ubuntu-latest', tf: '2.18.0', backend: 'uv', expected: 'works' }

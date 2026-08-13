@@ -27,19 +27,43 @@ data frame of valid dependencies
 A helper function for specifying versions of Tensorflow (TF), Tensorflow
 Probability (TFP), and Python. Defaulting to 2.21.0,
 0.25.0, and 3.12, respectively.
-greta checks it supports the TF version (versions newer than greta has been
-tested against are rejected); compatible TFP and Python versions are resolved
-at install time by uv (or, for a conda environment, by conda/pip). greta
-checks a range of TensorFlow versions weekly; open the most recent run from
-\url{https://github.com/greta-dev/greta/actions/workflows/install-check.yaml}
-to see which combinations were tried and what each resolved to.
 }
-\details{
+\section{What you can actually choose}{
+
+
+\strong{TensorFlow, between 2.18.0 and
+2.21.0.} Versions outside that range are rejected, and
+the range is narrower than it looks for two reasons that compound:
+\itemize{
+\item greta's optimisers use the Keras 3 API, which ships with TensorFlow 2.16.
+Below that, \code{adam()} and the rest cannot be constructed at all.
+\item TensorFlow Probability has not had a release since 0.25.0 in November
+2024, and 0.25.0 is tested against TensorFlow 2.18. It installs against
+2.16 and 2.17 -- its metadata asks only for \code{tensorflow>=2.16} -- and then
+fails to import.
+}
+
+\strong{Python.} Passed through to the resolver rather than checked by greta.
+
+\strong{TensorFlow Probability, in principle.} In practice there is one usable
+version: 0.25.0 is the newest release and the only one that pairs with the
+supported TensorFlow range. Older TFP releases pair with TensorFlow versions
+greta no longer supports (0.24.0 with 2.16, 0.23.0 with 2.15). So changing
+\code{tfp_version} is unlikely to give you a working environment, and greta does
+not check it -- an incompatible choice surfaces as a resolver or import
+error at install time.
+
+greta installs and runs against this range weekly, on Linux, macOS and
+Windows. Each run publishes a table of every combination tried, what each
+resolved to, and which did not work; open the most recent from
+\url{https://github.com/greta-dev/greta/actions/workflows/install-check.yaml}.
+
 Calling \code{greta_deps_spec()} with no arguments returns greta's current
 default (recommended) versions, and is the supported way to query them -
 for example \code{greta_deps_spec()$tf_version} for the default TensorFlow
 version.
 }
+
 \examples{
 greta_deps_spec()
 # every combination below is one the weekly install check passes on
