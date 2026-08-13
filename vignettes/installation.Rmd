@@ -259,9 +259,9 @@ Build a version choice with `greta_deps_spec()`:
 
 ```{r deps-spec, eval = FALSE}
 greta_deps_spec(
-  tf_version = "2.15.0",
-  tfp_version = "0.23.0",
-  python_version = "3.10"
+  tf_version = "2.19.0",
+  tfp_version = "0.25.0",
+  python_version = "3.12"
 )
 ```
 
@@ -283,9 +283,9 @@ the next load) and `install_greta_deps()` (as its default `deps`):
 ```{r set-deps, eval = FALSE}
 greta_set_deps(
   greta_deps_spec(
-    tf_version = "2.14.0",
-    tfp_version = "0.22.1",
-    python_version = "3.10"
+    tf_version = "2.19.0",
+    tfp_version = "0.25.0",
+    python_version = "3.12"
   )
 )
 

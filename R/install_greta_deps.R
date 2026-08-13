@@ -311,21 +311,20 @@ greta_deps_default <- list(
 #'
 #' @examples
 #' greta_deps_spec()
-#' greta_deps_spec(tf_version = "2.15.1")
-#' greta_deps_spec(tf_version = "2.15.0")
-#' greta_deps_spec(tf_version = "2.15.1", tfp_version = "0.23.0")
-#' greta_deps_spec(tf_version = "2.15.0", tfp_version = "0.23.0")
-#' greta_deps_spec(tf_version = "2.15.1", python_version = "3.10")
-#' greta_deps_spec(tf_version = "2.15.0", python_version = "3.10")
+#' # every combination below is one the weekly install check passes on
+#' greta_deps_spec(tf_version = "2.18.0")
+#' greta_deps_spec(tf_version = "2.19.0")
+#' greta_deps_spec(tf_version = "2.20.0")
 #' greta_deps_spec(
-#'   tf_version = "2.14.0",
-#'   tfp_version = "0.22.1",
-#'   python_version = "3.10"
-#'   )
-#' # this will fail: greta has not been tested above the version it pins
+#'   tf_version = "2.19.0",
+#'   tfp_version = "0.25.0",
+#'   python_version = "3.12"
+#' )
+#' # these fail: greta supports TensorFlow 2.18.0 up to the version it pins
 #' \dontrun{
+#' greta_deps_spec(tf_version = "2.17.0")
 #' greta_deps_spec(tf_version = "2.99.0")
-#'   }
+#' }
 greta_deps_spec <- function(
   tf_version = "2.21.0",
   tfp_version = "0.25.0",

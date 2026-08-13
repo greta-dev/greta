@@ -43,9 +43,9 @@ versions.
 \dontrun{
 # pin an older TensorFlow for the managed (uv) environment
 greta_set_deps(greta_deps_spec(
-  tf_version = "2.14.0",
-  tfp_version = "0.22.1",
-  python_version = "3.10"
+  tf_version = "2.19.0",
+  tfp_version = "0.25.0",
+  python_version = "3.12"
 ))
 
 # clear the stored versions and return to greta's defaults
