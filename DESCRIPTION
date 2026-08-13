@@ -85,8 +85,8 @@ Encoding: UTF-8
 Language: en-GB
 Roxygen: list(markdown = TRUE)
 SystemRequirements: Python (>= 3.9) with header files and shared
-    library; TensorFlow (>= v2.15.0, <= v2.21.0;
-    https://www.tensorflow.org/); TensorFlow Probability (>= v0.23.0;
+    library; TensorFlow (>= v2.18.0, <= v2.21.0;
+    https://www.tensorflow.org/); TensorFlow Probability (>= v0.25.0;
     https://www.tensorflow.org/probability/)
 LazyData: true
 Config/roxygen2/version: 8.0.0
