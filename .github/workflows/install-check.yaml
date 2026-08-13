@@ -47,22 +47,34 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          # every TF version greta accepts, on one OS, via uv. 'default' is
+          # Every TF version greta accepts, on one OS, via uv. 'default' is
           # whatever greta_deps_default$tf currently is, so the newest version
-          # stays covered without editing this list
-          - { os: 'ubuntu-latest', tf: '2.16.0', backend: 'uv' }
-          - { os: 'ubuntu-latest', tf: '2.17.0', backend: 'uv' }
-          - { os: 'ubuntu-latest', tf: '2.18.0', backend: 'uv' }
-          - { os: 'ubuntu-latest', tf: '2.19.0', backend: 'uv' }
-          - { os: 'ubuntu-latest', tf: '2.20.0', backend: 'uv' }
-          - { os: 'ubuntu-latest', tf: 'default', backend: 'uv' }
+          # stays covered without editing this list.
+          #
+          # `expected` is what the run should find. Cells below greta's floor
+          # are kept deliberately: "2.16 does not work, and here is why" is
+          # half of what a user needs, and it cannot be read off a table that
+          # lists only successes. They are recorded rather than failed -- but
+          # if one ever starts working, that fails, because it means the floor
+          # in greta_deps_default$tf_min has become too high.
+          #
+          # Nothing varies TensorFlow Probability, because there is nothing to
+          # vary: 0.25.0 (November 2024) is still the latest release. The real
+          # question is which TensorFlow versions that one frozen TFP works
+          # with, which is what this matrix answers.
+          - { os: 'ubuntu-latest', tf: '2.16.0', backend: 'uv', expected: 'unsupported' }
+          - { os: 'ubuntu-latest', tf: '2.17.0', backend: 'uv', expected: 'unsupported' }
+          - { os: 'ubuntu-latest', tf: '2.18.0', backend: 'uv', expected: 'works' }
+          - { os: 'ubuntu-latest', tf: '2.19.0', backend: 'uv', expected: 'works' }
+          - { os: 'ubuntu-latest', tf: '2.20.0', backend: 'uv', expected: 'works' }
+          - { os: 'ubuntu-latest', tf: 'default', backend: 'uv', expected: 'works' }
           # the default version everywhere, so OS-specific breakage shows up
-          - { os: 'macOS-latest', tf: 'default', backend: 'uv' }
-          - { os: 'windows-latest', tf: 'default', backend: 'uv' }
+          - { os: 'macOS-latest', tf: 'default', backend: 'uv', expected: 'works' }
+          - { os: 'windows-latest', tf: 'default', backend: 'uv', expected: 'works' }
           # the conda path, which has no other CI coverage
-          - { os: 'ubuntu-latest', tf: 'default', backend: 'conda' }
-          - { os: 'macOS-latest', tf: 'default', backend: 'conda' }
-          - { os: 'windows-latest', tf: 'default', backend: 'conda' }
+          - { os: 'ubuntu-latest', tf: 'default', backend: 'conda', expected: 'works' }
+          - { os: 'macOS-latest', tf: 'default', backend: 'conda', expected: 'works' }
+          - { os: 'windows-latest', tf: 'default', backend: 'conda', expected: 'works' }
 
     runs-on: ${{ matrix.os }}
 
@@ -70,6 +82,7 @@ jobs:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
       GRETA_TF_VERSION: ${{ matrix.tf }}
       GRETA_BACKEND: ${{ matrix.backend }}
+      GRETA_EXPECTED: ${{ matrix.expected }}
       # reticulate's changelog names an inherited PowerShell 7 PSModulePath as
       # the cause of its Windows uv bootstrap failure. Clearing it did not fix
       # the job on CRAN reticulate, so this is kept as one known contributor

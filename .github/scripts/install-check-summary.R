@@ -1,10 +1,10 @@
 # Collect one row per matrix cell into a single table on the run page.
 #
 # GitHub renders a step summary per job, so without this a run leaves eleven
-# separate blocks to compare by eye, and "which versions work" cannot be read
-# off it. This job runs after the matrix with `if: always()`, so a run that had
-# failures still produces the table -- a red cell is a result, and the table is
-# where the answer lives.
+# separate blocks to compare by eye, and "which versions can I use?" cannot be
+# read off it at all. This job runs after the matrix with `if: always()`, so a
+# run with failures still produces the table -- and the failures are half the
+# answer, so they get a row and a reason rather than being left out.
 #
 # Each cell writes cell-result.tsv (see install-check.R) and uploads it as an
 # artifact; those are downloaded into a directory tree below.
@@ -30,30 +30,46 @@ cols <- c(
   "tfp",
   "python",
   "tf_keras",
-  "status"
+  "outcome",
+  "detail"
 )
 
 rows <- do.call(
   rbind,
   lapply(files, function(f) {
     parts <- strsplit(readLines(f, warn = FALSE)[1], "\t", fixed = TRUE)[[1]]
+    length(parts) <- length(cols)
+    parts[is.na(parts)] <- ""
     setNames(as.data.frame(as.list(parts), stringsAsFactors = FALSE), cols)
   })
 )
 
-# newest TensorFlow first, so the supported range reads top-down
-rows <- rows[order(rows$os, rows$backend, numeric_version(rows$tf)), ]
+# requested version order, so the supported range reads as a range. "default"
+# sorts last: it is whichever version greta currently pins, so it belongs at the
+# newest end.
+sort_key <- ifelse(
+  rows$requested == "default",
+  "99.99",
+  rows$requested
+)
+rows <- rows[order(rows$os, rows$backend, numeric_version(sort_key)), ]
 
-tick <- function(status) {
-  ifelse(status == "works", "pass", paste0("**", status, "**"))
-}
+worked <- rows$outcome == "works"
 
 lines <- c(
   "## Which combinations work",
   "",
   paste(
-    "Each row is one matrix cell. `requested` is what the cell asked for;",
-    "the rest is what the resolver actually installed."
+    "Every combination tried, in both directions.",
+    "`requested` is what the cell asked for; the rest is what the resolver",
+    "actually installed. A combination that does not work is part of the",
+    "answer, so it gets a row and a reason."
+  ),
+  "",
+  sprintf(
+    "**%d of %d work.**",
+    sum(worked),
+    nrow(rows)
   ),
   "",
   "| OS | backend | requested | TensorFlow | TFP | Python | tf-keras | result |",
@@ -67,13 +83,20 @@ lines <- c(
     rows$tfp,
     rows$python,
     rows$tf_keras,
-    tick(rows$status)
+    ifelse(
+      worked,
+      "works",
+      ifelse(
+        nzchar(rows$detail),
+        paste0("**", rows$outcome, "** -- ", rows$detail),
+        paste0("**", rows$outcome, "**")
+      )
+    )
   ),
   "",
   sprintf(
-    "%d of %d cells reported; any cell missing from this table failed before it could resolve a stack.",
-    nrow(rows),
-    as.integer(Sys.getenv("GRETA_EXPECTED_CELLS", nrow(rows)))
+    "%d cells reported; any cell missing from this table failed before it could write a row.",
+    nrow(rows)
   ),
   ""
 )
