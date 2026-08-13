@@ -272,7 +272,7 @@ greta_deps_default <- list(
   # python_min and python_range disagree on purpose, because they answer
   # different questions. python_min is the oldest Python greta_sitrep() will
   # accept in an environment that already exists: someone running Python 3.9
-  # with TensorFlow 2.15 has a working setup, and warning them about it would be
+  # with TensorFlow 2.20 has a working setup, and warning them about it would be
   # wrong. python_range is what greta asks uv to install now, so it has to be a
   # Python the *pinned* TensorFlow publishes wheels for -- TensorFlow dropped
   # cp39 at 2.21, and leaving the floor at 3.9 let uv resolve a Python that no
