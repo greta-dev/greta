@@ -471,17 +471,32 @@ test_that("greta_set_deps() round-trips through the stored file", {
   withr::local_envvar(R_USER_CONFIG_DIR = withr::local_tempdir())
   expect_null(get_greta_stored_deps())
 
+  # a supported triple: this is about the round trip, not about the versions,
+  # and greta_deps_spec() enforces the supported TensorFlow range
   deps <- greta_deps_spec(
-    tf_version = "2.14.0",
-    tfp_version = "0.22.1",
-    python_version = "3.10"
+    tf_version = "2.19.0",
+    tfp_version = "0.24.0",
+    python_version = "3.11"
   )
   suppressMessages(greta_set_deps(deps))
   stored <- get_greta_stored_deps()
   expect_s3_class(stored, "greta_deps_spec")
-  expect_equal(stored$tf_version, "2.14.0")
-  expect_equal(stored$tfp_version, "0.22.1")
-  expect_equal(stored$python_version, "3.10")
+  expect_equal(stored$tf_version, "2.19.0")
+  expect_equal(stored$tfp_version, "0.24.0")
+  expect_equal(stored$python_version, "3.11")
+})
+
+test_that("a stored deps file below the supported floor is treated as absent", {
+  # someone who pinned an older TensorFlow under a previous greta should fall
+  # back to the current defaults on upgrade, not have load fail
+  withr::local_envvar(R_USER_CONFIG_DIR = withr::local_tempdir())
+  ensure_greta_config_dir()
+
+  writeLines(
+    c("tf_version=2.15.0", "tfp_version=0.23.0", "python_version=3.11"),
+    greta_deps_file()
+  )
+  expect_null(get_greta_stored_deps())
 })
 
 test_that("greta_set_deps() reports what it stored", {
