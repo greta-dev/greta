@@ -264,8 +264,13 @@ greta_deps_default <- list(
   tf = "2.21.0",
   tfp = "0.25.0",
   python = "3.12",
-  tf_min = "2.15.0",
-  tfp_min = "0.23.0",
+  # The floors are what the weekly install check actually passes on, not the
+  # oldest version that ever worked. TensorFlow 2.16 and 2.17 install but
+  # cannot load tensorflow_probability, because greta pins TFP to the 0.25
+  # series whatever the TensorFlow version; so the floor is a consequence of
+  # that pinning, and may drop again if greta stops pinning TFP (#638).
+  tf_min = "2.18.0",
+  tfp_min = "0.25.0",
   python_min = "3.9",
   # python_min and python_range disagree on purpose, because they answer
   # different questions. python_min is the oldest Python greta_sitrep() will
@@ -443,13 +448,40 @@ greta_deps_receipt <- function() {
   )
 }
 
-# greta supports TensorFlow only up to the version in greta_deps_default$tf, the
-# newest version greta is tested against. This is the only version constraint
-# greta enforces itself; compatible TensorFlow Probability and Python versions
-# are resolved by uv (or, for a conda environment, by conda/pip).
+# greta supports TensorFlow between greta_deps_default$tf_min and
+# greta_deps_default$tf: the oldest and newest versions the weekly install check
+# passes on. This is the only version constraint greta enforces itself;
+# compatible TensorFlow Probability and Python versions are resolved by uv (or,
+# for a conda environment, by conda/pip).
+#
+# Rejecting a too-old version here rather than letting it install matters: 2.16
+# and 2.17 resolve and install perfectly well, and only fail later, when
+# tensorflow_probability will not import. An R-level error naming the range
+# beats a Python import error after a 43-package download.
 
 check_greta_tf_supported <- function(deps, call = rlang::caller_env()) {
   greta_tf_version_max <- greta_deps_default$tf
+  greta_tf_version_min <- greta_deps_default$tf_min
+
+  too_old <- numeric_version(deps$tf_version) <
+    numeric_version(greta_tf_version_min)
+  if (too_old) {
+    gh_issue <- "https://github.com/greta-dev/greta/issues/638"
+    cli::cli_abort(
+      message = c(
+        "{.pkg greta} supports TensorFlow from version \\
+        {.val {greta_tf_version_min}}.",
+        "x" = "The provided version was {.val {deps$tf_version}}.",
+        "i" = "Older versions install, but cannot load TensorFlow \\
+        Probability, because {.pkg greta} pins it to the \\
+        {.val {greta_deps_default$tfp}} series; see {.url {gh_issue}}.",
+        "i" = "The weekly install check reports which combinations work: \\
+        {.url https://github.com/greta-dev/greta/actions/workflows/install-check.yaml}"
+      ),
+      call = call
+    )
+  }
+
   too_new <- numeric_version(deps$tf_version) >
     numeric_version(greta_tf_version_max)
   if (too_new) {

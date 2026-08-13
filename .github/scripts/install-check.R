@@ -60,6 +60,27 @@ cat("tensorflow:", resolved_tf, "\n")
 cat("tfp       :", resolved_tfp, "\n")
 cat("tf_keras  :", has_tf_keras, "\n")
 
+# One row per cell, collected by install-check-summary.R into a single table on
+# the run page. Written here rather than at the end, so that a cell which
+# resolves and then fails still reports what it resolved -- that is usually the
+# interesting part. Rewritten as "works" once the model has actually run.
+write_row <- function(status) {
+  row <- paste(
+    Sys.getenv("RUNNER_OS", "unknown"),
+    backend,
+    tf_version,
+    resolved_tf,
+    resolved_tfp,
+    resolved_python,
+    has_tf_keras,
+    status,
+    sep = "\t"
+  )
+  writeLines(row, "cell-result.tsv")
+}
+
+write_row("loaded, but did not run")
+
 # Fail rather than report a green for a version that was never installed. greta
 # pins a minor series (tensorflow==2.16.*), so the patch version uv picks is its
 # choice to make and only the series is checked. Without this, a preference that
@@ -94,6 +115,8 @@ draws <- mcmc(m, n_samples = 100, warmup = 100, chains = 2, verbose = FALSE)
 cat("mcmc draws:", nrow(as.matrix(draws)), "\n")
 
 cat("--- ok ---\n")
+
+write_row("works")
 
 # Write the resolved stack to the run page, so the answer to "does this
 # combination work" is readable without opening a job log. GitHub renders one

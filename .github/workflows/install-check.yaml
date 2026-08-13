@@ -35,6 +35,7 @@ on:
       - '.github/workflows/install-check.yaml'
       - '.github/scripts/install-check.R'
       - '.github/scripts/set-deps.R'
+      - '.github/scripts/install-check-summary.R'
 
 name: install-check
 
@@ -113,6 +114,43 @@ jobs:
 
       - name: Exercise greta
         run: Rscript .github/scripts/install-check.R
+
+      # always(), because a cell that resolved a stack and then failed is
+      # exactly the row worth reading in the summary table
+      - name: Upload this cell's result
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cell-${{ matrix.os }}-tf-${{ matrix.tf }}-${{ matrix.backend }}
+          path: cell-result.tsv
+          if-no-files-found: ignore
+          retention-days: 30
+
+  summarise:
+    name: which combinations work
+    needs: install-check
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          r-version: 'release'
+          use-public-rspm: true
+
+      - uses: actions/download-artifact@v4
+        with:
+          path: cell-results
+          pattern: cell-*
+          merge-multiple: false
+
+      - name: Write the summary table
+        env:
+          GRETA_EXPECTED_CELLS: '11'
+        run: Rscript .github/scripts/install-check-summary.R
 
   newer-tensorflow-available:
     name: newer TensorFlow released?

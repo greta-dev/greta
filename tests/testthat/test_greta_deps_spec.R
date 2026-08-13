@@ -24,15 +24,18 @@ test_that("greta_deps_receipt errors when deps are not installed", {
 
 test_that("greta_deps_spec accepts supported TensorFlow versions", {
   expect_s3_class(greta_deps_spec(), "greta_deps_spec")
-  expect_s3_class(greta_deps_spec(tf_version = "2.14.0"), "greta_deps_spec")
-  expect_s3_class(greta_deps_spec(tf_version = "2.9.0"), "greta_deps_spec")
-  expect_s3_class(greta_deps_spec(tf_version = "2.15.0"), "greta_deps_spec")
-  expect_s3_class(greta_deps_spec(tf_version = "2.15.1"), "greta_deps_spec")
+  expect_s3_class(greta_deps_spec(tf_version = "2.18.0"), "greta_deps_spec")
+  expect_s3_class(greta_deps_spec(tf_version = "2.19.0"), "greta_deps_spec")
+  expect_s3_class(greta_deps_spec(tf_version = "2.21.0"), "greta_deps_spec")
 })
 
-test_that("greta_deps_spec accepts TensorFlow 2.16+, which ships Keras 3", {
-  expect_s3_class(greta_deps_spec(tf_version = "2.16.1"), "greta_deps_spec")
-  expect_s3_class(greta_deps_spec(tf_version = "2.21.0"), "greta_deps_spec")
+# 2.16 and 2.17 resolve and install, and only fail when tensorflow_probability
+# will not import, so rejecting them here is what keeps that from looking like a
+# greta bug an hour into an install
+test_that("greta_deps_spec rejects TensorFlow older than greta supports", {
+  expect_error(greta_deps_spec(tf_version = "2.17.0"), "supports TensorFlow")
+  expect_error(greta_deps_spec(tf_version = "2.16.1"), "supports TensorFlow")
+  expect_error(greta_deps_spec(tf_version = "2.15.0"), "supports TensorFlow")
 })
 
 test_that("greta_deps_spec rejects TensorFlow newer than greta supports", {
@@ -43,7 +46,7 @@ test_that("greta_deps_spec leaves TFP and Python to the resolver", {
   # these previously errored against the compatibility matrix; greta now only
   # bounds TF and lets uv / conda reject incompatible TFP or Python
   expect_s3_class(
-    greta_deps_spec(tf_version = "2.15.0", tfp_version = "0.6.0"),
+    greta_deps_spec(tf_version = "2.18.0", tfp_version = "0.6.0"),
     "greta_deps_spec"
   )
   expect_s3_class(
