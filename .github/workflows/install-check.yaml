@@ -52,25 +52,14 @@ jobs:
           # whatever greta_deps_default$tf currently is, so the newest version
           # stays covered without editing this list.
           #
-          # `expected` is what the run should find. Cells below greta's floor
-          # are kept deliberately: "2.16 does not work, and here is why" is
-          # half of what a user needs, and it cannot be read off a table that
-          # lists only successes. They are recorded rather than failed -- but
-          # if one ever starts working, that fails, because it means the floor
-          # in greta_deps_default$tf_min has become too high.
+          # `expected` is what the run should find; install-check.R fails the
+          # cell when reality disagrees in either direction. Cells below
+          # greta's floor are kept so the published table can say "2.16 does
+          # not work, and here is why" rather than only listing successes.
           #
-          # Nothing varies TensorFlow Probability, because for this range there
-          # is nothing to vary. 0.25.0 (November 2024) is still the latest
-          # release, and the older ones pair with TensorFlow versions greta no
-          # longer supports: greta's optimisers need the Keras 3 API, which
-          # arrives in TensorFlow 2.16, while TFP 0.24 is tested against 2.16
-          # and 0.23 against 2.15. So the question this matrix answers is which
-          # TensorFlow versions the one usable TFP works with.
-          #
-          # Note that TFP 0.25's metadata asks only for `tensorflow>=2.16`,
-          # with no upper bound, so leaving it unpinned would not resolve 2.16
-          # to an older TFP -- it would install 0.25 and fail on import, which
-          # is exactly what the 2.16 and 2.17 rows below record.
+          # Nothing varies TensorFlow Probability: 0.25.0 (November 2024) is
+          # still the latest release, and the older ones pair with TensorFlow
+          # versions greta no longer supports. See check_greta_tf_supported().
           - { os: 'ubuntu-latest', tf: '2.16.0', backend: 'uv', expected: 'unsupported' }
           - { os: 'ubuntu-latest', tf: '2.17.0', backend: 'uv', expected: 'unsupported' }
           - { os: 'ubuntu-latest', tf: '2.18.0', backend: 'uv', expected: 'works' }
@@ -126,10 +115,7 @@ jobs:
         if: matrix.backend == 'conda'
         run: Rscript .github/scripts/install-conda.R
 
-      # Also a separate R session, and for the same reason: greta reads the
-      # stored dependency versions in .onLoad(), so a preference set after
-      # library(greta) is read too late and the cell resolves on greta's
-      # defaults instead of the version it names.
+      # a separate R session, for the reason set-deps.R explains
       - name: Pin the dependency versions
         if: matrix.tf != 'default'
         run: Rscript .github/scripts/set-deps.R

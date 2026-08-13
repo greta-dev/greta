@@ -1,9 +1,8 @@
 # One row per matrix cell, shared by set-deps.R and install-check.R.
 #
-# Both can be the last thing a cell does: greta refuses a version it does not
-# support, so a cell below the floor never reaches the exercise step, and
-# "greta would not accept this version" is as much an answer as "it installed
-# and then failed to import". Whichever script stops first writes the row.
+# Either can be the last thing a cell does: greta refuses a version outside the
+# range it supports, so a cell below the floor stops in set-deps.R and never
+# reaches install-check.R. Whichever stops first writes the row.
 
 new_cell <- function() {
   cell <- new.env(parent = emptyenv())

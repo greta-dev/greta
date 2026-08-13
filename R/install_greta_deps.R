@@ -264,10 +264,8 @@ greta_deps_default <- list(
   tfp = "0.25.0",
   python = "3.12",
   # The floors are what the weekly install check actually passes on, not the
-  # oldest version that ever worked. TensorFlow 2.16 and 2.17 install but
-  # cannot load tensorflow_probability, because greta pins TFP to the 0.25
-  # series whatever the TensorFlow version; so the floor is a consequence of
-  # that pinning, and may drop again if greta stops pinning TFP (#638).
+  # oldest version that ever worked. See check_greta_tf_supported() for why the
+  # range is this narrow.
   tf_min = "2.18.0",
   tfp_min = "0.25.0",
   python_min = "3.9",

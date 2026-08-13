@@ -2,9 +2,7 @@
 #
 # GitHub renders a step summary per job, so without this a run leaves eleven
 # separate blocks to compare by eye, and "which versions can I use?" cannot be
-# read off it at all. This job runs after the matrix with `if: always()`, so a
-# run with failures still produces the table -- and the failures are half the
-# answer, so they get a row and a reason rather than being left out.
+# read off it at all.
 #
 # Each cell writes cell-result.tsv (see install-check.R) and uploads it as an
 # artifact; those are downloaded into a directory tree below.
