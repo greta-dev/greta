@@ -9,7 +9,20 @@ need to be documented to satisfy CRAN's check.
 ## Usage
 
 ``` r
-x %*% y
+abind(
+  ...,
+  along = N,
+  rev.along = NULL,
+  new.names = NULL,
+  force.array = TRUE,
+  make.names = use.anon.names,
+  use.anon.names = FALSE,
+  use.first.dimnames = FALSE,
+  hier.names = FALSE,
+  use.dnns = FALSE
+)
+
+diag(x = 1, nrow, ncol)
 
 chol2inv(x, size = NCOL(x), LINPACK = FALSE)
 
@@ -43,20 +56,7 @@ eigen(x, symmetric, only.values, EISPACK)
 
 rdist(x1, x2 = NULL, compact = FALSE)
 
-abind(
-  ...,
-  along = N,
-  rev.along = NULL,
-  new.names = NULL,
-  force.array = TRUE,
-  make.names = use.anon.names,
-  use.anon.names = FALSE,
-  use.first.dimnames = FALSE,
-  hier.names = FALSE,
-  use.dnns = FALSE
-)
-
-diag(x = 1, nrow, ncol)
+x %*% y
 ```
 
 ## Arguments

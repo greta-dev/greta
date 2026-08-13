@@ -85,7 +85,8 @@ Functions and operations for modifying greta arrays
   [`log1pe()`](https://greta-dev.github.io/greta/dev/reference/transforms.md)
   [`imultilogit()`](https://greta-dev.github.io/greta/dev/reference/transforms.md)
   : transformation functions for greta arrays
-- [`` `%*%` ``](https://greta-dev.github.io/greta/dev/reference/overloaded.md)
+- [`abind()`](https://greta-dev.github.io/greta/dev/reference/overloaded.md)
+  [`diag()`](https://greta-dev.github.io/greta/dev/reference/overloaded.md)
   [`chol2inv()`](https://greta-dev.github.io/greta/dev/reference/overloaded.md)
   [`cov2cor()`](https://greta-dev.github.io/greta/dev/reference/overloaded.md)
   [`identity()`](https://greta-dev.github.io/greta/dev/reference/overloaded.md)
@@ -102,8 +103,7 @@ Functions and operations for modifying greta arrays
   [`tapply()`](https://greta-dev.github.io/greta/dev/reference/overloaded.md)
   [`eigen()`](https://greta-dev.github.io/greta/dev/reference/overloaded.md)
   [`rdist()`](https://greta-dev.github.io/greta/dev/reference/overloaded.md)
-  [`abind()`](https://greta-dev.github.io/greta/dev/reference/overloaded.md)
-  [`diag()`](https://greta-dev.github.io/greta/dev/reference/overloaded.md)
+  [`` `%*%` ``](https://greta-dev.github.io/greta/dev/reference/overloaded.md)
   : Functions overloaded by greta
 
 ## modelling
