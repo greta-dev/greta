@@ -29,6 +29,15 @@ test_that("greta_stash is attached to the namespace by .onLoad", {
   expect_type(greta_stash$numerical_messages, "character")
 })
 
+# Asserting the shape of .internals says nothing about whether it is exported:
+# .onLoad() builds it either way, so the sublist tests below pass in a session
+# where the NAMESPACE directive has gone missing, while the dependent packages
+# fail to build. That happened -- dropping the Collate field left roxygen with
+# no top-level object to see, and re-documenting silently removed the export.
+test_that(".internals is exported, not merely attached", {
+  expect_true(".internals" %in% getNamespaceExports("greta"))
+})
+
 test_that(".internals is attached with every sublist a dependent package uses", {
   expect_type(.internals, "list")
   expect_named(
