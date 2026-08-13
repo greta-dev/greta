@@ -36,6 +36,7 @@ on:
       - '.github/scripts/install-check.R'
       - '.github/scripts/set-deps.R'
       - '.github/scripts/install-check-summary.R'
+      - '.github/scripts/cell-row.R'
 
 name: install-check
 
@@ -133,7 +134,11 @@ jobs:
         if: matrix.tf != 'default'
         run: Rscript .github/scripts/set-deps.R
 
+      # skipped when greta refused the pinned version: that cell has already
+      # written its row, and running here would install the *default* versions
+      # and report a passing row for a combination nobody asked about
       - name: Exercise greta
+        if: env.GRETA_SKIP_EXERCISE != 'true'
         run: Rscript .github/scripts/install-check.R
 
       # always(), because a cell that resolved a stack and then failed is

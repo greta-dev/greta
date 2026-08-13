@@ -27,44 +27,11 @@ tf_version <- Sys.getenv("GRETA_TF_VERSION", "default")
 backend <- Sys.getenv("GRETA_BACKEND", "uv")
 expected <- Sys.getenv("GRETA_EXPECTED", "works")
 
-# An environment rather than a list, so the helpers can update it from inside
-# tryCatch() without the assignment gymnastics <<- would need.
-cell <- new.env(parent = emptyenv())
-cell$os <- Sys.getenv("RUNNER_OS", "unknown")
-cell$backend <- backend
-cell$requested <- tf_version
-cell$tf <- "-"
-cell$tfp <- "-"
-cell$python <- "-"
-cell$tf_keras <- "-"
-cell$outcome <- "did not load"
-cell$detail <- "did not get as far as loading Python"
+# run from the repository root, as the workflow does
+source(".github/scripts/cell-row.R")
 
-write_row <- function() {
-  writeLines(
-    paste(
-      cell$os,
-      cell$backend,
-      cell$requested,
-      cell$tf,
-      cell$tfp,
-      cell$python,
-      cell$tf_keras,
-      cell$outcome,
-      cell$detail,
-      sep = "\t"
-    ),
-    "cell-result.tsv"
-  )
-}
-
-# cli decorates errors with box drawing and bullets, which read badly inside a
-# markdown table cell
-first_line <- function(x) {
-  line <- sub("\n.*$", "", x)
-  line <- gsub("[|]", "/", line)
-  trimws(gsub("[\u2500-\u257f\u2716\u2139\u2192\u00d7]", "", line))
-}
+cell <- new_cell()
+write_row <- function() write_cell_row(cell)
 
 # Everything that can fail lives in here, so a single tryCatch below covers the
 # lot and the row is written exactly once, on every path. on.exit() will not do:

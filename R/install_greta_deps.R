@@ -291,25 +291,32 @@ greta_deps_default <- list(
 #' @section What you can actually choose:
 #'
 #' **TensorFlow, between `r greta_deps_default$tf_min` and
-#' `r greta_deps_default$tf`.** Versions outside that range are rejected, and
-#' the range is narrower than it looks for two reasons that compound:
-#'
-#' - greta's optimisers use the Keras 3 API, which ships with TensorFlow 2.16.
-#'   Below that, `adam()` and the rest cannot be constructed at all.
-#' - TensorFlow Probability has not had a release since 0.25.0 in November
-#'   2024, and 0.25.0 is tested against TensorFlow 2.18. It installs against
-#'   2.16 and 2.17 -- its metadata asks only for `tensorflow>=2.16` -- and then
-#'   fails to import.
+#' `r greta_deps_default$tf`.** This is the one genuine choice. Anything
+#' outside the range is rejected, with the range named in the error. The usual
+#' reason to pick an older version is Python: TensorFlow
+#' `r greta_deps_default$tf` has no Python 3.9 wheels.
 #'
 #' **Python.** Passed through to the resolver rather than checked by greta.
 #'
-#' **TensorFlow Probability, in principle.** In practice there is one usable
-#' version: 0.25.0 is the newest release and the only one that pairs with the
-#' supported TensorFlow range. Older TFP releases pair with TensorFlow versions
-#' greta no longer supports (0.24.0 with 2.16, 0.23.0 with 2.15). So changing
-#' `tfp_version` is unlikely to give you a working environment, and greta does
-#' not check it -- an incompatible choice surfaces as a resolver or import
-#' error at install time.
+#' **TensorFlow Probability: settable, but in practice fixed** at
+#' `r greta_deps_default$tfp`. Older releases pair with TensorFlow versions
+#' greta no longer supports (0.24.0 with 2.16, 0.23.0 with 2.15), so changing
+#' it is unlikely to give you a working environment. greta does not check it,
+#' so an unworkable choice surfaces as a resolver or import error at install
+#' time.
+#'
+#' @section Why the range is so narrow:
+#'
+#' TensorFlow Probability sets the floor. Its most recent release is
+#' `r greta_deps_default$tfp`, from November 2024, and that release is tested
+#' against TensorFlow `r greta_deps_default$tf_min`. It *installs* against 2.16
+#' and 2.17 -- its metadata asks only for `tensorflow>=2.16`, with no upper
+#' bound -- and then fails to import, which is why greta rejects those versions
+#' up front rather than after a long install.
+#'
+#' greta has a floor of its own at TensorFlow 2.16, because its optimisers use
+#' the Keras 3 API and Keras 3 arrives in 2.16. TensorFlow Probability's
+#' requirement is the stricter of the two, so it is the one you meet.
 #'
 #' greta installs and runs against this range weekly, on Linux, macOS and
 #' Windows. Each run publishes a table of every combination tried, what each
@@ -505,12 +512,10 @@ check_greta_tf_supported <- function(deps, call = rlang::caller_env()) {
         {.val {greta_deps_default$tfp}}.",
         "x" = "The provided version was {.val {deps$tf_version}}, which is \\
         too old.",
-        "i" = "{.pkg greta}'s optimisers use the Keras 3 API, which needs \\
-        TensorFlow 2.16 or later.",
-        "i" = "TensorFlow Probability has had no release since \\
-        {.val {greta_deps_default$tfp}} (November 2024), and that release is \\
-        tested against TensorFlow {.val {greta_tf_version_min}}. Older \\
-        TensorFlow installs, then fails to import it.",
+        "i" = "TensorFlow Probability sets the floor: its most recent release \\
+        is {.val {greta_deps_default$tfp}} (November 2024), which is tested \\
+        against TensorFlow {.val {greta_tf_version_min}}. Older TensorFlow \\
+        installs it and then fails to import it.",
         "i" = "Every combination tried, and what each resolved to: \\
         {.url {install_check}}"
       ),
