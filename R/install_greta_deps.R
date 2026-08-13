@@ -303,22 +303,28 @@ greta_deps_default <- list(
 #' so an unworkable choice surfaces as a resolver or import error at install
 #' time.
 #'
-#' @section Why the range is so narrow:
+#' @section TensorFlow 2.16 and 2.17 cannot be used:
 #'
-#' TensorFlow Probability sets the floor. Its most recent release is
+#' They are rejected, and there is no way to opt in. Anything below
+#' `r greta_deps_default$tf_min` is refused when you build the spec, before
+#' anything is downloaded.
+#'
+#' The reason is TensorFlow Probability. Its most recent release is
 #' `r greta_deps_default$tfp`, from November 2024, and that release is tested
-#' against TensorFlow `r greta_deps_default$tf_min`. It *installs* against 2.16
-#' and 2.17 -- its metadata asks only for `tensorflow>=2.16`, with no upper
-#' bound -- and then fails to import, which is why greta rejects those versions
-#' up front rather than after a long install.
+#' against TensorFlow `r greta_deps_default$tf_min`. On 2.16 or 2.17 it
+#' *installs* perfectly well -- its metadata asks only for `tensorflow>=2.16`,
+#' with no upper bound -- and then fails to import when greta tries to use it.
+#' Refusing up front is what stops you finding that out after a long install.
 #'
-#' greta has a floor of its own at TensorFlow 2.16, because its optimisers use
-#' the Keras 3 API and Keras 3 arrives in 2.16. TensorFlow Probability's
-#' requirement is the stricter of the two, so it is the one you meet.
+#' Pairing 2.16 with the older TensorFlow Probability that suits it (0.24.0)
+#' is not supported either: greta is not tested against it, and greta's own
+#' optimisers need the Keras 3 API, which only arrives in TensorFlow 2.16 in
+#' the first place. The supported combination is the one greta ships.
 #'
 #' greta installs and runs against this range weekly, on Linux, macOS and
 #' Windows. Each run publishes a table of every combination tried, what each
-#' resolved to, and which did not work; open the most recent from
+#' resolved to, and which did not work -- including 2.16 and 2.17, recorded as
+#' failures with their reason. Open the most recent from
 #' <https://github.com/greta-dev/greta/actions/workflows/install-check.yaml>.
 #'
 #' Calling `greta_deps_spec()` with no arguments returns greta's current

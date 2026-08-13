@@ -288,20 +288,27 @@ Older TFP releases pair with TensorFlow versions greta no longer supports --
 unlikely to give you a working environment. greta does not check it, so an
 unworkable choice surfaces as a resolver or import error at install time.
 
-#### Why the range is so narrow
+#### TensorFlow 2.16 and 2.17 cannot be used
 
-**TensorFlow Probability sets the floor.** Its most recent release is 0.25.0,
-from November 2024, and that release is tested against TensorFlow 2.18. It will
-*install* against 2.16 or 2.17 -- its metadata asks only for
-`tensorflow>=2.16`, with no upper bound -- and then fail to import. That is why
-greta rejects those versions up front rather than after a long install.
+They are rejected, and there is no way to opt in. Anything below TensorFlow
+2.18 is refused when you build the spec, before anything is downloaded -- which
+is what the error above shows.
 
-greta has a floor of its own, at TensorFlow 2.16, because its optimisers use
-the Keras 3 API and Keras 3 arrives in 2.16. But TensorFlow Probability's
-requirement is the stricter of the two, so it is the one you meet.
+**The reason is TensorFlow Probability.** Its most recent release is 0.25.0,
+from November 2024, and that release is tested against TensorFlow 2.18. On 2.16
+or 2.17 it *installs* perfectly well -- its metadata asks only for
+`tensorflow>=2.16`, with no upper bound -- and then fails to import when greta
+tries to use it. Refusing up front is what stops you finding that out after a
+long install.
+
+Pairing 2.16 with the older TensorFlow Probability that suits it (0.24.0) is
+not supported either: greta is not tested against it, and greta's own
+optimisers need the Keras 3 API, which only arrives in TensorFlow 2.16 in the
+first place. The supported combination is the one greta ships.
 
 If you would rather see this than take our word for it, every combination greta
-tries each week is published with what it resolved to and whether it worked:
+tries each week is published with what it resolved to and whether it worked --
+including 2.16 and 2.17, recorded as failures with their reason:
 <https://github.com/greta-dev/greta/actions/workflows/install-check.yaml>.
 
 greta checks a range of TensorFlow versions every week, on Linux, macOS and
