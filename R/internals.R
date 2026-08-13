@@ -1,5 +1,18 @@
+# The export below has to be written out literally. `.internals` is built by
+# `.onLoad()` (see R/zzz.R), so there is no top-level object for roxygen to
+# find and `@export` silently generates nothing -- which is how the directive
+# went missing the moment the package was re-documented after the `Collate`
+# field was dropped. R itself is happy with it: loadNamespace() runs `.onLoad()`
+# *before* sealing the namespace and processing exports, so `.internals` exists
+# by the time the directive is resolved.
+#
+# greta.gp, greta.dynamics and greta.gam all read `.internals`, and none of them
+# is reached by a revdep run, so losing this export surfaces as three broken
+# builds rather than as a failing check here.
+
 #' @name internals
 #' @aliases .internals
+#' @rawNamespace export(.internals)
 #' @title internal greta methods
 #'
 #' @description A list of functions and R6 class objects that can be used to
