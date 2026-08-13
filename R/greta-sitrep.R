@@ -409,11 +409,17 @@ have_python_module <- function(label, get_version, minimum) {
   )
 }
 
+# The floors come from greta_deps_default rather than being written out again
+# here. They used to be 0.15.0 and 2.9.0, which no longer had anything to do
+# with what greta needs: an environment on TensorFlow 2.15 passed this gate,
+# loaded, and then failed inside Keras, because greta moved to the Keras 3
+# optimiser API. One constant, so the gate cannot drift from what greta
+# advertises again.
 have_tfp <- function() {
   have_python_module(
     label = "TensorFlow Probability",
     get_version = \() tfp$`__version__`,
-    minimum = "0.15.0"
+    minimum = greta_deps_default$tfp_min
   )
 }
 
@@ -421,7 +427,7 @@ have_tf <- function() {
   have_python_module(
     label = "TensorFlow",
     get_version = \() suppressMessages(tf$`__version__`),
-    minimum = "2.9.0"
+    minimum = greta_deps_default$tf_min
   )
 }
 

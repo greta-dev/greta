@@ -91,7 +91,6 @@
 #' install_greta_deps()
 #' }
 #' @importFrom reticulate py_available
-#' @importFrom tensorflow install_tensorflow
 #' @importFrom reticulate conda_create
 #' @importFrom reticulate conda_install
 #' @importFrom cli cli_alert_info

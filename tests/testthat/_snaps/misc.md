@@ -5,16 +5,18 @@
     Condition
       Error in `check_tf_version()`:
       ! x greta could not load TensorFlow.
-      > TensorFlow: TensorFlow 0.9.0 is installed, but greta needs 2.9.0 or later
+      > TensorFlow: TensorFlow 0.9.0 is installed, but greta needs 2.18.0 or later
+      i If greta has just been updated, restart R: the managed environment installs the versions greta asks for on the next load.
       i Run `greta::greta_sitrep()` to check your installation.
-      i For help, including offline or conda installs, see the installation vignette (`vignette(greta::installation)`), or install a conda environment with `install_greta_deps()`.
+      i For offline and conda installs, see the installation vignette (`vignette(greta::installation)`).
 
 ---
 
     x greta could not load TensorFlow.
-    > TensorFlow: TensorFlow 0.9.0 is installed, but greta needs 2.9.0 or later
+    > TensorFlow: TensorFlow 0.9.0 is installed, but greta needs 2.18.0 or later
+    i If greta has just been updated, restart R: the managed environment installs the versions greta asks for on the next load.
     i Run `greta::greta_sitrep()` to check your installation.
-    i For help, including offline or conda installs, see the installation vignette (`vignette(greta::installation)`), or install a conda environment with `install_greta_deps()`.
+    i For offline and conda installs, see the installation vignette (`vignette(greta::installation)`).
 
 ---
 
@@ -22,9 +24,10 @@
       check_tf_version("message")
     Message
       x greta could not load TensorFlow.
-      > TensorFlow: TensorFlow 0.9.0 is installed, but greta needs 2.9.0 or later
+      > TensorFlow: TensorFlow 0.9.0 is installed, but greta needs 2.18.0 or later
+      i If greta has just been updated, restart R: the managed environment installs the versions greta asks for on the next load.
       i Run `greta::greta_sitrep()` to check your installation.
-      i For help, including offline or conda installs, see the installation vignette (`vignette(greta::installation)`), or install a conda environment with `install_greta_deps()`.
+      i For offline and conda installs, see the installation vignette (`vignette(greta::installation)`).
 
 # define and mcmc error informatively
 
