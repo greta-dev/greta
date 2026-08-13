@@ -13,6 +13,17 @@ release_bullets <- function() {
       "A clean `revdep/problems.md` is not evidence that they were checked."
     ),
     paste0(
+      "Run the Geweke checks: ",
+      "`GRETA_GEWEKE=true Rscript -e ",
+      "'devtools::test(filter = \"posteriors_geweke\")'`. ",
+      "They take roughly half an hour locally and longer on CI, so they are ",
+      "off by default and every other `test_posteriors_*.R` file runs without ",
+      "them. They are also the only check that catches the sampler drifting ",
+      "from the distribution it should be sampling: TensorFlow Probability ",
+      "0.25.0 silently changed how `lkj_correlation()` and `wishart()` draw, ",
+      "and nothing else in the suite would have noticed."
+    ),
+    paste0(
       "Check greta.gam and greta.distributions by hand. Neither is on CRAN, ",
       "so no revdep run will ever cover them, and both read `.internals` ",
       "while they build, which is the first place a breaking change to it ",
