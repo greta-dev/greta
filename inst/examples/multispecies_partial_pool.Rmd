@@ -3,7 +3,7 @@ output: html_document
 ---
 ### Multiple species with partial pooling of regression coefficients
 
-An example of a logistic regression being used to estimate the probability of multiple species' presences along a number of environmental gradients. Instead of assuming independence of species regression coefficients, we assume they are drawn from a shared distribution. We partially pool species responses. This gives us not ony the regression coefficients for each species but also a global average coefficient and a measure of variation between species responses to environmental gradients.
+An example of a logistic regression being used to estimate the probability of multiple species' presences along a number of environmental gradients. Instead of assuming independence of species regression coefficients, we assume they are drawn from a shared distribution. We partially pool species responses. This gives us not only the regression coefficients for each species but also a global average coefficient and a measure of variation between species responses to environmental gradients.
 
 #### data
 ```{r data_multispecies_partially_pool, highlight = FALSE}

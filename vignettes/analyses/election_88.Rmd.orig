@@ -106,7 +106,7 @@ with.
 The target (voting outcome):
 
 ```{r}
-data.frame(y) %>% 
+data.frame(y) |> 
   ggplot(aes(y)) +
   geom_bar() +
   ggtitle("Distribution of voting outcomes")
@@ -115,7 +115,7 @@ data.frame(y) %>%
 Here's the gender indicator.
 
 ```{r}
-data.frame(female) %>% 
+data.frame(female) |> 
   ggplot(aes(female)) +
   geom_bar() +
   ggtitle("Distribution of female indicator")
@@ -124,7 +124,7 @@ data.frame(female) %>%
 Here's the race indicator.
 
 ```{r}
-data.frame(black) %>% 
+data.frame(black) |> 
   ggplot(aes(black)) +
   geom_bar() +
   ggtitle("Distribution of black indicator")
@@ -134,7 +134,7 @@ Here's the state variable. We have 51 state codes in the data, which includes
 Washington, DC.
 
 ```{r}
-data.frame(state) %>% 
+data.frame(state) |> 
   ggplot(aes(state)) +
   geom_bar() +
   ggtitle("Distribution of values within state")
