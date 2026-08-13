@@ -286,46 +286,16 @@ greta_deps_default <- list(
 #' Probability (TFP), and Python. Defaulting to `r greta_deps_default$tf`,
 #' `r greta_deps_default$tfp`, and `r greta_deps_default$python`, respectively.
 #'
-#' @section What you can actually choose:
+#' @section Supported versions:
 #'
-#' **TensorFlow, between `r greta_deps_default$tf_min` and
-#' `r greta_deps_default$tf`.** This is the one genuine choice. Anything
-#' outside the range is rejected, with the range named in the error. The usual
-#' reason to pick an older version is Python: TensorFlow
-#' `r greta_deps_default$tf` has no Python 3.9 wheels.
+#' TensorFlow `r greta_deps_default$tf_min` to `r greta_deps_default$tf`, with
+#' TensorFlow Probability fixed at `r greta_deps_default$tfp`. A TensorFlow
+#' version outside that range is rejected. Python is passed to the resolver
+#' and not checked.
 #'
-#' **Python.** Passed through to the resolver rather than checked by greta.
-#'
-#' **TensorFlow Probability: settable, but in practice fixed** at
-#' `r greta_deps_default$tfp`. Older releases pair with TensorFlow versions
-#' greta no longer supports (0.24.0 with 2.16, 0.23.0 with 2.15), so changing
-#' it is unlikely to give you a working environment. greta does not check it,
-#' so an unworkable choice surfaces as a resolver or import error at install
-#' time.
-#'
-#' @section TensorFlow 2.16 and 2.17 cannot be used:
-#'
-#' They are rejected, and there is no way to opt in. Anything below
-#' `r greta_deps_default$tf_min` is refused when you build the spec, before
-#' anything is downloaded.
-#'
-#' The reason is TensorFlow Probability. Its most recent release is
-#' `r greta_deps_default$tfp`, from November 2024, and that release is tested
-#' against TensorFlow `r greta_deps_default$tf_min`. On 2.16 or 2.17 it
-#' *installs* perfectly well -- its metadata asks only for `tensorflow>=2.16`,
-#' with no upper bound -- and then fails to import when greta tries to use it.
-#' Refusing up front is what stops you finding that out after a long install.
-#'
-#' Pairing 2.16 with the older TensorFlow Probability that suits it (0.24.0)
-#' is not supported either: greta is not tested against it, and greta's own
-#' optimisers need the Keras 3 API, which only arrives in TensorFlow 2.16 in
-#' the first place. The supported combination is the one greta ships.
-#'
-#' greta installs and runs against this range weekly, on Linux, macOS and
-#' Windows. Each run publishes a table of every combination tried, what each
-#' resolved to, and which did not work -- including 2.16 and 2.17, recorded as
-#' failures with their reason. Open the most recent from
-#' <https://github.com/greta-dev/greta/actions/workflows/install-check.yaml>.
+#' For why the range is this narrow, and why TensorFlow Probability is not
+#' really a choice, see the "I need specific dependency versions" section of
+#' `vignette("installation", package = "greta")`.
 #'
 #' Calling `greta_deps_spec()` with no arguments returns greta's current
 #' default (recommended) versions, and is the supported way to query them -
@@ -488,16 +458,10 @@ greta_deps_receipt <- function() {
 #   * TensorFlow Probability has had no release since 0.25.0 (November 2024),
 #     and 0.25.0 is tested against TensorFlow 2.18.
 #
-# So the usable band is TF 2.18 upwards, with the one TFP release that pairs
-# with it. This is worth stating rather than implying: greta's version
-# arguments look like a free choice, and for TFP they are not.
-#
-# Rejecting a too-old version here rather than letting it install matters, and
-# TFP's own metadata is why. Its `tf` extra asks only for `tensorflow>=2.16`,
-# with no upper bound, so a resolver will happily put TFP 0.25 next to
-# TensorFlow 2.16 -- it installs, downloads 43 packages, and only then fails to
-# import. That also rules out the obvious fix of leaving TFP unpinned: the
-# metadata carries too little information to resolve on.
+# Leaving TFP unpinned is the obvious fix and does not work: its `tf` extra
+# asks only for `tensorflow>=2.16`, with no upper bound, so a resolver puts
+# TFP 0.25 next to TensorFlow 2.16 quite happily -- it installs, and only
+# fails on import. Checking here is what stops that costing a full download.
 
 check_greta_tf_supported <- function(deps, call = rlang::caller_env()) {
   greta_tf_version_max <- greta_deps_default$tf
@@ -506,41 +470,20 @@ check_greta_tf_supported <- function(deps, call = rlang::caller_env()) {
     "https://github.com/greta-dev/greta/actions/workflows/install-check.yaml"
   )
 
-  too_old <- numeric_version(deps$tf_version) <
-    numeric_version(greta_tf_version_min)
-  if (too_old) {
-    cli::cli_abort(
-      message = c(
-        "{.pkg greta} supports TensorFlow {.val {greta_tf_version_min}} to \\
-        {.val {greta_tf_version_max}}, with TensorFlow Probability \\
-        {.val {greta_deps_default$tfp}}.",
-        "x" = "The provided version was {.val {deps$tf_version}}, which is \\
-        too old.",
-        "i" = "TensorFlow Probability sets the floor: its most recent release \\
-        is {.val {greta_deps_default$tfp}} (November 2024), which is tested \\
-        against TensorFlow {.val {greta_tf_version_min}}. Older TensorFlow \\
-        installs it and then fails to import it.",
-        "i" = "Every combination tried, and what each resolved to: \\
-        {.url {install_check}}"
-      ),
-      call = call
-    )
-  }
+  out_of_range <- numeric_version(deps$tf_version) <
+    numeric_version(greta_tf_version_min) ||
+    numeric_version(deps$tf_version) > numeric_version(greta_tf_version_max)
 
-  too_new <- numeric_version(deps$tf_version) >
-    numeric_version(greta_tf_version_max)
-  if (too_new) {
-    gh_issue <- "https://github.com/greta-dev/greta/issues/675"
+  if (out_of_range) {
     cli::cli_abort(
       message = c(
         "{.pkg greta} supports TensorFlow {.val {greta_tf_version_min}} to \\
         {.val {greta_tf_version_max}}, with TensorFlow Probability \\
         {.val {greta_deps_default$tfp}}.",
-        "x" = "The provided version was {.val {deps$tf_version}}, which is \\
-        newer than {.pkg greta} has been tested against; see \\
-        {.url {gh_issue}}.",
-        "i" = "Every combination tried, and what each resolved to: \\
-        {.url {install_check}}"
+        "x" = "The provided version was {.val {deps$tf_version}}.",
+        "i" = "For why the range is this narrow, see the \\
+        {.emph I need specific dependency versions} section of \\
+        {.vignette greta::installation}."
       ),
       call = call
     )

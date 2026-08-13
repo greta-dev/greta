@@ -28,49 +28,17 @@ A helper function for specifying versions of Tensorflow (TF), Tensorflow
 Probability (TFP), and Python. Defaulting to 2.21.0,
 0.25.0, and 3.12, respectively.
 }
-\section{What you can actually choose}{
+\section{Supported versions}{
 
 
-\strong{TensorFlow, between 2.18.0 and
-2.21.0.} This is the one genuine choice. Anything
-outside the range is rejected, with the range named in the error. The usual
-reason to pick an older version is Python: TensorFlow
-2.21.0 has no Python 3.9 wheels.
+TensorFlow 2.18.0 to 2.21.0, with
+TensorFlow Probability fixed at 0.25.0. A TensorFlow
+version outside that range is rejected. Python is passed to the resolver
+and not checked.
 
-\strong{Python.} Passed through to the resolver rather than checked by greta.
-
-\strong{TensorFlow Probability: settable, but in practice fixed} at
-0.25.0. Older releases pair with TensorFlow versions
-greta no longer supports (0.24.0 with 2.16, 0.23.0 with 2.15), so changing
-it is unlikely to give you a working environment. greta does not check it,
-so an unworkable choice surfaces as a resolver or import error at install
-time.
-}
-
-\section{TensorFlow 2.16 and 2.17 cannot be used}{
-
-
-They are rejected, and there is no way to opt in. Anything below
-2.18.0 is refused when you build the spec, before
-anything is downloaded.
-
-The reason is TensorFlow Probability. Its most recent release is
-0.25.0, from November 2024, and that release is tested
-against TensorFlow 2.18.0. On 2.16 or 2.17 it
-\emph{installs} perfectly well -- its metadata asks only for \code{tensorflow>=2.16},
-with no upper bound -- and then fails to import when greta tries to use it.
-Refusing up front is what stops you finding that out after a long install.
-
-Pairing 2.16 with the older TensorFlow Probability that suits it (0.24.0)
-is not supported either: greta is not tested against it, and greta's own
-optimisers need the Keras 3 API, which only arrives in TensorFlow 2.16 in
-the first place. The supported combination is the one greta ships.
-
-greta installs and runs against this range weekly, on Linux, macOS and
-Windows. Each run publishes a table of every combination tried, what each
-resolved to, and which did not work -- including 2.16 and 2.17, recorded as
-failures with their reason. Open the most recent from
-\url{https://github.com/greta-dev/greta/actions/workflows/install-check.yaml}.
+For why the range is this narrow, and why TensorFlow Probability is not
+really a choice, see the "I need specific dependency versions" section of
+\code{vignette("installation", package = "greta")}.
 
 Calling \code{greta_deps_spec()} with no arguments returns greta's current
 default (recommended) versions, and is the supported way to query them -
