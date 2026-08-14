@@ -409,11 +409,15 @@ have_python_module <- function(label, get_version, minimum) {
   )
 }
 
+# This gate decides whether greta runs at all, so it reads the floors from
+# greta_deps_default rather than carrying its own copy: a gate looser than the
+# advertised range lets an environment load and then fail inside Keras, which
+# reads as a greta bug rather than an unsupported install.
 have_tfp <- function() {
   have_python_module(
     label = "TensorFlow Probability",
     get_version = \() tfp$`__version__`,
-    minimum = "0.15.0"
+    minimum = greta_deps_default$tfp_min
   )
 }
 
@@ -421,7 +425,7 @@ have_tf <- function() {
   have_python_module(
     label = "TensorFlow",
     get_version = \() suppressMessages(tf$`__version__`),
-    minimum = "2.9.0"
+    minimum = greta_deps_default$tf_min
   )
 }
 

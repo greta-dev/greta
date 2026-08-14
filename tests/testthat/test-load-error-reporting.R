@@ -21,6 +21,7 @@ test_that("have_python reports why Python could not be loaded", {
 })
 
 test_that("check_tf_version names which requirement failed", {
+  local_python_plan()
   local_mocked_bindings(
     have_python = function() check_result(TRUE),
     have_tf = function() check_result(TRUE),
@@ -29,9 +30,81 @@ test_that("check_tf_version names which requirement failed", {
   expect_snapshot(error = TRUE, check_tf_version("error"))
 })
 
+test_that("a module older than greta's floor is rejected, naming both", {
+  too_old <- have_python_module(
+    label = "TensorFlow",
+    get_version = function() "2.15.0",
+    minimum = greta_deps_default$tf_min
+  )
+  expect_false(isTRUE(too_old))
+  expect_match(check_reason(too_old), "2.15.0 is installed")
+  expect_match(check_reason(too_old), greta_deps_default$tf_min)
+
+  new_enough <- have_python_module(
+    label = "TensorFlow",
+    get_version = function() greta_deps_default$tf,
+    minimum = greta_deps_default$tf_min
+  )
+  expect_true(isTRUE(new_enough))
+})
+
+# The load gate and greta_deps_spec() are separate code paths that must agree
+# about which versions greta supports. They disagreed for the whole of the Keras
+# 3 changeover -- the gate accepted TensorFlow 2.9 while greta had moved to an
+# API that needs 2.18 -- so an old environment loaded and then failed inside
+# Keras.
+test_that("the load gate and greta_deps_spec() agree on the floor", {
+  below_floor <- "2.17.0"
+
+  expect_error(
+    greta_deps_spec(tf_version = below_floor),
+    "supports TensorFlow"
+  )
+
+  gate <- have_python_module(
+    label = "TensorFlow",
+    get_version = function() below_floor,
+    minimum = greta_deps_default$tf_min
+  )
+  expect_false(isTRUE(gate))
+})
+
+test_that("a too-old TensorFlow on conda says what to run", {
+  local_python_plan(
+    new_python_plan("conda", "auto_detect", python = "greta-env-tf2")
+  )
+  local_mocked_bindings(
+    have_python = function() check_result(TRUE),
+    have_tf = function() {
+      check_result(
+        FALSE,
+        "TensorFlow 2.15.0 is installed, but greta needs 2.18.0 or later"
+      )
+    },
+    have_tfp = function() check_result(TRUE)
+  )
+  expect_snapshot(error = TRUE, check_tf_version("error"))
+})
+
+test_that("a too-old TensorFlow on the managed backend says to restart", {
+  local_python_plan()
+  local_mocked_bindings(
+    have_python = function() check_result(TRUE),
+    have_tf = function() {
+      check_result(
+        FALSE,
+        "TensorFlow 2.15.0 is installed, but greta needs 2.18.0 or later"
+      )
+    },
+    have_tfp = function() check_result(TRUE)
+  )
+  expect_snapshot(error = TRUE, check_tf_version("error"))
+})
+
 test_that("check_tf_version reports every failed requirement", {
   # the diagnostic is mocked: it spawns a subprocess, and this test is about
   # the message rather than about running one
+  local_python_plan()
   local_mocked_bindings(
     have_python = function() check_result(FALSE, "python is a no-show"),
     have_tf = function() check_result(FALSE, "tensorflow is a no-show"),
@@ -98,6 +171,7 @@ test_that("check_tf_version does not diagnose when it is not erroring", {
 })
 
 test_that("a failed check without a reason still errors cleanly", {
+  local_python_plan()
   local_mocked_bindings(
     have_python = function() check_result(TRUE),
     have_tf = function() check_result(FALSE),
@@ -108,6 +182,7 @@ test_that("a failed check without a reason still errors cleanly", {
 
 test_that("braces in a Python message are not read as cli interpolation", {
   # uv and Python messages contain braces; unescaped they would be evaluated
+  local_python_plan()
   local_mocked_bindings(
     have_python = function() check_result(TRUE),
     have_tf = function() check_result(TRUE),

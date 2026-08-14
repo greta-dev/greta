@@ -34,6 +34,9 @@ on:
       - 'R/reinstallers.R'
       - '.github/workflows/install-check.yaml'
       - '.github/scripts/install-check.R'
+      - '.github/scripts/set-deps.R'
+      - '.github/scripts/install-check-summary.R'
+      - '.github/scripts/cell-row.R'
 
 name: install-check
 
@@ -45,22 +48,31 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          # every TF version greta accepts, on one OS, via uv. 'default' is
+          # Every TF version greta accepts, on one OS, via uv. 'default' is
           # whatever greta_deps_default$tf currently is, so the newest version
-          # stays covered without editing this list
-          - { os: 'ubuntu-latest', tf: '2.16.0', backend: 'uv' }
-          - { os: 'ubuntu-latest', tf: '2.17.0', backend: 'uv' }
-          - { os: 'ubuntu-latest', tf: '2.18.0', backend: 'uv' }
-          - { os: 'ubuntu-latest', tf: '2.19.0', backend: 'uv' }
-          - { os: 'ubuntu-latest', tf: '2.20.0', backend: 'uv' }
-          - { os: 'ubuntu-latest', tf: 'default', backend: 'uv' }
+          # stays covered without editing this list.
+          #
+          # `expected` is what the run should find; install-check.R fails the
+          # cell when reality disagrees in either direction. Cells below
+          # greta's floor are kept so the published table can say "2.16 does
+          # not work, and here is why" rather than only listing successes.
+          #
+          # Nothing varies TensorFlow Probability: 0.25.0 (November 2024) is
+          # still the latest release, and the older ones pair with TensorFlow
+          # versions greta no longer supports. See check_greta_tf_supported().
+          - { os: 'ubuntu-latest', tf: '2.16.0', backend: 'uv', expected: 'unsupported' }
+          - { os: 'ubuntu-latest', tf: '2.17.0', backend: 'uv', expected: 'unsupported' }
+          - { os: 'ubuntu-latest', tf: '2.18.0', backend: 'uv', expected: 'works' }
+          - { os: 'ubuntu-latest', tf: '2.19.0', backend: 'uv', expected: 'works' }
+          - { os: 'ubuntu-latest', tf: '2.20.0', backend: 'uv', expected: 'works' }
+          - { os: 'ubuntu-latest', tf: 'default', backend: 'uv', expected: 'works' }
           # the default version everywhere, so OS-specific breakage shows up
-          - { os: 'macOS-latest', tf: 'default', backend: 'uv' }
-          - { os: 'windows-latest', tf: 'default', backend: 'uv' }
+          - { os: 'macOS-latest', tf: 'default', backend: 'uv', expected: 'works' }
+          - { os: 'windows-latest', tf: 'default', backend: 'uv', expected: 'works' }
           # the conda path, which has no other CI coverage
-          - { os: 'ubuntu-latest', tf: 'default', backend: 'conda' }
-          - { os: 'macOS-latest', tf: 'default', backend: 'conda' }
-          - { os: 'windows-latest', tf: 'default', backend: 'conda' }
+          - { os: 'ubuntu-latest', tf: 'default', backend: 'conda', expected: 'works' }
+          - { os: 'macOS-latest', tf: 'default', backend: 'conda', expected: 'works' }
+          - { os: 'windows-latest', tf: 'default', backend: 'conda', expected: 'works' }
 
     runs-on: ${{ matrix.os }}
 
@@ -68,6 +80,7 @@ jobs:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
       GRETA_TF_VERSION: ${{ matrix.tf }}
       GRETA_BACKEND: ${{ matrix.backend }}
+      GRETA_EXPECTED: ${{ matrix.expected }}
       # reticulate's changelog names an inherited PowerShell 7 PSModulePath as
       # the cause of its Windows uv bootstrap failure. Clearing it did not fix
       # the job on CRAN reticulate, so this is kept as one known contributor
@@ -102,8 +115,54 @@ jobs:
         if: matrix.backend == 'conda'
         run: Rscript .github/scripts/install-conda.R
 
+      # a separate R session, for the reason set-deps.R explains
+      - name: Pin the dependency versions
+        if: matrix.tf != 'default'
+        run: Rscript .github/scripts/set-deps.R
+
+      # skipped when greta refused the pinned version: that cell has already
+      # written its row, and running here would install the *default* versions
+      # and report a passing row for a combination nobody asked about
       - name: Exercise greta
+        if: env.GRETA_SKIP_EXERCISE != 'true'
         run: Rscript .github/scripts/install-check.R
+
+      # always(), because a cell that resolved a stack and then failed is
+      # exactly the row worth reading in the summary table
+      - name: Upload this cell's result
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cell-${{ matrix.os }}-tf-${{ matrix.tf }}-${{ matrix.backend }}
+          path: cell-result.tsv
+          if-no-files-found: ignore
+          retention-days: 30
+
+  summarise:
+    name: which combinations work
+    needs: install-check
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          r-version: 'release'
+          use-public-rspm: true
+
+      - uses: actions/download-artifact@v4
+        with:
+          path: cell-results
+          pattern: cell-*
+          merge-multiple: false
+
+      - name: Write the summary table
+        env:
+          GRETA_EXPECTED_CELLS: '11'
+        run: Rscript .github/scripts/install-check-summary.R
 
   newer-tensorflow-available:
     name: newer TensorFlow released?

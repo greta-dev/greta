@@ -7,6 +7,39 @@
 #' @importFrom cli cli_process_start
 #' @importFrom cli cli_process_done
 #' @importFrom cli cli_process_failed
+# What to actually do about a failed load, which depends on where greta's Python
+# is coming from. A conda environment is the case worth special-casing: it is
+# never updated automatically, so an environment built against an older greta
+# keeps failing until it is rebuilt, and the generic "see the vignette" advice
+# leaves the user to work that out. The managed (uv) environment installs what
+# greta asks for on the next load, so there the useful advice is to restart.
+greta_load_failure_advice <- function(
+  backend = greta_stash$python_backend$backend,
+  deps_removed = isTRUE(greta_stash$deps_removed_this_session)
+) {
+  if (identical(backend, "conda")) {
+    return(c(
+      "i" = "Your Python comes from the {.val greta-env-tf2} conda \\
+      environment, which greta never updates on its own.",
+      "*" = "Recommended: switch to greta's managed environment. Run \\
+      {.run greta::greta_remove(\"env\")}, restart R, and greta installs \\
+      what it needs. Add {.run greta::greta_remove(\"preference\")} if you \\
+      have used {.fun greta_set_python}.",
+      "*" = "To stay on conda: run {.run greta::reinstall_greta_deps()}."
+    ))
+  }
+  # a removal earlier this session already gets a restart hint below, and that
+  # one names the actual cause, so a second one here would only dilute it
+  if (deps_removed) {
+    return(character())
+  }
+
+  c(
+    "i" = "If greta has just been updated, restart R: the managed environment \\
+    installs the versions greta asks for on the next load."
+  )
+}
+
 check_tf_version <- function(
   alert = c("none", "error", "warn", "message", "startup")
 ) {
@@ -57,10 +90,10 @@ check_tf_version <- function(
 
     cli_msg <- c(
       "x" = "greta could not load {.strong {failed}}.",
+      greta_load_failure_advice(),
       "i" = "Run {.run greta::greta_sitrep()} to check your installation.",
-      "i" = "For help, including offline or conda installs, see the \\
-      installation vignette ({.vignette greta::installation}), or install a \\
-      conda environment with {.fun install_greta_deps}."
+      "i" = "For offline and conda installs, see the installation vignette \\
+      ({.vignette greta::installation})."
     )
 
     # Say what went wrong, not only that something did. Without this every

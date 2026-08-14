@@ -31,9 +31,8 @@
 #'   specify python, TensorFlow (TF), and TensorFlow Probability (TFP) versions.
 #'   By default these are TF `r greta_deps_default$tf`, TFP
 #'   `r greta_deps_default$tfp`, and Python `r greta_deps_default$python`.
-#'   [greta_deps_spec()] checks that the TF version is one greta supports;
-#'   compatible TFP and Python versions are resolved at install time. See
-#'   ?[greta_deps_spec()] for more information. If you have stored a
+#'   [greta_deps_spec()] checks all three against the versions greta supports.
+#'   See ?[greta_deps_spec()] for more information. If you have stored a
 #'   preference with [greta_set_deps()], it is used when `deps` is not
 #'   supplied.
 #'
@@ -91,7 +90,6 @@
 #' install_greta_deps()
 #' }
 #' @importFrom reticulate py_available
-#' @importFrom tensorflow install_tensorflow
 #' @importFrom reticulate conda_create
 #' @importFrom reticulate conda_install
 #' @importFrom cli cli_alert_info
@@ -252,7 +250,7 @@ restart_or_not <- function(restart) {
 # To make it easier to maintain the canonical Python deps that greta supports:
 # this is the single source of truth for the uv py_require() pins
 # (greta_py_require_args()), the TF support ceiling
-# (check_greta_tf_supported()), and the roxygen for greta_deps_spec().
+# (check_greta_versions_supported()), and the roxygen for greta_deps_spec().
 # The greta_deps_spec() formals repeat these literal version numbers, so users
 # see actual values, not `greta_deps_default$tf` etc.
 # the consistency test in test_greta_deps_spec.R keeps them in agreement.
@@ -264,17 +262,19 @@ greta_deps_default <- list(
   tf = "2.21.0",
   tfp = "0.25.0",
   python = "3.12",
-  tf_min = "2.15.0",
-  tfp_min = "0.23.0",
+  # The floors are what the weekly install check actually passes on, not the
+  # oldest version that ever worked. See check_greta_versions_supported() for why the
+  # range is this narrow.
+  tf_min = "2.18.0",
+  tfp_min = "0.25.0",
+  # what greta_deps_spec() accepts; see check_greta_versions_supported()
   python_min = "3.9",
-  # python_min and python_range disagree on purpose, because they answer
-  # different questions. python_min is the oldest Python greta_sitrep() will
-  # accept in an environment that already exists: someone running Python 3.9
-  # with TensorFlow 2.15 has a working setup, and warning them about it would be
-  # wrong. python_range is what greta asks uv to install now, so it has to be a
-  # Python the *pinned* TensorFlow publishes wheels for -- TensorFlow dropped
-  # cp39 at 2.21, and leaving the floor at 3.9 let uv resolve a Python that no
-  # TensorFlow would install against, which broke installation on Windows.
+  python_max = "3.12",
+  # A different question: what greta asks uv to install now, so its floor suits
+  # the *pinned* TensorFlow rather than the whole supported range. Leaving that
+  # floor at 3.9 let uv resolve a Python no TensorFlow would install against,
+  # which broke installation on Windows. Its ceiling tracks python_max, and
+  # test_greta_deps_spec.R is what holds the two together.
   python_range = ">=3.10,<=3.12"
 )
 
@@ -283,12 +283,23 @@ greta_deps_default <- list(
 #' A helper function for specifying versions of Tensorflow (TF), Tensorflow
 #' Probability (TFP), and Python. Defaulting to `r greta_deps_default$tf`,
 #' `r greta_deps_default$tfp`, and `r greta_deps_default$python`, respectively.
-#' greta checks it supports the TF version (versions newer than greta has been
-#' tested against are rejected); compatible TFP and Python versions are resolved
-#' at install time by uv (or, for a conda environment, by conda/pip). greta
-#' checks a range of TensorFlow versions weekly; open the most recent run from
-#' <https://github.com/greta-dev/greta/actions/workflows/install-check.yaml>
-#' to see which combinations were tried and what each resolved to.
+#'
+#' @section Supported versions:
+#'
+#' TensorFlow `r greta_deps_default$tf_min` to `r greta_deps_default$tf`, with
+#' TensorFlow Probability fixed at `r greta_deps_default$tfp`. Anything else is
+#' rejected, for either of them.
+#'
+#' Python `r greta_deps_default$python_min` to `r greta_deps_default$python_max`
+#' is accepted, which is what some supported TensorFlow can use. Which of them
+#' work with the TensorFlow you picked is narrower, and left to the resolver:
+#' TensorFlow `r greta_deps_default$tf` is not built for Python
+#' `r greta_deps_default$python_min`, so a combination greta accepts here can
+#' still fail at install time.
+#'
+#' For why the range is this narrow, and why TensorFlow Probability is not a
+#' choice, see the "I need specific dependency versions" section of
+#' `vignette("installation", package = "greta")`.
 #'
 #' Calling `greta_deps_spec()` with no arguments returns greta's current
 #' default (recommended) versions, and is the supported way to query them -
@@ -307,21 +318,20 @@ greta_deps_default <- list(
 #'
 #' @examples
 #' greta_deps_spec()
-#' greta_deps_spec(tf_version = "2.15.1")
-#' greta_deps_spec(tf_version = "2.15.0")
-#' greta_deps_spec(tf_version = "2.15.1", tfp_version = "0.23.0")
-#' greta_deps_spec(tf_version = "2.15.0", tfp_version = "0.23.0")
-#' greta_deps_spec(tf_version = "2.15.1", python_version = "3.10")
-#' greta_deps_spec(tf_version = "2.15.0", python_version = "3.10")
+#' # every combination below is one the weekly install check passes on
+#' greta_deps_spec(tf_version = "2.18.0")
+#' greta_deps_spec(tf_version = "2.19.0")
+#' greta_deps_spec(tf_version = "2.20.0")
 #' greta_deps_spec(
-#'   tf_version = "2.14.0",
-#'   tfp_version = "0.22.1",
-#'   python_version = "3.10"
-#'   )
-#' # this will fail: greta has not been tested above the version it pins
+#'   tf_version = "2.19.0",
+#'   tfp_version = "0.25.0",
+#'   python_version = "3.12"
+#' )
+#' # these fail: greta supports TensorFlow 2.18.0 up to the version it pins
 #' \dontrun{
+#' greta_deps_spec(tf_version = "2.17.0")
 #' greta_deps_spec(tf_version = "2.99.0")
-#'   }
+#' }
 greta_deps_spec <- function(
   tf_version = "2.21.0",
   tfp_version = "0.25.0",
@@ -333,9 +343,9 @@ greta_deps_spec <- function(
     python_version = python_version
   )
 
-  # greta only constrains the TensorFlow version (see check_greta_tf_supported);
-  # compatible TFP and Python versions are left to uv (or conda) to resolve
-  check_greta_tf_supported(deps_obj)
+  # TensorFlow and TensorFlow Probability are both constrained; Python is left
+  # to uv (or conda) to resolve
+  check_greta_versions_supported(deps_obj)
 
   deps_obj
 }
@@ -443,26 +453,82 @@ greta_deps_receipt <- function() {
   )
 }
 
-# greta supports TensorFlow only up to the version in greta_deps_default$tf, the
-# newest version greta is tested against. This is the only version constraint
-# greta enforces itself; compatible TensorFlow Probability and Python versions
-# are resolved by uv (or, for a conda environment, by conda/pip).
+# greta supports TensorFlow between greta_deps_default$tf_min and
+# greta_deps_default$tf, and the window is narrow because two constraints
+# compound:
+#
+#   * greta's optimisers use the Keras 3 API (tf$keras$optimizers$*), which
+#     ships with TensorFlow 2.16. Below that they cannot be constructed.
+#   * TensorFlow Probability has had no release since 0.25.0 (November 2024),
+#     and 0.25.0 is tested against TensorFlow 2.18.
+#
+# Leaving TFP unpinned is the obvious fix and does not work: its `tf` extra
+# asks only for `tensorflow>=2.16`, with no upper bound, so a resolver puts
+# TFP 0.25 next to TensorFlow 2.16 quite happily -- it installs, and only
+# fails on import. Checking here is what stops that costing a full download.
 
-check_greta_tf_supported <- function(deps, call = rlang::caller_env()) {
-  greta_tf_version_max <- greta_deps_default$tf
-  too_new <- numeric_version(deps$tf_version) >
-    numeric_version(greta_tf_version_max)
-  if (too_new) {
-    gh_issue <- "https://github.com/greta-dev/greta/issues/675"
+version_outside <- function(version, min, max) {
+  numeric_version(version) < numeric_version(min) ||
+    numeric_version(version) > numeric_version(max)
+}
+
+check_greta_versions_supported <- function(deps, call = rlang::caller_env()) {
+  tf_min <- greta_deps_default$tf_min
+  tf_max <- greta_deps_default$tf
+  tfp <- greta_deps_default$tfp
+  python_min <- greta_deps_default$python_min
+  python_max <- greta_deps_default$python_max
+
+  supported <- "{.pkg greta} supports TensorFlow {.val {tf_min}} to \\
+    {.val {tf_max}}, with TensorFlow Probability {.val {tfp}}."
+  see_vignette <- paste(
+    "the {.emph I need specific dependency versions} section of",
+    "{.vignette greta::installation}."
+  )
+
+  if (version_outside(deps$tf_version, tf_min, tf_max)) {
     cli::cli_abort(
       message = c(
-        "{.pkg greta} supports TensorFlow up to version \\
-        {.val {greta_tf_version_max}}.",
-        "x" = "The provided version was {.val {deps$tf_version}}.",
-        "i" = "Later versions have not been tested with greta; see \\
-        {.url {gh_issue}}.",
-        "i" = "greta resolves compatible TensorFlow Probability and Python \\
-        versions automatically."
+        supported,
+        "x" = "The TensorFlow version was {.val {deps$tf_version}}.",
+        "i" = paste(
+          "For more on the TensorFlow version range, see",
+          see_vignette
+        )
+      ),
+      call = call
+    )
+  }
+
+  # One supported version, checked against a constant rather than against a
+  # table of pairings: #675 removed the latter, and rightly -- greta_deps_tf_tfp
+  # went stale and started giving the wrong answer. A single constant cannot.
+  if (!identical(deps$tfp_version, tfp)) {
+    cli::cli_abort(
+      message = c(
+        supported,
+        "x" = "The TensorFlow Probability version was {.val {deps$tfp_version}}.",
+        "i" = paste(
+          "For why TensorFlow Probability is fixed, see",
+          see_vignette
+        )
+      ),
+      call = call
+    )
+  }
+
+  # Bounds what *any* supported TensorFlow can use, not what the one you picked
+  # can: Python 3.9 works with TensorFlow 2.18 to 2.20 but not with 2.21, and
+  # greta does not know which pairing you meant. The resolver rejects the
+  # pairing; this rejects a Python no supported TensorFlow builds against.
+  if (version_outside(deps$python_version, python_min, python_max)) {
+    cli::cli_abort(
+      message = c(
+        "{.pkg greta} supports Python {.val {python_min}} to {.val {python_max}}.",
+        "x" = "The Python version was {.val {deps$python_version}}.",
+        "i" = "Which of those work depends on the TensorFlow version: \\
+        TensorFlow {.val {tf_max}} is not built for Python {.val {python_min}}, \\
+        so the resolver may still reject a combination greta accepts here."
       ),
       call = call
     )

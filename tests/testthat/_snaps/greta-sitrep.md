@@ -7,15 +7,17 @@
     Condition
       Error in `check_tf_version()`:
       ! x greta could not load Python, TensorFlow, and TensorFlow Probability.
+      i If greta has just been updated, restart R: the managed environment installs the versions greta asks for on the next load.
       i Run `greta::greta_sitrep()` to check your installation.
-      i For help, including offline or conda installs, see the installation vignette (`vignette(greta::installation)`), or install a conda environment with `install_greta_deps()`.
+      i For offline and conda installs, see the installation vignette (`vignette(greta::installation)`).
       i What Python and uv reported is in `greta::open_greta_install_log()`.
 
 ---
 
     x greta could not load Python, TensorFlow, and TensorFlow Probability.
+    i If greta has just been updated, restart R: the managed environment installs the versions greta asks for on the next load.
     i Run `greta::greta_sitrep()` to check your installation.
-    i For help, including offline or conda installs, see the installation vignette (`vignette(greta::installation)`), or install a conda environment with `install_greta_deps()`.
+    i For offline and conda installs, see the installation vignette (`vignette(greta::installation)`).
 
 ---
 
@@ -23,8 +25,9 @@
       check_tf_version("message")
     Message
       x greta could not load Python, TensorFlow, and TensorFlow Probability.
+      i If greta has just been updated, restart R: the managed environment installs the versions greta asks for on the next load.
       i Run `greta::greta_sitrep()` to check your installation.
-      i For help, including offline or conda installs, see the installation vignette (`vignette(greta::installation)`), or install a conda environment with `install_greta_deps()`.
+      i For offline and conda installs, see the installation vignette (`vignette(greta::installation)`).
 
 # check_tf_version fails when tfp not available
 
@@ -37,44 +40,51 @@
     Condition
       Error in `check_tf_version()`:
       ! x greta could not load TensorFlow Probability.
+      i If greta has just been updated, restart R: the managed environment installs the versions greta asks for on the next load.
       i Run `greta::greta_sitrep()` to check your installation.
-      i For help, including offline or conda installs, see the installation vignette (`vignette(greta::installation)`), or install a conda environment with `install_greta_deps()`.
+      i For offline and conda installs, see the installation vignette (`vignette(greta::installation)`).
 
 # greta_sitrep warns when have_python, _tf, or _tfp is FALSE
 
     x greta could not load Python and TensorFlow.
+    i If greta has just been updated, restart R: the managed environment installs the versions greta asks for on the next load.
     i Run `greta::greta_sitrep()` to check your installation.
-    i For help, including offline or conda installs, see the installation vignette (`vignette(greta::installation)`), or install a conda environment with `install_greta_deps()`.
+    i For offline and conda installs, see the installation vignette (`vignette(greta::installation)`).
 
 ---
 
     x greta could not load Python, TensorFlow, and TensorFlow Probability.
+    i If greta has just been updated, restart R: the managed environment installs the versions greta asks for on the next load.
     i Run `greta::greta_sitrep()` to check your installation.
-    i For help, including offline or conda installs, see the installation vignette (`vignette(greta::installation)`), or install a conda environment with `install_greta_deps()`.
+    i For offline and conda installs, see the installation vignette (`vignette(greta::installation)`).
 
 ---
 
     x greta could not load TensorFlow.
+    i If greta has just been updated, restart R: the managed environment installs the versions greta asks for on the next load.
     i Run `greta::greta_sitrep()` to check your installation.
-    i For help, including offline or conda installs, see the installation vignette (`vignette(greta::installation)`), or install a conda environment with `install_greta_deps()`.
+    i For offline and conda installs, see the installation vignette (`vignette(greta::installation)`).
 
 ---
 
     x greta could not load Python and TensorFlow Probability.
+    i If greta has just been updated, restart R: the managed environment installs the versions greta asks for on the next load.
     i Run `greta::greta_sitrep()` to check your installation.
-    i For help, including offline or conda installs, see the installation vignette (`vignette(greta::installation)`), or install a conda environment with `install_greta_deps()`.
+    i For offline and conda installs, see the installation vignette (`vignette(greta::installation)`).
 
 ---
 
     x greta could not load Python and TensorFlow.
+    i If greta has just been updated, restart R: the managed environment installs the versions greta asks for on the next load.
     i Run `greta::greta_sitrep()` to check your installation.
-    i For help, including offline or conda installs, see the installation vignette (`vignette(greta::installation)`), or install a conda environment with `install_greta_deps()`.
+    i For offline and conda installs, see the installation vignette (`vignette(greta::installation)`).
 
 ---
 
     x greta could not load TensorFlow Probability.
+    i If greta has just been updated, restart R: the managed environment installs the versions greta asks for on the next load.
     i Run `greta::greta_sitrep()` to check your installation.
-    i For help, including offline or conda installs, see the installation vignette (`vignette(greta::installation)`), or install a conda environment with `install_greta_deps()`.
+    i For offline and conda installs, see the installation vignette (`vignette(greta::installation)`).
 
 ---
 
