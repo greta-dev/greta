@@ -10,11 +10,13 @@
   uv reported in the installation logfile, which you can read with
   [`open_greta_install_log()`](https://greta-dev.github.io/greta/dev/reference/open_greta_install_log.md)
   ([\#825](https://github.com/greta-dev/greta/issues/825)).
-- greta now uses the Keras 3 optimiser API and so works with TensorFlow
-  2.16 and later; the Keras 2 `tf.keras.optimizers.legacy` API it
-  previously used does not exist in Keras 3, where every one of greta’s
-  Keras optimisers would fail to construct
-  ([\#633](https://github.com/greta-dev/greta/issues/633)).
+- greta now uses the Keras 3 optimiser API, which is what lets it move
+  off the TensorFlow 2.15 ceiling it was previously capped at; the Keras
+  2 `tf.keras.optimizers.legacy` API it used before does not exist in
+  Keras 3, where every one of greta’s Keras optimisers would fail to
+  construct. Keras 3 arrives in TensorFlow 2.16, though the version
+  greta supports starts at 2.18 — see the bullet below on the supported
+  range ([\#633](https://github.com/greta-dev/greta/issues/633)).
 - greta’s default dependency versions are now TensorFlow 2.21.0,
   TensorFlow Probability 0.25.0, and Python 3.12, up from TensorFlow
   2.15.1, TensorFlow Probability 0.23.0, and Python 3.11
@@ -24,7 +26,7 @@
   the minimum Python version at 3.9 meant the installer could choose a
   Python that TensorFlow could not then be installed into, which broke
   installation on Windows. You can still use greta on Python 3.9 by
-  choosing TensorFlow 2.20 or earlier, with
+  choosing TensorFlow 2.18 to 2.20, with
   `greta_set_deps(greta_deps_spec(tf_version = "2.20.0", python_version = "3.9"))`,
   and
   [`greta_sitrep()`](https://greta-dev.github.io/greta/dev/reference/greta_sitrep.md)
@@ -67,10 +69,53 @@
   now defaults to a `learning_rate` of 0.1, up from 0.001, which was too
   small to reach the optimum of even a five-parameter model within 2000
   iterations ([\#633](https://github.com/greta-dev/greta/issues/633)).
+- greta supports TensorFlow 2.18.0 to 2.21.0, with TensorFlow
+  Probability fixed at 0.25.0. The documentation now states the range
+  rather than implying that all three versions are a free choice; the
+  installation vignette explains why the range is this narrow, and why
+  TensorFlow Probability is not really a choice
+  ([\#633](https://github.com/greta-dev/greta/issues/633),
+  [\#638](https://github.com/greta-dev/greta/issues/638)).
 - [`greta_deps_spec()`](https://greta-dev.github.io/greta/dev/reference/greta_deps_spec.md)
-  now accepts TensorFlow 2.16 and later, which ship Keras 3; it still
-  rejects versions newer than the one greta is tested against
-  ([\#633](https://github.com/greta-dev/greta/issues/633)).
+  now checks all three versions rather than only TensorFlow, and the
+  error names the supported range. TensorFlow must be 2.18.0 to 2.21.0,
+  TensorFlow Probability must be 0.25.0, and Python must be 3.9 to 3.12.
+  Previously an unsupported choice was accepted here and surfaced much
+  later, as a Python import error after a full install — TensorFlow 2.16
+  and 2.17, for instance, install without complaint and then cannot load
+  TensorFlow Probability. Which Pythons work with which TensorFlow is
+  narrower still, and left to the resolver
+  ([\#633](https://github.com/greta-dev/greta/issues/633),
+  [\#638](https://github.com/greta-dev/greta/issues/638)).
+- greta now checks the TensorFlow and TensorFlow Probability versions it
+  finds against the versions it actually needs, rather than against much
+  older floors of 2.9.0 and 0.15.0 that had not moved since before the
+  Keras 3 change. An existing `greta-env-tf2` conda environment built
+  for an older greta previously passed this check, loaded, and then
+  failed inside Keras; it now reports which version is installed and
+  which greta needs, at the point you first use greta
+  ([\#638](https://github.com/greta-dev/greta/issues/638),
+  [\#684](https://github.com/greta-dev/greta/issues/684)).
+- When greta cannot load its dependencies from a conda environment, the
+  error now says what to run: `greta_remove("env")` and a restart to
+  switch to greta’s managed environment, or
+  [`reinstall_greta_deps()`](https://greta-dev.github.io/greta/dev/reference/install_greta_deps.md)
+  to rebuild the conda one. Previously it pointed at
+  [`install_greta_deps()`](https://greta-dev.github.io/greta/dev/reference/install_greta_deps.md),
+  which creates an environment rather than replacing an existing one
+  ([\#684](https://github.com/greta-dev/greta/issues/684)).
+- `install_tensorflow()` is no longer re-exported by greta. It was
+  [`tensorflow::install_tensorflow()`](https://rdrr.io/pkg/tensorflow/man/install_tensorflow.html)
+  under greta’s name, and it bypasses every version check greta makes,
+  so it could install a TensorFlow that greta then refuses. Call
+  [`tensorflow::install_tensorflow()`](https://rdrr.io/pkg/tensorflow/man/install_tensorflow.html)
+  directly if you need it, or use
+  [`install_greta_deps()`](https://greta-dev.github.io/greta/dev/reference/install_greta_deps.md)
+  ([\#638](https://github.com/greta-dev/greta/issues/638)).
+- The weekly install check now ends with a single table of every
+  combination it tried and what each resolved to, instead of one block
+  per job, so the versions that work can be read off a run at a glance
+  ([\#638](https://github.com/greta-dev/greta/issues/638)).
 - [`lkj_correlation()`](https://greta-dev.github.io/greta/dev/reference/distributions.md)
   and
   [`wishart()`](https://greta-dev.github.io/greta/dev/reference/distributions.md)

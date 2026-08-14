@@ -332,15 +332,63 @@ else provisioned.</p>
 <p>Build a version choice with <code><a href="../reference/greta_deps_spec.html">greta_deps_spec()</a></code>:</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/greta_deps_spec.html">greta_deps_spec</a></span><span class="op">(</span></span>
-<span>  tf_version <span class="op">=</span> <span class="st">"2.15.0"</span>,</span>
-<span>  tfp_version <span class="op">=</span> <span class="st">"0.23.0"</span>,</span>
-<span>  python_version <span class="op">=</span> <span class="st">"3.10"</span></span>
+<span>  tf_version <span class="op">=</span> <span class="st">"2.19.0"</span>,</span>
+<span>  tfp_version <span class="op">=</span> <span class="st">"0.25.0"</span>,</span>
+<span>  python_version <span class="op">=</span> <span class="st">"3.12"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<p><code><a href="../reference/greta_deps_spec.html">greta_deps_spec()</a></code> checks that the TensorFlow version is
-one greta supports. Compatible TFP and Python versions are left to uv
-(or conda) to work out at install time, so an incompatible combination
-shows up as a resolver error during installation rather than being
-rejected up front.</p>
+<div class="section level4">
+<h4 id="what-you-can-actually-choose">What you can actually choose<a class="anchor" aria-label="anchor" href="#what-you-can-actually-choose"></a>
+</h4>
+<p>The three arguments look like three free choices. Only one of them
+really is.</p>
+<p><strong>TensorFlow is a genuine choice</strong>, within a supported
+range. Pick outside it and <code><a href="../reference/greta_deps_spec.html">greta_deps_spec()</a></code> says so, and
+says what the range is:</p>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/greta_deps_spec.html">greta_deps_spec</a></span><span class="op">(</span>tf_version <span class="op">=</span> <span class="st">"2.16.0"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #BBBB00; font-weight: bold;">Error</span><span style="font-weight: bold;"> in `greta_deps_spec()`:</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> <span style="color: #0000BB;">greta</span> supports TensorFlow <span style="color: #0000BB;">"2.18.0"</span> to <span style="color: #0000BB;">"2.21.0"</span>, with TensorFlow</span></span>
+<span><span class="co">#&gt;   Probability <span style="color: #0000BB;">"0.25.0"</span>.</span></span>
+<span><span class="co">#&gt; <span style="color: #BB0000;">✖</span> The TensorFlow version was <span style="color: #0000BB;">"2.16.0"</span>.</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> For more on the TensorFlow version range, see the <span style="font-style: italic;">I need specific dependency</span></span></span>
+<span><span class="co">#&gt;   <span style="font-style: italic;">versions</span> section of `vignette(greta::installation)`.</span></span></code></pre></div>
+<p>The usual reason to choose an older TensorFlow is Python: TensorFlow
+2.21 has no Python 3.9 wheels, so pick 2.20 or earlier if you are stuck
+on 3.9.</p>
+<p><strong>Python 3.9 to 3.12 is accepted</strong>, which is the range
+some supported TensorFlow can use. Which of them work with the
+TensorFlow you picked is narrower and left to the resolver – TensorFlow
+2.21 is not built for Python 3.9 – so a combination greta accepts can
+still fail at install time. Left to itself greta asks for Python 3.10 to
+3.12, which suits the pinned TensorFlow.</p>
+<p><strong>TensorFlow Probability is not a choice.</strong> There is one
+release that works with the supported TensorFlow range, it is the
+default, and anything else is rejected. Older TFP releases pair with
+TensorFlow versions greta no longer supports – 0.24.0 with TensorFlow
+2.16, 0.23.0 with 2.15 – so the argument exists for completeness rather
+than for use.</p>
+<div class="section level5">
+<h5 id="tensorflow-2-16-and-2-17-cannot-be-used">TensorFlow 2.16 and 2.17 cannot be used<a class="anchor" aria-label="anchor" href="#tensorflow-2-16-and-2-17-cannot-be-used"></a>
+</h5>
+<p>They are rejected, and there is no way to opt in. Anything below
+TensorFlow 2.18 is refused when you build the spec, before anything is
+downloaded – which is what the error above shows.</p>
+<p><strong>The reason is TensorFlow Probability.</strong> Its most
+recent release is 0.25.0, from November 2024, and that release is tested
+against TensorFlow 2.18. On 2.16 or 2.17 it <em>installs</em> perfectly
+well – its metadata asks only for <code>tensorflow&gt;=2.16</code>, with
+no upper bound – and then fails to import when greta tries to use it.
+Refusing up front is what stops you finding that out after a long
+install.</p>
+<p>Pairing 2.16 with the older TensorFlow Probability that suits it
+(0.24.0) is not supported either: greta is not tested against it, and
+greta’s own optimisers need the Keras 3 API, which only arrives in
+TensorFlow 2.16 in the first place. The supported combination is the one
+greta ships.</p>
+<p>If you would rather see this than take our word for it, every
+combination greta tries each week is published with what it resolved to
+and whether it worked – including 2.16 and 2.17, recorded as failures
+with their reason: <a href="https://github.com/greta-dev/greta/actions/workflows/install-check.yaml" class="external-link uri">https://github.com/greta-dev/greta/actions/workflows/install-check.yaml</a>.</p>
 <p>greta checks a range of TensorFlow versions every week, on Linux,
 macOS and Windows. Each run lists the combinations it tried and reports
 the Python, TensorFlow and TensorFlow Probability versions each one
@@ -350,12 +398,12 @@ resolved to. Open the most recent run from <a href="https://github.com/greta-dev
 the managed (uv) environment (installed on the next load) and
 <code><a href="../reference/install_greta_deps.html">install_greta_deps()</a></code> (as its default
 <code>deps</code>):</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/greta_set_deps.html">greta_set_deps</a></span><span class="op">(</span></span>
 <span>  <span class="fu"><a href="../reference/greta_deps_spec.html">greta_deps_spec</a></span><span class="op">(</span></span>
-<span>    tf_version <span class="op">=</span> <span class="st">"2.14.0"</span>,</span>
-<span>    tfp_version <span class="op">=</span> <span class="st">"0.22.1"</span>,</span>
-<span>    python_version <span class="op">=</span> <span class="st">"3.10"</span></span>
+<span>    tf_version <span class="op">=</span> <span class="st">"2.19.0"</span>,</span>
+<span>    tfp_version <span class="op">=</span> <span class="st">"0.25.0"</span>,</span>
+<span>    python_version <span class="op">=</span> <span class="st">"3.12"</span></span>
 <span>  <span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span></span>
@@ -365,6 +413,8 @@ the managed (uv) environment (installed on the next load) and
 take effect on the next restart – see <a href="#i-want-the-conda-workflow">I want the conda workflow</a> if
 you’re building a conda environment, or just restart R if you’re using
 the managed (uv) environment.</p>
+</div>
+</div>
 </div>
 <div class="section level3">
 <h3 id="i-want-the-conda-workflow">I want the conda workflow<a class="anchor" aria-label="anchor" href="#i-want-the-conda-workflow"></a>
@@ -383,12 +433,12 @@ Probability into it. By default it uses the same versions as the managed
 environment (TensorFlow 2.21.0, TensorFlow Probability 0.25.0, Python
 3.12), or your stored <code><a href="../reference/greta_set_deps.html">greta_set_deps()</a></code> choice if you’ve
 made one:</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/install_greta_deps.html">install_greta_deps</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p>Follow any prompts, then <strong>restart R</strong>. To make greta
 use this environment, set it as your preference (then restart R
 again):</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/greta_set_python.html">greta_set_python</a></span><span class="op">(</span><span class="st">"conda"</span><span class="op">)</span></span></code></pre></div>
 <p>Using a conda environment isolates these exact Python modules from
 other Python installations, so only greta sees them. This avoids a class
@@ -442,7 +492,7 @@ it will use after you restart R – run <code><a href="../reference/greta_sitrep
 <p>You can switch environments at any time with
 <code><a href="../reference/greta_set_python.html">greta_set_python()</a></code>, then <strong>restart R</strong>. Each
 call reports what greta will resolve to on its next load:</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># use the managed (uv) environment (the default)</span></span>
 <span><span class="fu"><a href="../reference/greta_set_python.html">greta_set_python</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co"># use the "greta-env-tf2" conda environment</span></span>
@@ -457,7 +507,7 @@ sessions.</p>
 <p>For finer control, setting the <code>RETICULATE_PYTHON</code>
 environment variable to a path (e.g. in your <code>.Rprofile</code>)
 takes precedence over the stored preference:</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Sys.setenv.html" class="external-link">Sys.setenv</a></span><span class="op">(</span>RETICULATE_PYTHON <span class="op">=</span> <span class="st">"/path/to/your/python"</span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://greta-dev.github.io/greta/">greta</a></span><span class="op">)</span></span></code></pre></div>
 <p>Because <code>RETICULATE_PYTHON</code> takes precedence, a stored
@@ -475,7 +525,7 @@ reference.</p>
 <p>If your setup is in a confusing state and you just want a clean
 slate, use <code><a href="../reference/greta_remove.html">greta_remove()</a></code>. It takes a <code>what</code>
 argument to choose how much to remove:</p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># everything at once (the default) -- asks for confirmation once, then</span></span>
 <span><span class="co"># removes everything it finds</span></span>
 <span><span class="fu"><a href="../reference/greta_remove.html">greta_remove</a></span><span class="op">(</span><span class="op">)</span></span>
@@ -560,7 +610,7 @@ over</a> – then try <code><a href="../reference/install_greta_deps.html">insta
 <p><strong>The helpers above still don’t work.</strong> As a last
 resort, you can install the Python modules yourself into a conda
 environment:</p>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">reticulate</span><span class="fu">::</span><span class="fu"><a href="https://rstudio.github.io/reticulate/reference/install_miniconda.html" class="external-link">install_miniconda</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="fu">reticulate</span><span class="fu">::</span><span class="fu"><a href="https://rstudio.github.io/reticulate/reference/conda-tools.html" class="external-link">conda_create</a></span><span class="op">(</span></span>
 <span>  envname <span class="op">=</span> <span class="st">"greta-env-tf2"</span>,</span>

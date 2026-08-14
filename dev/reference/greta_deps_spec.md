@@ -2,13 +2,7 @@
 
 A helper function for specifying versions of Tensorflow (TF), Tensorflow
 Probability (TFP), and Python. Defaulting to 2.21.0, 0.25.0, and 3.12,
-respectively. greta checks it supports the TF version (versions newer
-than greta has been tested against are rejected); compatible TFP and
-Python versions are resolved at install time by uv (or, for a conda
-environment, by conda/pip). greta checks a range of TensorFlow versions
-weekly; open the most recent run from
-<https://github.com/greta-dev/greta/actions/workflows/install-check.yaml>
-to see which combinations were tried and what each resolved to.
+respectively.
 
 ## Usage
 
@@ -41,7 +35,19 @@ greta_deps_spec(
 
 data frame of valid dependencies
 
-## Details
+## Supported versions
+
+TensorFlow 2.18.0 to 2.21.0, with TensorFlow Probability fixed at
+0.25.0. Anything else is rejected, for either of them.
+
+Python 3.9 to 3.12 is accepted, which is what some supported TensorFlow
+can use. Which of them work with the TensorFlow you picked is narrower,
+and left to the resolver: TensorFlow 2.21.0 is not built for Python 3.9,
+so a combination greta accepts here can still fail at install time.
+
+For why the range is this narrow, and why TensorFlow Probability is not
+a choice, see the "I need specific dependency versions" section of
+[`vignette("installation", package = "greta")`](https://greta-dev.github.io/greta/dev/articles/installation.md).
 
 Calling `greta_deps_spec()` with no arguments returns greta's current
 default (recommended) versions, and is the supported way to query them -
@@ -54,33 +60,26 @@ version.
 greta_deps_spec()
 #>   tf_version tfp_version python_version
 #> 1     2.21.0      0.25.0           3.12
-greta_deps_spec(tf_version = "2.15.1")
+# every combination below is one the weekly install check passes on
+greta_deps_spec(tf_version = "2.18.0")
 #>   tf_version tfp_version python_version
-#> 1     2.15.1      0.25.0           3.12
-greta_deps_spec(tf_version = "2.15.0")
+#> 1     2.18.0      0.25.0           3.12
+greta_deps_spec(tf_version = "2.19.0")
 #>   tf_version tfp_version python_version
-#> 1     2.15.0      0.25.0           3.12
-greta_deps_spec(tf_version = "2.15.1", tfp_version = "0.23.0")
+#> 1     2.19.0      0.25.0           3.12
+greta_deps_spec(tf_version = "2.20.0")
 #>   tf_version tfp_version python_version
-#> 1     2.15.1      0.23.0           3.12
-greta_deps_spec(tf_version = "2.15.0", tfp_version = "0.23.0")
-#>   tf_version tfp_version python_version
-#> 1     2.15.0      0.23.0           3.12
-greta_deps_spec(tf_version = "2.15.1", python_version = "3.10")
-#>   tf_version tfp_version python_version
-#> 1     2.15.1      0.25.0           3.10
-greta_deps_spec(tf_version = "2.15.0", python_version = "3.10")
-#>   tf_version tfp_version python_version
-#> 1     2.15.0      0.25.0           3.10
+#> 1     2.20.0      0.25.0           3.12
 greta_deps_spec(
-  tf_version = "2.14.0",
-  tfp_version = "0.22.1",
-  python_version = "3.10"
-  )
+  tf_version = "2.19.0",
+  tfp_version = "0.25.0",
+  python_version = "3.12"
+)
 #>   tf_version tfp_version python_version
-#> 1     2.14.0      0.22.1           3.10
-# this will fail: greta has not been tested above the version it pins
+#> 1     2.19.0      0.25.0           3.12
+# these fail: greta supports TensorFlow 2.18.0 up to the version it pins
 if (FALSE) { # \dontrun{
+greta_deps_spec(tf_version = "2.17.0")
 greta_deps_spec(tf_version = "2.99.0")
-  } # }
+} # }
 ```

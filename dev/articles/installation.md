@@ -288,17 +288,74 @@ Build a version choice with
 ``` r
 
 greta_deps_spec(
-  tf_version = "2.15.0",
-  tfp_version = "0.23.0",
-  python_version = "3.10"
+  tf_version = "2.19.0",
+  tfp_version = "0.25.0",
+  python_version = "3.12"
 )
 ```
 
+#### What you can actually choose
+
+The three arguments look like three free choices. Only one of them
+really is.
+
+**TensorFlow is a genuine choice**, within a supported range. Pick
+outside it and
 [`greta_deps_spec()`](https://greta-dev.github.io/greta/dev/reference/greta_deps_spec.md)
-checks that the TensorFlow version is one greta supports. Compatible TFP
-and Python versions are left to uv (or conda) to work out at install
-time, so an incompatible combination shows up as a resolver error during
-installation rather than being rejected up front.
+says so, and says what the range is:
+
+``` r
+
+greta_deps_spec(tf_version = "2.16.0")
+#> Error in `greta_deps_spec()`:
+#> ! greta supports TensorFlow "2.18.0" to "2.21.0", with TensorFlow
+#>   Probability "0.25.0".
+#> ✖ The TensorFlow version was "2.16.0".
+#> ℹ For more on the TensorFlow version range, see the I need specific dependency
+#>   versions section of `vignette(greta::installation)`.
+```
+
+The usual reason to choose an older TensorFlow is Python: TensorFlow
+2.21 has no Python 3.9 wheels, so pick 2.20 or earlier if you are stuck
+on 3.9.
+
+**Python 3.9 to 3.12 is accepted**, which is the range some supported
+TensorFlow can use. Which of them work with the TensorFlow you picked is
+narrower and left to the resolver – TensorFlow 2.21 is not built for
+Python 3.9 – so a combination greta accepts can still fail at install
+time. Left to itself greta asks for Python 3.10 to 3.12, which suits the
+pinned TensorFlow.
+
+**TensorFlow Probability is not a choice.** There is one release that
+works with the supported TensorFlow range, it is the default, and
+anything else is rejected. Older TFP releases pair with TensorFlow
+versions greta no longer supports – 0.24.0 with TensorFlow 2.16, 0.23.0
+with 2.15 – so the argument exists for completeness rather than for use.
+
+##### TensorFlow 2.16 and 2.17 cannot be used
+
+They are rejected, and there is no way to opt in. Anything below
+TensorFlow 2.18 is refused when you build the spec, before anything is
+downloaded – which is what the error above shows.
+
+**The reason is TensorFlow Probability.** Its most recent release is
+0.25.0, from November 2024, and that release is tested against
+TensorFlow 2.18. On 2.16 or 2.17 it *installs* perfectly well – its
+metadata asks only for `tensorflow>=2.16`, with no upper bound – and
+then fails to import when greta tries to use it. Refusing up front is
+what stops you finding that out after a long install.
+
+Pairing 2.16 with the older TensorFlow Probability that suits it
+(0.24.0) is not supported either: greta is not tested against it, and
+greta’s own optimisers need the Keras 3 API, which only arrives in
+TensorFlow 2.16 in the first place. The supported combination is the one
+greta ships.
+
+If you would rather see this than take our word for it, every
+combination greta tries each week is published with what it resolved to
+and whether it worked – including 2.16 and 2.17, recorded as failures
+with their reason:
+<https://github.com/greta-dev/greta/actions/workflows/install-check.yaml>.
 
 greta checks a range of TensorFlow versions every week, on Linux, macOS
 and Windows. Each run lists the combinations it tried and reports the
@@ -317,9 +374,9 @@ The stored versions are then used by both the managed (uv) environment
 
 greta_set_deps(
   greta_deps_spec(
-    tf_version = "2.14.0",
-    tfp_version = "0.22.1",
-    python_version = "3.10"
+    tf_version = "2.19.0",
+    tfp_version = "0.25.0",
+    python_version = "3.12"
   )
 )
 

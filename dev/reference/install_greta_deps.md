@@ -36,8 +36,7 @@ reinstall_greta_deps(
   (TFP) versions. By default these are TF 2.21.0, TFP 0.25.0, and Python
   3.12.
   [`greta_deps_spec()`](https://greta-dev.github.io/greta/dev/reference/greta_deps_spec.md)
-  checks that the TF version is one greta supports; compatible TFP and
-  Python versions are resolved at install time. See
+  checks all three against the versions greta supports. See
   ?[`greta_deps_spec()`](https://greta-dev.github.io/greta/dev/reference/greta_deps_spec.md)
   for more information. If you have stored a preference with
   [`greta_set_deps()`](https://greta-dev.github.io/greta/dev/reference/greta_set_deps.md),
