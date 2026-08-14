@@ -32,12 +32,18 @@ Probability (TFP), and Python. Defaulting to 2.21.0,
 
 
 TensorFlow 2.18.0 to 2.21.0, with
-TensorFlow Probability fixed at 0.25.0. A TensorFlow
-version outside that range is rejected. Python is passed to the resolver
-and not checked.
+TensorFlow Probability fixed at 0.25.0. Anything else is
+rejected, for either of them.
 
-For why the range is this narrow, and why TensorFlow Probability is not
-really a choice, see the "I need specific dependency versions" section of
+Python 3.9 to 3.12
+is accepted, which is what some supported TensorFlow can use. Which of them
+work with the TensorFlow you picked is narrower, and left to the resolver:
+TensorFlow 2.21.0 is not built for Python
+3.9, so a combination greta accepts here can
+still fail at install time.
+
+For why the range is this narrow, and why TensorFlow Probability is not a
+choice, see the "I need specific dependency versions" section of
 \code{vignette("installation", package = "greta")}.
 
 Calling \code{greta_deps_spec()} with no arguments returns greta's current

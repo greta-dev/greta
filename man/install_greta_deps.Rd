@@ -24,9 +24,8 @@ reinstall_greta_deps(
 specify python, TensorFlow (TF), and TensorFlow Probability (TFP) versions.
 By default these are TF 2.21.0, TFP
 0.25.0, and Python 3.12.
-\code{\link[=greta_deps_spec]{greta_deps_spec()}} checks that the TF version is one greta supports;
-compatible TFP and Python versions are resolved at install time. See
-?\code{\link[=greta_deps_spec]{greta_deps_spec()}} for more information. If you have stored a
+\code{\link[=greta_deps_spec]{greta_deps_spec()}} checks all three against the versions greta supports.
+See ?\code{\link[=greta_deps_spec]{greta_deps_spec()}} for more information. If you have stored a
 preference with \code{\link[=greta_set_deps]{greta_set_deps()}}, it is used when \code{deps} is not
 supplied.}
 

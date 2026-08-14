@@ -97,7 +97,9 @@ run_cell <- function() {
     tf_version
   }
   minor_series <- function(x) sub("\\.[^.]*$", "", x)
-  if (!identical(minor_series(cell$tf), minor_series(expected_tf))) {
+  wrong_series <- !identical(minor_series(cell$tf), minor_series(expected_tf))
+
+  if (wrong_series) {
     cell$outcome <- "wrong version installed"
     stop(
       "asked for TensorFlow ",

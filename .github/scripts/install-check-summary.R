@@ -54,6 +54,15 @@ rows <- rows[order(rows$os, rows$backend, numeric_version(sort_key)), ]
 
 worked <- rows$outcome == "works"
 
+# A cell that never loaded Python has an outcome but nothing to say about why,
+# so the reason is appended only when there is one.
+failure_note <- ifelse(
+  nzchar(rows$detail),
+  paste0("**", rows$outcome, "** -- ", rows$detail),
+  paste0("**", rows$outcome, "**")
+)
+result <- ifelse(worked, "works", failure_note)
+
 lines <- c(
   "## Which combinations work",
   "",
@@ -81,15 +90,7 @@ lines <- c(
     rows$tfp,
     rows$python,
     rows$tf_keras,
-    ifelse(
-      worked,
-      "works",
-      ifelse(
-        nzchar(rows$detail),
-        paste0("**", rows$outcome, "** -- ", rows$detail),
-        paste0("**", rows$outcome, "**")
-      )
-    )
+    result
   ),
   "",
   sprintf(

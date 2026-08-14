@@ -279,14 +279,17 @@ greta_deps_spec(tf_version = "2.16.0")
 The usual reason to choose an older TensorFlow is Python: TensorFlow 2.21 has
 no Python 3.9 wheels, so pick 2.20 or earlier if you are stuck on 3.9.
 
-**Python is passed straight to the resolver.** greta does not check it.
+**Python 3.9 to 3.12 is accepted**, which is the range some supported
+TensorFlow can use. Which of them work with the TensorFlow you picked is
+narrower and left to the resolver -- TensorFlow 2.21 is not built for Python
+3.9 -- so a combination greta accepts can still fail at install time. Left to
+itself greta asks for Python 3.10 to 3.12, which suits the pinned TensorFlow.
 
-**TensorFlow Probability is settable, but in practice fixed.** There is one
-release that works with the supported TensorFlow range, and it is the default.
-Older TFP releases pair with TensorFlow versions greta no longer supports --
-0.24.0 with TensorFlow 2.16, 0.23.0 with 2.15 -- so changing `tfp_version` is
-unlikely to give you a working environment. greta does not check it, so an
-unworkable choice surfaces as a resolver or import error at install time.
+**TensorFlow Probability is not a choice.** There is one release that works
+with the supported TensorFlow range, it is the default, and anything else is
+rejected. Older TFP releases pair with TensorFlow versions greta no longer
+supports -- 0.24.0 with TensorFlow 2.16, 0.23.0 with 2.15 -- so the argument
+exists for completeness rather than for use.
 
 #### TensorFlow 2.16 and 2.17 cannot be used
 

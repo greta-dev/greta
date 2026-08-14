@@ -472,17 +472,17 @@ test_that("greta_set_deps() round-trips through the stored file", {
   expect_null(get_greta_stored_deps())
 
   # a supported triple: this is about the round trip, not about the versions,
-  # and greta_deps_spec() enforces the supported TensorFlow range
+  # and greta_deps_spec() enforces which are supported
   deps <- greta_deps_spec(
     tf_version = "2.19.0",
-    tfp_version = "0.24.0",
+    tfp_version = greta_deps_default$tfp,
     python_version = "3.11"
   )
   suppressMessages(greta_set_deps(deps))
   stored <- get_greta_stored_deps()
   expect_s3_class(stored, "greta_deps_spec")
   expect_equal(stored$tf_version, "2.19.0")
-  expect_equal(stored$tfp_version, "0.24.0")
+  expect_equal(stored$tfp_version, greta_deps_default$tfp)
   expect_equal(stored$python_version, "3.11")
 })
 
