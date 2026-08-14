@@ -1,0 +1,60 @@
+# Do greta's samplers still sample from the distribution they should?
+#
+# test_posteriors_geweke.R compares hmc(), rwmh() and slice() against draws
+# taken the long way round, by Gibbs sampling the posterior and the data
+# generating function. It is the only check that catches a sampler drifting
+# from its target: TensorFlow Probability 0.25.0 silently changed how
+# lkj_correlation() and wishart() draw, and nothing else in the suite noticed.
+#
+# It is not in the ordinary suite because it takes roughly half an hour --
+# hmc 11 min, rwmh 8 min, slice 14 min at niter = 2000 -- and longer here. The
+# cost is the loop rebuilding the log prob tf_function once per iteration; see
+# #739. The other six test_posteriors_*.R files are cheap and run on every pull
+# request through R-CMD-check, so this is the only one that needs a schedule.
+#
+# Scheduled rather than triggered by pull requests, because half an hour on
+# every PR touching R/ is not worth the latency: sampler correctness moves
+# slowly, and a week is a short enough bisect. Tuesday, so a failure is waiting
+# at the start of a working week rather than over a weekend, and away from
+# install-check's Saturday run so two reds are never read as one problem.
+#
+# This is deliberately not a required check. The test compares p-values against
+# 0.005 per sampler, so across three samplers roughly one run in 70 fails by
+# chance -- under one a year. That is rare enough to be worth investigating and
+# too common to block a merge on.
+
+on:
+  schedule:
+    - cron: '0 5 * * Tue'
+  workflow_dispatch:
+
+name: geweke-checks
+
+jobs:
+  geweke-checks:
+    name: samplers sample from the right distribution
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      # quoted: the gate compares against the string "true", and an unquoted
+      # YAML boolean is a needless thing to have to reason about
+      GRETA_GEWEKE: 'true'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          r-version: 'release'
+          use-public-rspm: true
+
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          extra-packages: local::. any::devtools
+
+      # the same command release_bullets() puts on the release checklist, so
+      # what CI runs and what a maintainer runs by hand cannot drift apart
+      - name: Run the Geweke checks
+        run: Rscript -e 'devtools::test(filter = "posteriors_geweke")'

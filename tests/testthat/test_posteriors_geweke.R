@@ -1,9 +1,7 @@
-Sys.setenv("RELEASE_CANDIDATE" = "false")
-
 test_that("samplers pass geweke tests", {
   skip_if_not(check_tf_version())
 
-  skip_if_not_release()
+  skip_if_not_geweke()
 
   # nolint start
   # run geweke tests on this model:

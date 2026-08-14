@@ -650,12 +650,15 @@ compare_iid_samples <- function(
   testthat::expect_gte(test_result$p.value, p_value_threshold)
 }
 
-# is this a release candidate?
-skip_if_not_release <- function() {
-  if (identical(Sys.getenv("RELEASE_CANDIDATE"), "true")) {
+# Are the Geweke checks switched on? They rebuild the log prob tf_function once
+# per iteration, so they run in hours rather than minutes and cannot sit in the
+# ordinary suite. CI sets GRETA_GEWEKE, so nobody has to remember to; see
+# release_bullets() for running them by hand.
+skip_if_not_geweke <- function() {
+  if (identical(Sys.getenv("GRETA_GEWEKE"), "true")) {
     return(invisible(TRUE))
   }
-  skip("Not a Release Candidate")
+  skip("Geweke checks are off; set GRETA_GEWEKE=true to run them")
 }
 
 # run a geweke test on a greta model, providing: 'sampler' a greta sampler (e.g.
