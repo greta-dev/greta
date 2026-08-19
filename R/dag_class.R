@@ -108,7 +108,8 @@ dag_class <- R6Class(
     define_tf_trace_values_batch = function() {
       self$tf_trace_values_batch <- tensorflow::tf_function(
         f = self$define_trace_values_batch,
-        input_signature = self$free_state_signature()
+        input_signature = self$free_state_signature(),
+        jit_compile = self$compile
       )
     },
 
@@ -120,7 +121,8 @@ dag_class <- R6Class(
 
       self$tf_log_prob_function <- tensorflow::tf_function(
         f = self$generate_log_prob_function(),
-        input_signature = self$free_state_signature()
+        input_signature = self$free_state_signature(),
+        jit_compile = self$compile
       )
 
       # rebuilt from the new log-density function the next time it is used
@@ -136,7 +138,8 @@ dag_class <- R6Class(
       if (is.null(self$tf_log_prob_function_one_row)) {
         self$tf_log_prob_function_one_row <- tensorflow::tf_function(
           f = self$generate_log_prob_function(),
-          input_signature = self$free_state_signature(n_rows = 1L)
+          input_signature = self$free_state_signature(n_rows = 1L),
+          jit_compile = self$compile
         )
       }
       self$tf_log_prob_function_one_row(free_state)
