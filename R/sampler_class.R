@@ -483,8 +483,8 @@ sampler <- R6Class(
       dag <- self$model$dag
       tfe <- dag$tf_environment
 
-      # TF1/2 check seed
-      # how do TF2 and TFP use seeds?
+      # this stores the seed but nothing reads it, and sample_chain() below
+      # takes no seed argument: seeding is greta-dev/greta#285 and #427
       self$set_tf_seed()
 
       sampler_kernel <- self$define_tf_kernel(
