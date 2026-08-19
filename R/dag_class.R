@@ -43,7 +43,8 @@ dag_class <- R6Class(
 
     define_tf_trace_values_batch = function() {
       self$tf_trace_values_batch <- tensorflow::tf_function(
-        f = self$define_trace_values_batch
+        f = self$define_trace_values_batch,
+        jit_compile = self$compile
       )
     },
 
@@ -52,7 +53,8 @@ dag_class <- R6Class(
         # TF1/2 check
         # need to check in on all cases of `tensorflow::tf_function()`
         # as we are getting lots of warnings about retracting
-        f = self$generate_log_prob_function()
+        f = self$generate_log_prob_function(),
+        jit_compile = self$compile
       )
     },
 
