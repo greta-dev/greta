@@ -465,7 +465,9 @@ calculate_target_tensor_list <- function(
   target_nodes <- lapply(target, get_node)
   target_names_list <- lapply(target_nodes, dag$tf_name)
 
-  # under eager execution this leaves real values in tfe, so the tensors are
+  # one pass over one environment defines every target, so multiple targets are
+  # drawn from a single joint sample rather than sampled separately.
+  # Under eager execution this leaves real values in tfe, so the tensors are
   # read straight back out below and converted with as.array()
   dag$define_tf(target_nodes = target_nodes)
 

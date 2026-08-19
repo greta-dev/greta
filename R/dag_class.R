@@ -65,8 +65,9 @@ dag_class <- R6Class(
 
     # greta's own name table, not a TF1 graph: node_types.R assigns each tensor
     # under its tf_name and looks its parents up by name while a tf_function
-    # body is being assembled. The three places that do that assembly swap in a
-    # fresh environment and restore this one on exit.
+    # body is being assembled. The three assembly sites in this file swap in a
+    # fresh environment and restore this one on exit; calculate_target_tensor_list()
+    # does not - it builds into the live environment and leaves its tensors there.
     new_tf_environment = function() {
       self$tf_environment <- new.env()
       # vestigial TF1 feed_dict plumbing - written, never read:
@@ -305,10 +306,11 @@ dag_class <- R6Class(
     },
 
     define_tf = function(target_nodes = self$node_list) {
-      # all_sampling is the prior-sampling path, where calculate() has already
-      # set .batch_size from nsim. Belt-and-braces: with this check removed
-      # define_batch_size() still short-circuits on its own existence guard,
-      # and the suite stays green
+      # all_sampling is the prior-sampling path. calculate() is its only caller
+      # today and pre-sets .batch_size from nsim, so define_batch_size() would
+      # short-circuit anyway - but nothing enforces that precondition, and any
+      # all_sampling caller that did not pre-set it would hit
+      # tf$shape(free_state) with no free_state
       if (self$mode != "all_sampling") {
         self$define_batch_size()
       }

@@ -22,8 +22,14 @@ NULL
 #' @param diag_sd estimate of the posterior marginal standard deviations
 #'   (positive, will be tuned).
 #'
-#' @details For `hmc()`, the number of leapfrog steps at each iteration is
-#'   selected uniformly at random from between `Lmin` and `Lmax`.
+#' @details For `hmc()`, the number of leapfrog steps is selected uniformly at
+#'   random from between `Lmin` and `Lmax`. It is not redrawn at every
+#'   iteration: greta draws a new value each time it returns from TensorFlow.
+#'   During warmup that is roughly every 3 iterations, since tuning breaks the
+#'   run up that often; during sampling it is every `pb_update` iterations, or
+#'   once for the whole phase when `verbose = FALSE`. Setting
+#'   `one_by_one = TRUE` draws a new value every iteration. `pb_update`,
+#'   `verbose` and `one_by_one` are all arguments of [mcmc()].
 #'   `diag_sd` is used to rescale the parameter space to make it more
 #'   uniform, and make sampling more efficient.
 hmc <- function(Lmin = 5, Lmax = 10, epsilon = 0.1, diag_sd = 1) {

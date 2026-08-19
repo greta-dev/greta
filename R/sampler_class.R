@@ -515,6 +515,8 @@ sampler <- R6Class(
       # combine the sampler information with information on the sampler's tuning
       # parameters, and make into a dict
 
+      # write-only, see get_tf_data_list() in dag_class.R - this is not the
+      # .batch_size that node definition reads
       dag$set_tf_data_list(".batch_size", nrow(self$free_state))
 
       # run the sampler, handling numerical errors

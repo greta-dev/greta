@@ -921,14 +921,15 @@ wishart_distribution <- R6Class(
   "wishart_distribution",
   inherit = distribution_node,
   public = list(
-    # FALSE rather than NULL: it is the answer, not a placeholder waiting to be
-    # filled in - the parameter simply is not a cholesky factor.
-    # reset_target_flags() puts target_is_cholesky back to FALSE on
-    # redefinition, and every read is a bare if(), which NULL would error on
+    # FALSE rather than NULL throughout: it is the answer, not a placeholder -
+    # the parameter simply is not a cholesky factor. Every read is a bare if(),
+    # which NULL would error on.
+
     # set when defining the distribution
     sigma_is_cholesky = FALSE,
 
-    # set when defining the graph
+    # set when defining the graph, and put back to FALSE by
+    # reset_target_flags() when the target is redefined
     target_is_cholesky = FALSE,
     initialize = function(df, Sigma) {
       # nolint
