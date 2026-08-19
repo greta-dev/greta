@@ -483,8 +483,10 @@ sampler <- R6Class(
       dag <- self$model$dag
       tfe <- dag$tf_environment
 
-      # this stores the seed but nothing reads it, and sample_chain() below
-      # takes no seed argument: seeding is greta-dev/greta#285 and #427
+      # despite the name this sets no TF seed: it stashes self$seed in the tf
+      # environment as `rng_seed`, which nothing reads. sample_chain() below
+      # does take a `seed` argument, which is where seeding would have to go:
+      # see greta-dev/greta#285 and #427
       self$set_tf_seed()
 
       sampler_kernel <- self$define_tf_kernel(
@@ -500,10 +502,10 @@ sampler <- R6Class(
       # need to pass these arguments directly
 
       # define the whole draws tensor
-      # TF1/2 check
-      # `seed` arg now gets passed to `sample_chain`.
-      # Need to work out how to get sampler_batch() to run as a TF function.
-      # To do that we need to work out how to get the free state
+      # this now runs as a TF function: define_tf_evaluate_sample_batch()
+      # wraps define_tf_draws() in tf_function(), tracing free_state as a
+      # TensorSpec argument. it traces once, but each burst still returns to R
+      # for tuning: doing the warmup loop in TF is greta-dev/greta#547
 
       sampler_batch <- tfp$mcmc$sample_chain(
         num_results = tf$math$floordiv(sampler_burst_length, sampler_thin),
