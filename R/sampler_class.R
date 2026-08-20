@@ -66,8 +66,7 @@ sampler <- R6Class(
         self$parameters$diag_sd <- diag_sd
       }
 
-      # define the draws tensor on the tf graph
-      # define_tf_draws is now used in place of of run_burst
+      # wrapped in tf_function here so every burst reuses a single trace
       self$define_tf_evaluate_sample_batch()
     },
 
@@ -201,9 +200,6 @@ sampler <- R6Class(
 
         # relay between R and tensorflow in a burst to be cpu efficient
         for (burst in seq_along(burst_lengths)) {
-          # TF1/2 check todo?
-          # replace with define_tf_draws
-
           self$run_burst(n_samples = burst_lengths[burst])
           # align the free state back to the parameters we are tracing
           # TF1/2 check todo?
@@ -283,10 +279,6 @@ sampler <- R6Class(
         completed_iterations <- cumsum(burst_lengths)
 
         for (burst in seq_along(burst_lengths)) {
-          # so these bursts are R objects being passed through to python
-          # and how often to return them
-          # TF1/2 check todo
-          # replace with define_tf_draws
           self$run_burst(n_samples = burst_lengths[burst], thin = thin)
           # trace is it receiving the python
           self$trace()
@@ -501,12 +493,6 @@ sampler <- R6Class(
       # Need to understand if/how tf_function will re-run those values - might
       # need to pass these arguments directly
 
-      # define the whole draws tensor
-      # this now runs as a TF function: define_tf_evaluate_sample_batch()
-      # wraps define_tf_draws() in tf_function(), tracing free_state as a
-      # TensorSpec argument. it traces once, but each burst still returns to R
-      # for tuning: doing the warmup loop in TF is greta-dev/greta#547
-
       sampler_batch <- tfp$mcmc$sample_chain(
         num_results = tf$math$floordiv(sampler_burst_length, sampler_thin),
         current_state = free_state,
@@ -523,11 +509,8 @@ sampler <- R6Class(
       )
     },
 
-    # run a burst of the sampler
-    # TF1/2 check
-    # this will be removed in favour of the tf_function decorated
-    # define_tf_draws() function that takes in argument values
-    # sampler_burst_length and sampler_thin
+    # bursts break so that tuning and progress reporting can run in R between
+    # them; moving the loop itself into TF is greta-dev/greta#547
     run_burst = function(n_samples, thin = 1L) {
       dag <- self$model$dag
       tfe <- dag$tf_environment
