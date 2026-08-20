@@ -11,7 +11,6 @@ dag_class <- R6Class(
     target_nodes = list(),
     variables_without_free_state = list(),
     tf_environment = NA,
-    tf_graph = NA,
     tf_float = NA,
     n_cores = 0L,
     compile = NA,
@@ -29,9 +28,6 @@ dag_class <- R6Class(
       # find the nodes we care about
       self$target_nodes <- lapply(target_greta_arrays, get_node)
 
-      # set up the tf environment, with a graph
-      # TF1/2 check
-      # not sure if we need to build the new environment in eager mode?
       self$new_tf_environment()
 
       # store the performance control info
@@ -72,7 +68,6 @@ dag_class <- R6Class(
     # everything will be passed as functions?
     new_tf_environment = function() {
       self$tf_environment <- new.env()
-      self$tf_graph <- tf$Graph()
       self$tf_environment$all_forward_data_list <- list()
       self$tf_environment$all_sampling_data_list <- list()
       self$tf_environment$hybrid_data_list <- list()
