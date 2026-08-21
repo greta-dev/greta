@@ -44,10 +44,11 @@ dag_class <- R6Class(
     },
 
     define_tf_log_prob_function = function() {
+      # no input_signature, so this retraces once per distinct batch shape and
+      # then caches - bounded by how many chain counts a session uses, not by
+      # how often it is called. Measured, so it is not the source of the
+      # retracing warnings in greta-dev/greta#546
       self$tf_log_prob_function <- tensorflow::tf_function(
-        # TF1/2 check
-        # need to check in on all cases of `tensorflow::tf_function()`
-        # as we are getting lots of warnings about retracting
         f = self$generate_log_prob_function()
       )
     },
@@ -62,12 +63,14 @@ dag_class <- R6Class(
       self$tf_log_prob_function(free_state)$unadjusted
     },
 
-    # TF1/2 check
-    # built with TF
-    # Not sure if we need tensorflow environments in TF2, given that
-    # everything will be passed as functions?
+    # greta's own name table, not a TF1 graph: node_types.R assigns each tensor
+    # under its tf_name and looks its parents up by name while a tf_function
+    # body is being assembled. The three places that do that assembly swap in a
+    # fresh environment and restore this one on exit.
     new_tf_environment = function() {
       self$tf_environment <- new.env()
+      # vestigial TF1 feed_dict plumbing - written, never read:
+      # greta-dev/greta#739
       self$tf_environment$all_forward_data_list <- list()
       self$tf_environment$all_sampling_data_list <- list()
       self$tf_environment$hybrid_data_list <- list()
@@ -205,15 +208,13 @@ dag_class <- R6Class(
         hybrid = self$how_to_define_hybrid(node)
       )
     },
+    # the batch (chain) dimension, read while nodes are being defined:
+    # node_types.R tiles data up to it, tf_functions.R builds shapes from it.
+    # Threading it through as an argument instead of via the environment is the
+    # same change as greta-dev/greta#739.
     define_batch_size = function() {
-      # TF1/2 check?
-      # pretty sure `.batch_size` just now needs to be the input of a function
-      # I'm not even sure that .batch_size needs to be a function, it might
-      # just need to be the input to wherever it is used next?
-
-      ## NOTE: when calling `model` there is no `free_state` in `tf_environment`
-      ## Trying out something where the free state is set if there isn't one?
-
+      # calculate() sets this itself before defining the dag, so only compute it
+      # when nothing has
       if (!exists(".batch_size", envir = self$tf_environment)) {
         with(
           data = self$tf_environment,
@@ -303,19 +304,9 @@ dag_class <- R6Class(
       invisible(NULL)
     },
 
-    # TF1/2 check?
-    # I think we can probably remove this part of things? However I'm not sure
-    # if the "mode" part is going to be imporatnt here?
-    # define tf graph in environment; either for forward-mode computation from a
-    # free state variable, or for sampling
     define_tf = function(target_nodes = self$node_list) {
-      # define the free state variable
-      # TF1/2 check?
-      # pretty sure define_batch_size needs to be passed as an argument to
-      # whatever is above here...if define_tf even needs to exist?
-      # and I think we can remove define_batch_size since
-      # this should just be passed as an argument later?
-
+      # all_sampling is the prior-sampling path: calculate() has already set
+      # .batch_size from nsim, and there is no free_state to take a shape from
       if (self$mode != "all_sampling") {
         self$define_batch_size()
       }
