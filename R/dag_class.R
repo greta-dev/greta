@@ -305,8 +305,10 @@ dag_class <- R6Class(
     },
 
     define_tf = function(target_nodes = self$node_list) {
-      # all_sampling is the prior-sampling path: calculate() has already set
-      # .batch_size from nsim, and there is no free_state to take a shape from
+      # all_sampling is the prior-sampling path, where calculate() has already
+      # set .batch_size from nsim. Belt-and-braces: with this check removed
+      # define_batch_size() still short-circuits on its own existence guard,
+      # and the suite stays green
       if (self$mode != "all_sampling") {
         self$define_batch_size()
       }
@@ -582,6 +584,10 @@ dag_class <- R6Class(
 
       parameters
     },
+    # vestigial TF1 feed_dict plumbing. The lists are written by node_types.R
+    # and sampler_class.R and read by nothing - get_tf_data_list() has no
+    # callers in greta or in any extension package, and removing both writers
+    # leaves the test suite green. greta-dev/greta#739 to remove or repurpose.
     get_tf_data_list = function() {
       data_list_name <- glue::glue("{self$mode}_data_list")
       self$tf_environment[[data_list_name]]
@@ -617,8 +623,10 @@ dag_class <- R6Class(
         self$tf_name
       )
 
-      # TF1/2 check
-      # maybe remove onexit stuff?
+      # swap in a scratch environment for this trace, and put the old one back
+      # afterwards. The restore matters: without it, .batch_size and free_state
+      # from this trace stay on the dag, and define_batch_size()'s existence
+      # guard then short-circuits on a stale batch dimension
       tfe_old <- self$tf_environment
       on.exit(self$tf_environment <- tfe_old)
       tfe <- self$tf_environment <- new.env()
