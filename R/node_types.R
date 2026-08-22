@@ -40,23 +40,15 @@ data_node <- R6Class(
             shape = shape
           )
         } else {
-          # TF1/2 check
-          # We can pass tensors directly into ops and layers
-          # tf.function arguments do the job of placeholders
-          # or we can use tf$keras$Input ?
-          # unbatched_tensor <- tf$keras$Input(
-          # for data - find yourself so it can be substituted in
-          # we need to fetch the data from the DAG
-          # what is the TF2 method for casting data into a tensor
-          # we can probably just use `as_tensor`
+          # not a constant, so in principle substitutable - but still baked in
+          # at trace time. Swapping data without a rebuild is
+          # greta-dev/greta#739
           unbatched_tensor <- tensorflow::as_tensor(
             x = value,
             shape = shape,
             dtype = tf_float()
           )
-          # TF1/2 check
-          # note - we might not need this anymore as it was to do with
-          # stashing things for use in the feed_dict later
+          # write-only, see get_tf_data_list() in dag_class.R
           dag$set_tf_data_list(unbatched_name, value)
         }
 

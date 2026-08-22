@@ -11,7 +11,6 @@ dag_class <- R6Class(
     target_nodes = list(),
     variables_without_free_state = list(),
     tf_environment = NA,
-    tf_graph = NA,
     tf_float = NA,
     n_cores = 0L,
     compile = NA,
@@ -29,9 +28,6 @@ dag_class <- R6Class(
       # find the nodes we care about
       self$target_nodes <- lapply(target_greta_arrays, get_node)
 
-      # set up the tf environment, with a graph
-      # TF1/2 check
-      # not sure if we need to build the new environment in eager mode?
       self$new_tf_environment()
 
       # store the performance control info
@@ -48,10 +44,11 @@ dag_class <- R6Class(
     },
 
     define_tf_log_prob_function = function() {
+      # no input_signature, so this retraces once per distinct batch shape and
+      # then caches - bounded by how many chain counts a session uses, not by
+      # how often it is called. Measured, so it is not the source of the
+      # retracing warnings in greta-dev/greta#546
       self$tf_log_prob_function <- tensorflow::tf_function(
-        # TF1/2 check
-        # need to check in on all cases of `tensorflow::tf_function()`
-        # as we are getting lots of warnings about retracting
         f = self$generate_log_prob_function()
       )
     },
@@ -66,13 +63,15 @@ dag_class <- R6Class(
       self$tf_log_prob_function(free_state)$unadjusted
     },
 
-    # TF1/2 check
-    # built with TF
-    # Not sure if we need tensorflow environments in TF2, given that
-    # everything will be passed as functions?
+    # greta's own name table, not a TF1 graph: node_types.R assigns each tensor
+    # under its tf_name and looks its parents up by name while a tf_function
+    # body is being assembled. The three assembly sites in this file swap in a
+    # fresh environment and restore this one on exit; calculate_target_tensor_list()
+    # does not - it builds into the live environment and leaves its tensors there.
     new_tf_environment = function() {
       self$tf_environment <- new.env()
-      self$tf_graph <- tf$Graph()
+      # vestigial TF1 feed_dict plumbing - written, never read:
+      # greta-dev/greta#739
       self$tf_environment$all_forward_data_list <- list()
       self$tf_environment$all_sampling_data_list <- list()
       self$tf_environment$hybrid_data_list <- list()
@@ -210,15 +209,13 @@ dag_class <- R6Class(
         hybrid = self$how_to_define_hybrid(node)
       )
     },
+    # the batch (chain) dimension, read while nodes are being defined:
+    # node_types.R tiles data up to it, tf_functions.R builds shapes from it.
+    # Threading it through as an argument instead of via the environment is the
+    # same change as greta-dev/greta#739.
     define_batch_size = function() {
-      # TF1/2 check?
-      # pretty sure `.batch_size` just now needs to be the input of a function
-      # I'm not even sure that .batch_size needs to be a function, it might
-      # just need to be the input to wherever it is used next?
-
-      ## NOTE: when calling `model` there is no `free_state` in `tf_environment`
-      ## Trying out something where the free state is set if there isn't one?
-
+      # calculate() sets this itself before defining the dag, so only compute it
+      # when nothing has
       if (!exists(".batch_size", envir = self$tf_environment)) {
         with(
           data = self$tf_environment,
@@ -308,19 +305,12 @@ dag_class <- R6Class(
       invisible(NULL)
     },
 
-    # TF1/2 check?
-    # I think we can probably remove this part of things? However I'm not sure
-    # if the "mode" part is going to be imporatnt here?
-    # define tf graph in environment; either for forward-mode computation from a
-    # free state variable, or for sampling
     define_tf = function(target_nodes = self$node_list) {
-      # define the free state variable
-      # TF1/2 check?
-      # pretty sure define_batch_size needs to be passed as an argument to
-      # whatever is above here...if define_tf even needs to exist?
-      # and I think we can remove define_batch_size since
-      # this should just be passed as an argument later?
-
+      # all_sampling is the prior-sampling path. calculate() is its only caller
+      # today and pre-sets .batch_size from nsim, so define_batch_size() would
+      # short-circuit anyway - but nothing enforces that precondition, and any
+      # all_sampling caller that did not pre-set it would hit
+      # tf$shape(free_state) with no free_state
       if (self$mode != "all_sampling") {
         self$define_batch_size()
       }
@@ -596,6 +586,10 @@ dag_class <- R6Class(
 
       parameters
     },
+    # vestigial TF1 feed_dict plumbing. The lists are written by node_types.R
+    # and sampler_class.R and read by nothing - get_tf_data_list() has no
+    # callers in greta or in any extension package, and removing both writers
+    # leaves the test suite green. greta-dev/greta#739 to remove or repurpose.
     get_tf_data_list = function() {
       data_list_name <- glue::glue("{self$mode}_data_list")
       self$tf_environment[[data_list_name]]
@@ -631,8 +625,10 @@ dag_class <- R6Class(
         self$tf_name
       )
 
-      # TF1/2 check
-      # maybe remove onexit stuff?
+      # swap in a scratch environment for this trace, and put the old one back
+      # afterwards. The restore matters: without it, .batch_size and free_state
+      # from this trace stay on the dag, and define_batch_size()'s existence
+      # guard then short-circuits on a stale batch dimension
       tfe_old <- self$tf_environment
       on.exit(self$tf_environment <- tfe_old)
       tfe <- self$tf_environment <- new.env()
