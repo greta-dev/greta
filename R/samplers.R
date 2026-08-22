@@ -150,9 +150,9 @@ hmc_sampler <- R6Class(
 
       free_state_size <- length(sampler_param_vec) - 2
 
-      # TF1/2 check
-      # this will likely get replaced...
-
+      # the sampler's parameters arrive as one flat vector because that is what
+      # the traced function's TensorSpec takes; this unpacks it again. Passing
+      # them as real arguments is greta-dev/greta#547
       hmc_l <- sampler_param_vec[0]
       hmc_epsilon <- sampler_param_vec[1]
       hmc_diag_sd <- sampler_param_vec[2:(1 + free_state_size)]
@@ -164,10 +164,9 @@ hmc_sampler <- R6Class(
         ),
         dtype = tf$float64
       )
-      # TF1/2 check
-      # where is "free_state" pulled from, given that it is the
-      # argument to this function, "generate_log_prob_function" ?
-      # log probability function
+      # the kernel never sees free_state: its size comes from the parameter
+      # vector above, and TFP passes the current state to target_log_prob_fn
+      # when it calls it
 
       # build the kernel
       # nolint start
@@ -227,28 +226,11 @@ rwmh_sampler <- R6Class(
         uniform = tfp$mcmc$random_walk_uniform_fn
       )
 
-      # TF1/2 check
-      # I think a good portion of this code could be abstracted away
-      # Perhaps from `rwmh_epsilon` to `new_state_fn`
-      # could be passed
-      # tfe$log_prob_fun <- dag$generate_log_prob_function()
-
-      # tensors for sampler parameters
-      # rwmh_epsilon <- tf$compat$v1$placeholder(dtype = tf_float())
-
-      # need to pass in the value for this placeholder as a matrix (shape(n, 1))
-      # rwmh_diag_sd <- tf$compat$v1$placeholder(
-      #   dtype = tf_float(),
-      #   # TF1/2 check
-      # again what do we with with `free_state`?
-      #   shape = shape(dim(free_state)[[2]], 1)
-      # )
-
-      # but it step_sizes must be a vector (shape(n, )), so reshape it
+      # step_sizes must be a vector, shape(n, ), so reshape it. As in the HMC
+      # kernel, free_state is not needed: the size comes from the parameter
+      # vector, and TFP passes the state to target_log_prob_fn
       rwmh_step_sizes <- tf$reshape(
         rwmh_epsilon * (rwmh_diag_sd / tf$reduce_sum(rwmh_diag_sd)),
-        # TF1/2 check
-        # what are we to do about `free_state` here?
         shape = shape(free_state_size)
       )
 
