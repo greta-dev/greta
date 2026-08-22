@@ -328,10 +328,11 @@ calculate_greta_mcmc_list <- function(
 
   # if we're doing stochastic sampling, subsample the draws
   if (stochastic) {
-    # TF1/2 check todo
-    # might rename draws to indicate that it is a matrix, for readability
-    draws <- as.matrix(draws)
-    n_samples <- nrow(draws)
+    # named apart from `draws` on purpose: from here this is a plain matrix,
+    # while the else branch below still has the mcmc object and calls
+    # coda::thin() and stats::start() on it
+    draws_matrix <- as.matrix(draws)
+    n_samples <- nrow(draws_matrix)
 
     # if needed, sample with replacement and warn
     replace <- FALSE
@@ -344,13 +345,13 @@ calculate_greta_mcmc_list <- function(
     }
 
     rows <- sample.int(n_samples, nsim, replace = replace)
-    draws <- draws[rows, , drop = FALSE]
+    draws_matrix <- draws_matrix[rows, , drop = FALSE]
 
     # add the batch size to the data list
     # assign
     # pass these values in as the free state
     trace <- dag$trace_values(
-      draws,
+      draws_matrix,
       trace_batch_size = trace_batch_size,
       flatten = FALSE
     )
@@ -410,8 +411,6 @@ calculate_list <- function(target, values, nsim, tf_float, env) {
   # if (Sys.getenv("GRETA_DEBUG") == "true") {
   #   browser()
   # }
-  # TF1/2 check todo
-  # need to wrap this in tf_function I think?
   values <- calculate_target_tensor_list(
     dag = dag,
     fixed_greta_arrays = fixed_greta_arrays,
@@ -422,18 +421,6 @@ calculate_list <- function(target, values, nsim, tf_float, env) {
   )
 
   return(values)
-  # TF1/2 check
-  # could potentially not run this list in the correct way, in that
-  # it might result in running it twice with different seeds, rather than
-  # simultaneously
-  # assign("calculate_target_tensor_list", target_tensor_list, envir = tfe)
-
-  #   # add values or data not specified by the user
-  #   data_list <- dag$get_tf_data_list()
-  #   missing <- !names(data_list) %in% names(values)
-  #
-  #   # send list to tf environment and roll into a dict
-  #
 }
 
 
@@ -478,16 +465,9 @@ calculate_target_tensor_list <- function(
   target_nodes <- lapply(target, get_node)
   target_names_list <- lapply(target_nodes, dag$tf_name)
 
-  # this is taking advantage of non-eager mode
-  # TF1/2 check
-  # might need to use some of the tensorflow creation function
-  # approaches (in as_tf_function + generate_log_prob_function)
+  # under eager execution this leaves real values in tfe, so the tensors are
+  # read straight back out below and converted with as.array()
   dag$define_tf(target_nodes = target_nodes)
-
-  # look up the tf names of the target greta arrays (under sampling)
-  # create an object in the environment that's a list of these, and sample that
-  target_nodes <- lapply(target, get_node)
-  target_names_list <- lapply(target_nodes, dag$tf_name)
 
   target_tensor_list <- lapply(target_names_list, get, envir = tfe)
   target_tensor_list_array <- lapply(target_tensor_list, as.array)
