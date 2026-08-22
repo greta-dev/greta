@@ -626,16 +626,12 @@ sampler_utils_module <- function() {
   )
 }
 
-# TF1/2 check remove?
-# Is this still needed with the new `tf_function` from TF2?
-# I cannot actually currently see uses of `as_tf_function ` in the code
-# base currently
-# convert a function on greta arrays into a function on corresponding tensors,
-# given the greta arrays for inputs. When executed, this needs to be wrapped in
-# dag$on_graph() to get the tensors connected up with the rest of the graph
-# NOTE: Could use this as a way of getting the functions we need from greta
-# we could use this as a way of returning a function that TF recognises
-# as a function tensorflow function that returns tensors
+# convert a function on greta arrays into a function on the corresponding
+# tensors, given the greta arrays for its inputs.
+#
+# greta has no callers of its own: this is exported through `.internals` and
+# greta.dynamics calls it from iterate_dynamic_matrix() and ode_solve(). It
+# looks dead from inside greta and is not. Tests for it are greta-dev/greta#751
 as_tf_function <- function(r_fun, ...) {
   # run the operation on isolated greta arrays, so nothing gets attached to the
   # model real greta arrays in dots
