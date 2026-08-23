@@ -66,8 +66,7 @@ sampler <- R6Class(
         self$parameters$diag_sd <- diag_sd
       }
 
-      # define the draws tensor on the tf graph
-      # define_tf_draws is now used in place of of run_burst
+      # wrapped in tf_function here so every burst reuses a single trace
       self$define_tf_evaluate_sample_batch()
     },
 
@@ -201,16 +200,9 @@ sampler <- R6Class(
 
         # relay between R and tensorflow in a burst to be cpu efficient
         for (burst in seq_along(burst_lengths)) {
-          # TF1/2 check todo?
-          # replace with define_tf_draws
-
           self$run_burst(n_samples = burst_lengths[burst])
-          # align the free state back to the parameters we are tracing
-          # TF1/2 check todo?
-          # this is the tuning stage, might not need to evaluate
-          # / record the parameter values, as they will be thrown away
-          # after warmup - so could remove trace here.
-
+          # this trace is scrubbed the moment warmup ends and nothing reads
+          # it in between, so it is dead work: greta-dev/greta#834
           self$trace()
           # a memory efficient way to calculate summary stats of samples
           self$update_welford()
@@ -283,10 +275,6 @@ sampler <- R6Class(
         completed_iterations <- cumsum(burst_lengths)
 
         for (burst in seq_along(burst_lengths)) {
-          # so these bursts are R objects being passed through to python
-          # and how often to return them
-          # TF1/2 check todo
-          # replace with define_tf_draws
           self$run_burst(n_samples = burst_lengths[burst], thin = thin)
           # trace is it receiving the python
           self$trace()
@@ -483,8 +471,10 @@ sampler <- R6Class(
       dag <- self$model$dag
       tfe <- dag$tf_environment
 
-      # TF1/2 check seed
-      # how do TF2 and TFP use seeds?
+      # despite the name this sets no TF seed: it stashes self$seed in the tf
+      # environment as `rng_seed`, which nothing reads. sample_chain() below
+      # does take a `seed` argument, which is where seeding would have to go:
+      # see greta-dev/greta#285 and #427
       self$set_tf_seed()
 
       sampler_kernel <- self$define_tf_kernel(
@@ -498,12 +488,6 @@ sampler <- R6Class(
       # an "l" step.
       # Need to understand if/how tf_function will re-run those values - might
       # need to pass these arguments directly
-
-      # define the whole draws tensor
-      # TF1/2 check
-      # `seed` arg now gets passed to `sample_chain`.
-      # Need to work out how to get sampler_batch() to run as a TF function.
-      # To do that we need to work out how to get the free state
 
       sampler_batch <- tfp$mcmc$sample_chain(
         num_results = tf$math$floordiv(sampler_burst_length, sampler_thin),
@@ -521,11 +505,8 @@ sampler <- R6Class(
       )
     },
 
-    # run a burst of the sampler
-    # TF1/2 check
-    # this will be removed in favour of the tf_function decorated
-    # define_tf_draws() function that takes in argument values
-    # sampler_burst_length and sampler_thin
+    # bursts break so that tuning and progress reporting can run in R between
+    # them; moving the loop itself into TF is greta-dev/greta#547
     run_burst = function(n_samples, thin = 1L) {
       dag <- self$model$dag
       tfe <- dag$tf_environment
@@ -534,6 +515,8 @@ sampler <- R6Class(
       # combine the sampler information with information on the sampler's tuning
       # parameters, and make into a dict
 
+      # write-only, see get_tf_data_list() in dag_class.R - this is not the
+      # .batch_size that node definition reads
       dag$set_tf_data_list(".batch_size", nrow(self$free_state))
 
       # run the sampler, handling numerical errors
