@@ -105,6 +105,11 @@ NULL
 #'   [tensorflow::set_random_seed()] also works, and gives the same result,
 #'   because it sets R's seed too. See examples below.
 #'
+#'   Note that this covers the random numbers, not the arithmetic. On a GPU,
+#'   some TensorFlow operations accumulate in a non-deterministic order, so
+#'   results can still vary slightly between runs with the same seed. Seeded
+#'   runs on CPU (the default) are reproducible.
+#'
 #' @return `mcmc`, `stashed_samples` & `extra_samples` - a
 #'   `greta_mcmc_list` object that can be analysed using functions from the
 #'   coda package. This will contain mcmc samples of the greta arrays used to

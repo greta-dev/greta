@@ -226,6 +226,11 @@ seed from R's random number generator and passes that to TensorFlow, so
 both the initial values and the sampler are seeded.
 \code{\link[tensorflow:set_random_seed]{tensorflow::set_random_seed()}} also works, and gives the same result,
 because it sets R's seed too. See examples below.
+
+Note that this covers the random numbers, not the arithmetic. On a GPU,
+some TensorFlow operations accumulate in a non-deterministic order, so
+results can still vary slightly between runs with the same seed. Seeded
+runs on CPU (the default) are reproducible.
 }
 \examples{
 \dontrun{

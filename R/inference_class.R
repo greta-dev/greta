@@ -88,17 +88,16 @@ inference <- R6Class(
     # traced, which is when the kernel's stateful ops derive their seeds from
     # the global one - setting it later would be too late.
     set_tf_seed = function() {
-      # set_random_seed() also calls set.seed(), so put R's stream back:
-      # running mcmc() should not advance the user's RNG
-      r_seed <- get(".Random.seed", envir = .GlobalEnv)
-      on.exit(assign(".Random.seed", r_seed, envir = .GlobalEnv))
-
-      # and it sets CUDA_VISIBLE_DEVICES = -1 when disable_gpu is left at its
-      # default, which would disable the GPU for the whole session
-      tensorflow::set_random_seed(
-        seed = self$seed,
-        disable_gpu = is_using_cpu(self$compute_options)
-      )
+      # deliberately not tensorflow::set_random_seed(), which does two things we
+      # do not want here: it calls set.seed(), which would advance the user's R
+      # stream on every mcmc() call, and it sets CUDA_VISIBLE_DEVICES = -1
+      # unless told otherwise - a session-wide switch it never puts back, so one
+      # CPU run would hide the GPU from every later one.
+      #
+      # self$seed already came from R's RNG, so R is seeded by construction.
+      # What is left is the Python side.
+      reticulate::py_set_seed(self$seed)
+      tf$random$set_seed(self$seed)
     },
 
     # check and try to autofill a single set of initial values (single vector on
