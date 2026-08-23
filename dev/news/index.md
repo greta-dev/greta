@@ -104,6 +104,15 @@
   [`install_greta_deps()`](https://greta-dev.github.io/greta/dev/reference/install_greta_deps.md),
   which creates an environment rather than replacing an existing one
   ([\#684](https://github.com/greta-dev/greta/issues/684)).
+- [`hmc()`](https://greta-dev.github.io/greta/dev/reference/samplers.md)’s
+  documentation now says that the number of leapfrog steps is not
+  redrawn at every iteration: greta draws a new value each time it
+  returns from TensorFlow, which during warmup is roughly every 3
+  iterations and during sampling is every `pb_update` iterations.
+  `one_by_one = TRUE` draws a new value every iteration. The behaviour
+  is unchanged — HMC is valid for any fixed number of steps, so this
+  affects mixing rather than the distribution being sampled
+  ([\#745](https://github.com/greta-dev/greta/issues/745)).
 - `install_tensorflow()` is no longer re-exported by greta. It was
   [`tensorflow::install_tensorflow()`](https://rdrr.io/pkg/tensorflow/man/install_tensorflow.html)
   under greta’s name, and it bypasses every version check greta makes,

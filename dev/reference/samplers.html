@@ -108,8 +108,14 @@ algorithm used to adapt the size of the slice</p></dd>
     <p>During the warmup iterations of <code>mcmc</code>, some of these
 sampler parameters will be tuned to improve the efficiency of the sampler,
 so the values provided here are used as starting values.</p>
-<p>For <code>hmc()</code>, the number of leapfrog steps at each iteration is
-selected uniformly at random from between <code>Lmin</code> and <code>Lmax</code>.
+<p>For <code>hmc()</code>, the number of leapfrog steps is selected uniformly at
+random from between <code>Lmin</code> and <code>Lmax</code>. It is not redrawn at every
+iteration: greta draws a new value each time it returns from TensorFlow.
+During warmup that is roughly every 3 iterations, since tuning breaks the
+run up that often; during sampling it is every <code>pb_update</code> iterations, or
+once for the whole phase when <code>verbose = FALSE</code>. Setting
+<code>one_by_one = TRUE</code> draws a new value every iteration. <code>pb_update</code>,
+<code>verbose</code> and <code>one_by_one</code> are all arguments of <code><a href="inference.html">mcmc()</a></code>.
 <code>diag_sd</code> is used to rescale the parameter space to make it more
 uniform, and make sampling more efficient.</p>
 <p><code>rwmh()</code> creates a random walk Metropolis-Hastings sampler;  a

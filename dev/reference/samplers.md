@@ -53,10 +53,17 @@ During the warmup iterations of `mcmc`, some of these sampler parameters
 will be tuned to improve the efficiency of the sampler, so the values
 provided here are used as starting values.
 
-For `hmc()`, the number of leapfrog steps at each iteration is selected
-uniformly at random from between `Lmin` and `Lmax`. `diag_sd` is used to
-rescale the parameter space to make it more uniform, and make sampling
-more efficient.
+For `hmc()`, the number of leapfrog steps is selected uniformly at
+random from between `Lmin` and `Lmax`. It is not redrawn at every
+iteration: greta draws a new value each time it returns from TensorFlow.
+During warmup that is roughly every 3 iterations, since tuning breaks
+the run up that often; during sampling it is every `pb_update`
+iterations, or once for the whole phase when `verbose = FALSE`. Setting
+`one_by_one = TRUE` draws a new value every iteration. `pb_update`,
+`verbose` and `one_by_one` are all arguments of
+[`mcmc()`](https://greta-dev.github.io/greta/dev/reference/inference.md).
+`diag_sd` is used to rescale the parameter space to make it more
+uniform, and make sampling more efficient.
 
 `rwmh()` creates a random walk Metropolis-Hastings sampler; a a
 gradient-free sampling algorithm. The algorithm involves a proposal
