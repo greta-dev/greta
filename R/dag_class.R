@@ -232,40 +232,6 @@ dag_class <- R6Class(
       )
     },
 
-    define_free_state = function(
-      type = c("variable", "placeholder"),
-      name = "free_state"
-    ) {
-      type <- match.arg(type)
-      tfe <- self$tf_environment
-
-      vals <- self$example_parameters(free = TRUE)
-      vals <- unlist_tf(vals)
-
-      if (type == "variable") {
-        # TF1/2 check
-        # tf$Variable seems to have trouble assigning values, if created with
-        # numeric (rather than logical) NAs
-        vals <- as.logical(vals)
-        vals <- t(as.matrix(vals))
-
-        free_state <- tf$Variable(
-          initial_value = vals,
-          dtype = tf_float()
-        )
-      } else {
-        shape <- shape(NULL, length(vals))
-        # TF1/2 check
-        # instead?
-        # free_state <- tensorflow::as_tensor(
-        #   dtype = tf_float(),
-        #   shape = shape
-        # )
-      }
-
-      assign(name, free_state, envir = tfe)
-    },
-
     # split the overall free state vector into free versions of variables
     split_free_state = function() {
       tfe <- self$tf_environment
