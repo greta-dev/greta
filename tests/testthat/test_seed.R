@@ -151,6 +151,29 @@ test_that("mcmc seeds TensorFlow from set.seed(), not from session state", {
   expect_identical(as.numeric(one), as.numeric(two))
 })
 
+test_that("mcmc() advances R's RNG rather than resetting it", {
+  skip_if_not(check_tf_version())
+  x <- normal(0, 1)
+  m <- model(x)
+  draw <- function() {
+    as.numeric(mcmc(m, warmup = 5, n_samples = 1, chains = 1, verbose = FALSE))
+  }
+
+  # mcmc() takes its seed from R's stream, so the same seed gives the same run
+  set.seed(1)
+  one <- draw()
+  set.seed(1)
+  two <- draw()
+  expect_identical(one, two)
+
+  # but it leaves the stream where it got to rather than restoring or
+  # re-seeding it, so a second run without re-seeding does not repeat the first
+  set.seed(1)
+  first <- draw()
+  second <- draw()
+  expect_false(identical(first, second))
+})
+
 test_that("simulate uses the local RNG seed", {
   skip_if_not(check_tf_version())
 
