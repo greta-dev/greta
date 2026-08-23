@@ -221,9 +221,11 @@ parameters are in a vector, then split the vector up to define the model.
 The parameter vector can then be passed to model. See example.
 }
 \note{
-to set a seed with MCMC you can use \code{\link[=set.seed]{set.seed()}}, or
-\code{\link[tensorflow:set_random_seed]{tensorflow::set_random_seed()}}. They both give identical results. See
-examples below.
+\code{set.seed()} is enough to make MCMC reproducible: greta draws its own
+seed from R's random number generator and passes that to TensorFlow, so
+both the initial values and the sampler are seeded.
+\code{\link[tensorflow:set_random_seed]{tensorflow::set_random_seed()}} also works, and gives the same result,
+because it sets R's seed too. See examples below.
 }
 \examples{
 \dontrun{
@@ -310,7 +312,7 @@ tensorflow::set_random_seed(12345)
 two_tf <- mcmc(m, n_samples = 1, chains = 1)
 # same
 all.equal(as.numeric(one_tf), as.numeric(two_tf))
-# different
+# and the same as each other, since set_random_seed() sets R's seed too
 all.equal(as.numeric(one), as.numeric(one_tf))
 
 }
