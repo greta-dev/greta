@@ -471,10 +471,9 @@ sampler <- R6Class(
       dag <- self$model$dag
       tfe <- dag$tf_environment
 
-      # despite the name this sets no TF seed: it stashes self$seed in the tf
-      # environment as `rng_seed`, which nothing reads. sample_chain() below
-      # does take a `seed` argument, which is where seeding would have to go:
-      # see greta-dev/greta#285 and #427
+      # seeds TensorFlow from self$seed, which came from R's RNG - this is what
+      # makes set.seed() reach the sampler. It has to happen here, during
+      # tracing, because that is when the kernel's ops derive their seeds
       self$set_tf_seed()
 
       sampler_kernel <- self$define_tf_kernel(

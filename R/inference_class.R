@@ -83,11 +83,22 @@ inference <- R6Class(
       }
     },
 
-    # set RNG seed for a tensorflow graph. Must be done before definition of a
-    # random tensor
+    # Seed TensorFlow from the seed this sampler drew from R's RNG, so that
+    # set.seed() reaches the sampler. Called while the draws function is being
+    # traced, which is when the kernel's stateful ops derive their seeds from
+    # the global one - setting it later would be too late.
     set_tf_seed = function() {
-      dag <- self$model$dag
-      dag$tf_environment$rng_seed <- self$seed
+      # set_random_seed() also calls set.seed(), so put R's stream back:
+      # running mcmc() should not advance the user's RNG
+      r_seed <- get(".Random.seed", envir = .GlobalEnv)
+      on.exit(assign(".Random.seed", r_seed, envir = .GlobalEnv))
+
+      # and it sets CUDA_VISIBLE_DEVICES = -1 when disable_gpu is left at its
+      # default, which would disable the GPU for the whole session
+      tensorflow::set_random_seed(
+        seed = self$seed,
+        disable_gpu = is_using_cpu(self$compute_options)
+      )
     },
 
     # check and try to autofill a single set of initial values (single vector on

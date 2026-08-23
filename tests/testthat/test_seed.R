@@ -120,13 +120,35 @@ test_that("mcmc samples are the same when the R seed is the same, also with tf s
 
   expect_identical(as.numeric(one_tf), as.numeric(two_tf))
 
-  # but these are not (always) equal to each other
-  mcmc_matches_tf_one <- identical(as.numeric(one), as.numeric(one_tf))
-  mcmc_matches_tf_two <- identical(as.numeric(two), as.numeric(two_tf))
+  # and the two routes agree, as ?mcmc promises: set_random_seed() calls
+  # set.seed() internally, so both paths hand mcmc() the same seed. Before
+  # greta seeded TensorFlow at all, these differed, and this test asserted
+  # that they must - see greta-dev/greta#285
+  expect_identical(as.numeric(one), as.numeric(one_tf))
 
-  expect_false(mcmc_matches_tf_one)
+  expect_identical(as.numeric(two), as.numeric(two_tf))
+})
 
-  expect_false(mcmc_matches_tf_two)
+test_that("mcmc seeds TensorFlow from set.seed(), not from session state", {
+  skip_if_not(check_tf_version())
+  a <- normal(0, 1)
+  y <- normal(a, 1)
+  m <- model(y)
+
+  set.seed(12345)
+  one <- mcmc(m, warmup = 10, n_samples = 1, chains = 1, verbose = FALSE)
+
+  # perturb TensorFlow's global seed between the two runs. mcmc() draws its own
+  # seed from R's RNG, so if it passed that to TensorFlow this would be
+  # overwritten and the draws would still match. The test above this one only
+  # passes because an earlier calculate() call in this file has already set the
+  # TensorFlow seed as a side effect - it would fail run on its own.
+  tensorflow::tf$random$set_seed(999L)
+
+  set.seed(12345)
+  two <- mcmc(m, warmup = 10, n_samples = 1, chains = 1, verbose = FALSE)
+
+  expect_identical(as.numeric(one), as.numeric(two))
 })
 
 test_that("simulate uses the local RNG seed", {
