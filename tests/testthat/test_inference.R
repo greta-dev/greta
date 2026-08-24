@@ -64,6 +64,35 @@ test_that("mcmc works with verbosity and warmup", {
   quietly(expect_ok(mcmc(m, n_samples = 50, warmup = 50, verbose = TRUE)))
 })
 
+test_that("warmup does not accumulate the free state trace", {
+  skip_if_not(check_tf_version())
+
+  x <- rnorm(10)
+  z <- normal(0, 1)
+  distribution(x) <- normal(z, 1)
+  m <- model(z)
+
+  # update_welford() runs once per warmup burst, just after the trace would
+  # have been appended
+  traced_rows <- numeric()
+  spy <- hmc()
+  spy$class <- R6::R6Class(
+    "spy_sampler",
+    inherit = hmc_sampler,
+    public = list(
+      update_welford = function() {
+        traced_rows <<- c(traced_rows, nrow(self$traced_free_state[[1]]))
+        super$update_welford()
+      }
+    )
+  )
+
+  mcmc(m, spy, chains = 1, n_samples = 5, warmup = 9, verbose = FALSE)
+
+  expect_gt(length(traced_rows), 1)
+  expect_true(all(traced_rows == 0))
+})
+
 
 test_that("mcmc works with cpu and gpu options", {
   skip_if_not(check_tf_version())

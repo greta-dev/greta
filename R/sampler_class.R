@@ -201,9 +201,6 @@ sampler <- R6Class(
         # relay between R and tensorflow in a burst to be cpu efficient
         for (burst in seq_along(burst_lengths)) {
           self$run_burst(n_samples = burst_lengths[burst])
-          # this trace is scrubbed the moment warmup ends and nothing reads
-          # it in between, so it is dead work: greta-dev/greta#834
-          self$trace()
           # a memory efficient way to calculate summary stats of samples
           self$update_welford()
           self$tune(completed_iterations[burst], self$warmup)
