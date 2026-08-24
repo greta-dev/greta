@@ -174,6 +174,52 @@ test_that("mcmc() advances R's RNG rather than resetting it", {
   expect_false(identical(first, second))
 })
 
+test_that("chains are seeded distinctly and reproducibly", {
+  skip_if_not(check_tf_version())
+  x <- normal(0, 1)
+  m <- model(x)
+  draw <- function() {
+    d <- mcmc(m, warmup = 10, n_samples = 3, chains = 4, verbose = FALSE)
+    lapply(d, as.vector)
+  }
+
+  set.seed(2026)
+  one <- draw()
+  set.seed(2026)
+  two <- draw()
+
+  expect_identical(one, two)
+
+  # each sampler draws its own seed from the calling session's stream, so the
+  # chains must not all come out the same - which they would if they shared one
+  expect_length(unique(one), 4L)
+})
+
+test_that("parallel chains are seeded distinctly and reproducibly", {
+  skip_if_not(check_tf_version())
+  skip_on_cran()
+  op <- future::plan()
+  withr::defer(future::plan(op))
+  future::plan(future::multisession, workers = 2)
+
+  x <- normal(0, 1)
+  m <- model(x)
+  draw <- function() {
+    d <- mcmc(m, warmup = 10, n_samples = 3, chains = 2, verbose = FALSE)
+    lapply(d, as.vector)
+  }
+
+  # the seeds are drawn in this session and travel to the workers on the
+  # sampler objects, so the workers do not need seeding themselves
+  set.seed(2026)
+  one <- draw()
+  set.seed(2026)
+  two <- draw()
+
+  expect_identical(one, two)
+  expect_false(identical(one[[1]], one[[2]]))
+})
+
 test_that("simulate uses the local RNG seed", {
   skip_if_not(check_tf_version())
 
