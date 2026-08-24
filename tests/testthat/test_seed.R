@@ -1,3 +1,12 @@
+# Move TensorFlow's global seed to somewhere arbitrary. Tests that check
+# mcmc() is reproducible have to do this between the two runs, or they pass on
+# whatever seed an earlier test left set - the calculate() tests in this file
+# set one as a side effect. Drawn rather than hardcoded, because two tests
+# using the same constant makes the second one a no-op.
+perturb_tf_seed <- function() {
+  tensorflow::tf$random$set_seed(sample.int(1e6, 1))
+}
+
 test_that("calculate uses the local RNG seed", {
   skip_if_not(check_tf_version())
 
@@ -138,12 +147,9 @@ test_that("mcmc seeds TensorFlow from set.seed(), not from session state", {
   set.seed(12345)
   one <- mcmc(m, warmup = 10, n_samples = 1, chains = 1, verbose = FALSE)
 
-  # perturb TensorFlow's global seed between the two runs. mcmc() draws its own
-  # seed from R's RNG, so if it passed that to TensorFlow this would be
-  # overwritten and the draws would still match. The test above this one only
-  # passes because an earlier calculate() call in this file has already set the
-  # TensorFlow seed as a side effect - it would fail run on its own.
-  tensorflow::tf$random$set_seed(999L)
+  # mcmc() draws its own seed from R's RNG, so if it passes that to TensorFlow
+  # this is overwritten and the draws still match
+  perturb_tf_seed()
 
   set.seed(12345)
   two <- mcmc(m, warmup = 10, n_samples = 1, chains = 1, verbose = FALSE)
@@ -185,6 +191,9 @@ test_that("chains are seeded distinctly and reproducibly", {
 
   set.seed(2026)
   one <- draw()
+
+  perturb_tf_seed()
+
   set.seed(2026)
   two <- draw()
 
@@ -237,6 +246,7 @@ test_that("parallel chains are seeded distinctly and reproducibly", {
   # sampler objects, so the workers do not need seeding themselves
   set.seed(2026)
   one <- draw()
+  perturb_tf_seed()
   set.seed(2026)
   two <- draw()
 
