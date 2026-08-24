@@ -67,6 +67,15 @@ test_that("mcmc works with verbosity and warmup", {
 test_that("warmup does not accumulate the free state trace", {
   skip_if_not(check_tf_version())
 
+  # the spy below records into this frame, so the sampler has to stay in this
+  # process
+  op <- future::plan()
+  withr::defer(future::plan(op))
+  future::plan(future::sequential)
+
+  # leave the stream where the rest of the file expects it
+  withr::local_seed(2020 - 02 - 11)
+
   x <- rnorm(10)
   z <- normal(0, 1)
   distribution(x) <- normal(z, 1)
@@ -87,10 +96,13 @@ test_that("warmup does not accumulate the free state trace", {
     )
   )
 
-  mcmc(m, spy, chains = 1, n_samples = 5, warmup = 9, verbose = FALSE)
+  draws <- mcmc(m, spy, chains = 1, n_samples = 5, warmup = 9, verbose = FALSE)
 
   expect_gt(length(traced_rows), 1)
   expect_true(all(traced_rows == 0))
+
+  # the sampling phase still traces, so this cannot pass by dropping both
+  expect_true(coda::niter(draws) == 5)
 })
 
 

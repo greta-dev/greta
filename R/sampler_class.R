@@ -223,7 +223,7 @@ sampler <- R6Class(
           }
         }
 
-        # don't count warmup rejections against the sampling phase
+        # scrub the numerical rejections counted during warmup
         self$numerical_rejections <- 0
       } # end warmup
     },
