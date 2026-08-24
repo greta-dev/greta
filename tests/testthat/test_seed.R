@@ -195,6 +195,30 @@ test_that("chains are seeded distinctly and reproducibly", {
   expect_length(unique(one), 4L)
 })
 
+test_that("chains stay distinct from identical starting values", {
+  skip_if_not(check_tf_version())
+  x <- normal(0, 1)
+  m <- model(x)
+
+  # more chains than samplers, so some share a sampler and therefore a seed,
+  # and every chain starts from the same point - so only the sampler's own
+  # randomness can separate them. The free state is a batch dimension, so TFP
+  # draws each chain's momentum separately.
+  inits <- replicate(4, initials(x = 0.5), simplify = FALSE)
+
+  set.seed(2026)
+  draws <- mcmc(
+    m,
+    warmup = 10,
+    n_samples = 3,
+    chains = 4,
+    initial_values = inits,
+    verbose = FALSE
+  )
+
+  expect_length(unique(lapply(draws, as.vector)), 4L)
+})
+
 test_that("parallel chains are seeded distinctly and reproducibly", {
   skip_if_not(check_tf_version())
   skip_on_cran()
