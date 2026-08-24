@@ -214,17 +214,11 @@ calculate <- function(
 
         r_seed <- get(".Random.seed", envir = .GlobalEnv)
         on.exit(assign(".Random.seed", r_seed, envir = .GlobalEnv))
-        tensorflow::set_random_seed(
-          seed = seed,
-          disable_gpu = is_using_cpu(compute_options)
-        )
+        set_all_seeds(seed)
       }
 
       if (is.null(seed)) {
-        tensorflow::set_random_seed(
-          seed = get_seed(),
-          disable_gpu = is_using_cpu(compute_options)
-        )
+        set_all_seeds(get_seed())
       }
     }
 

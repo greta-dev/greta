@@ -88,14 +88,18 @@ inference <- R6Class(
     # traced, which is when the kernel's stateful ops derive their seeds from
     # the global one - setting it later would be too late.
     set_tf_seed = function() {
-      # deliberately not tensorflow::set_random_seed(), which does two things we
-      # do not want here: it calls set.seed(), which would advance the user's R
-      # stream on every mcmc() call, and it sets CUDA_VISIBLE_DEVICES = -1
-      # unless told otherwise - a session-wide switch it never puts back, so one
-      # CPU run would hide the GPU from every later one.
+      # Python and TensorFlow only - deliberately not set_all_seeds(), which
+      # calculate() uses.
       #
-      # self$seed already came from R's RNG, so R is seeded by construction.
-      # What is left is the Python side.
+      # calculate() takes a `seed` argument that has to determine the result
+      # whatever R's stream was doing, so it seeds R too. mcmc() draws its seed
+      # *from* that stream, so the stream is already the source of truth and
+      # re-seeding it here would be circular - it would also reset the draws
+      # HMC takes from R for its leapfrog count partway through a run.
+      #
+      # Not tensorflow::set_random_seed() either: that sets
+      # CUDA_VISIBLE_DEVICES = -1 unless told otherwise and never puts it back,
+      # so one CPU run would hide the GPU from every later one. See #839.
       reticulate::py_set_seed(self$seed)
       tf$random$set_seed(self$seed)
     },
