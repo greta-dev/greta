@@ -83,11 +83,25 @@ inference <- R6Class(
       }
     },
 
-    # set RNG seed for a tensorflow graph. Must be done before definition of a
-    # random tensor
+    # Seed TensorFlow from the seed this sampler drew from R's RNG, so that
+    # set.seed() reaches the sampler. Called while the draws function is being
+    # traced, which is when the kernel's stateful ops derive their seeds from
+    # the global one - setting it later would be too late.
     set_tf_seed = function() {
-      dag <- self$model$dag
-      dag$tf_environment$rng_seed <- self$seed
+      # Python and TensorFlow only - deliberately not set_all_seeds(), which
+      # calculate() uses.
+      #
+      # calculate() takes a `seed` argument that has to determine the result
+      # whatever R's stream was doing, so it seeds R too. mcmc() draws its seed
+      # *from* that stream, so the stream is already the source of truth and
+      # re-seeding it here would be circular - it would also reset the draws
+      # HMC takes from R for its leapfrog count partway through a run.
+      #
+      # Not tensorflow::set_random_seed() either: that sets
+      # CUDA_VISIBLE_DEVICES = -1 unless told otherwise and never puts it back,
+      # so one CPU run would hide the GPU from every later one. See #839.
+      reticulate::py_set_seed(self$seed)
+      tf$random$set_seed(self$seed)
     },
 
     # check and try to autofill a single set of initial values (single vector on

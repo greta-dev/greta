@@ -860,6 +860,24 @@ create_temp_file <- function(path) {
 #' gpu_only()
 #' cpu_only()
 #' @export
+# Seed R, Python and TensorFlow together.
+#
+# This is tensorflow::set_random_seed() minus one line: that function also sets
+# CUDA_VISIBLE_DEVICES = -1 unless told otherwise, a session-wide switch it
+# never puts back, so one CPU run would hide the GPU from every later one.
+#
+# set.seed() has to stay. Sampling under calculate(nsim = ) draws from R's RNG
+# as well as TensorFlow's, so without it an explicit `seed` no longer fully
+# determines the result - it starts depending on where R's stream happened to
+# be. See greta-dev/greta#285 and #839.
+set_all_seeds <- function(seed) {
+  seed <- as.integer(seed)
+  set.seed(seed)
+  reticulate::py_set_seed(seed)
+  tf$random$set_seed(seed)
+  invisible(NULL)
+}
+
 gpu_only <- function() {
   "GPU"
 }

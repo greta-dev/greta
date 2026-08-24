@@ -99,9 +99,16 @@ NULL
 #'   argument `trace_batch_size` can be modified to trade-off speed against
 #'   memory usage.
 #'
-#' @note to set a seed with MCMC you can use [set.seed()], or
-#'   [tensorflow::set_random_seed()]. They both give identical results. See
-#'   examples below.
+#' @note `set.seed()` is enough to make MCMC reproducible: greta draws its own
+#'   seed from R's random number generator and passes that to TensorFlow, so
+#'   both the initial values and the sampler are seeded.
+#'   [tensorflow::set_random_seed()] also works, and gives the same result,
+#'   because it sets R's seed too. See examples below.
+#'
+#'   Note that this covers the random numbers, not the arithmetic. On a GPU,
+#'   some TensorFlow operations accumulate in a non-deterministic order, so
+#'   results can still vary slightly between runs with the same seed. Seeded
+#'   runs on CPU (the default) are reproducible.
 #'
 #' @return `mcmc`, `stashed_samples` & `extra_samples` - a
 #'   `greta_mcmc_list` object that can be analysed using functions from the
@@ -193,7 +200,7 @@ NULL
 #' two_tf <- mcmc(m, n_samples = 1, chains = 1)
 #' # same
 #' all.equal(as.numeric(one_tf), as.numeric(two_tf))
-#' # different
+#' # and the same as each other, since set_random_seed() sets R's seed too
 #' all.equal(as.numeric(one), as.numeric(one_tf))
 #'
 #' }
