@@ -223,12 +223,7 @@ sampler <- R6Class(
           }
         }
 
-        # scrub the free state trace and numerical rejections
-        self$traced_free_state <- self$empty_matrices(
-          n = self$n_chains,
-          ncol = self$n_free
-        )
-
+        # don't count warmup rejections against the sampling phase
         self$numerical_rejections <- 0
       } # end warmup
     },
