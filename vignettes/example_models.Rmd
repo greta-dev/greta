@@ -127,7 +127,7 @@ design <- as.matrix(attitude[, 2:7])
 int <- normal(0, 10)
 sd <- cauchy(0, 3, truncation = c(0, Inf))
 
-tau <- exponential(0.5, dim = ncol(design)) 
+tau <- exponential(0.5, dim = ncol(design))
 coefs <- normal(0, tau)
 mu <- int + design %*% coefs
 
@@ -203,7 +203,7 @@ The slopes and intercepts for each species are *correlated* in this example.
 
 ``` r
 # model matrix
-modmat <- model.matrix(~ Sepal.Width, iris) 
+modmat <- model.matrix(~ Sepal.Width, iris)
 # index of species
 jj <- as.numeric(iris$Species)
 
@@ -220,7 +220,7 @@ Omega <- lkj_correlation(3, M)
 # cholesky factorization and whitening
 Omega_U <- chol(Omega)
 Sigma_U <- sweep(Omega_U, 2, tau, "*")
-z <- normal(0, 1, dim = c(N, M)) 
+z <- normal(0, 1, dim = c(N, M))
 ab <- z %*% Sigma_U # equivalent to: ab ~ multi_normal(0, Sigma_U)
 
 # the linear predictor
@@ -390,7 +390,7 @@ Z <- model.matrix(~ Species + Sepal.Length * Species - 1, data = iris)
 
 gamma_matrix <- multivariate_normal(matrix(0, 1, 2),
                                     diag(2),
-                                    n_realisations = 3) 
+                                    n_realisations = 3)
 gamma <- c(gamma_matrix)
 
 wi <- as_data(iris$Sepal.Width)
@@ -448,7 +448,7 @@ For clarity we use an architecture without a hidden layer, such that the weights
 N <- 100
 p <- 10
 
-set.seed(23)  
+set.seed(23)
 X <- matrix(rnorm(N * p), N)
 beta <- rnorm(10)
 y <- X %*% beta + rnorm(N, sd = 0.1)
@@ -461,7 +461,7 @@ neural_network <- function(x)
   # this can be arbitrarily complex, e.g. multiple hidden layers
   x %*% weights
 }
-  
+
 weights <- normal(0, 1, dim = c(p, 1))
 sd <- inverse_gamma(1, 1)
 
@@ -477,7 +477,7 @@ Factor analysis is a linear latent model used for finding a lower-dimensional pr
 $$
 \mathbf{x}_i = \mathbf{W} \mathbf{z}_i + \boldsymbol \mu + \epsilon_i
 $$
-where the noise $\epsilon$ is normally distributed with zero mean and diagonal covariance matrix $\Psi = \mathrm{diag}(\psi_1, \dots, \psi_p)$. The goal of factor analysis is to estimate the latent variables  $\mathbf{z}_i \mathbb{R}^q$. 
+where the noise $\epsilon$ is normally distributed with zero mean and diagonal covariance matrix $\Psi = \mathrm{diag}(\psi_1, \dots, \psi_p)$. The goal of factor analysis is to estimate the latent variables  $\mathbf{z}_i \mathbb{R}^q$.
 
 In this example we take the mean vector $\boldsymbol \mu$ to be zero.
 
@@ -489,12 +489,12 @@ generate.data <- function(n = 100, p = 5, q = 2, psi = diag(rgamma(p, 1, 1)))
   W  <- matrix(rnorm(p * q, 1), p, q)
   Z  <- matrix(rnorm(q * n, 2), q, n)
   WZ <- W %*% Z
-  
+
   X  <- matrix(0, n, p)
   for (i in seq_len(n)) {
     X[i, ] <- MASS::mvrnorm(1, WZ[, i], psi)
   }
-  
+
   list(X = X, W = W, Z = Z, psi = psi)
 }
 
@@ -521,7 +521,7 @@ distribution(X) <- multivariate_normal(t(W %*% Z), psi)
 
 The BUGS project provide a number of example models written in the BUGS modelling language. These models will run in WinBUGS and OpenBUGS, and likely also in JAGS. The [Stan wiki](https://github.com/stan-dev/example-models/wiki/BUGS-Examples-Sorted-Alphabetically) provides Stan implementations of these models.
 
-The following sections provide greta implementations of some of these example models, alongside the BUGS code from [WinBUGS examples volume 2](https://legacy.voteview.com/pdf/WINBUGSmanual_2.pdf) (PDF) and Stan code and an R version of the data from the [Stan example models wiki](https://github.com/stan-dev/example-models/wiki). 
+The following sections provide greta implementations of some of these example models, alongside the BUGS code from [WinBUGS examples volume 2](https://legacy.voteview.com/pdf/WINBUGSmanual_2.pdf) (PDF) and Stan code and an R version of the data from the [Stan example models wiki](https://github.com/stan-dev/example-models/wiki).
 
 <hr>
 
@@ -594,7 +594,7 @@ parameters {
 }
 model {
   array[J] real p;
-  theta1 ~ normal(0, 32); // 32^2 = 1024 
+  theta1 ~ normal(0, 32); // 32^2 = 1024
   theta2 ~ normal(0, 32);
   X ~ normal(alpha + beta * Z, sigma);
   y ~ binomial_logit(n, theta1 + theta2 * X);
@@ -708,10 +708,10 @@ See also the [Stan examples](https://github.com/stan-dev/example-models/wiki/ARM
 #### data
 
 ``` text
-y <- c(28, 26, 33, 24, 34, -44, 27, 16, 40, -2, 29, 22, 24, 21, 25, 
-       30, 23, 29, 31, 19, 24, 20, 36, 32, 36, 28, 25, 21, 28, 29, 
-       37, 25, 28, 26, 30, 32, 36, 26, 30, 22, 36, 23, 27, 27, 28, 
-       27, 31, 27, 26, 33, 26, 32, 32, 24, 39, 28, 24, 25, 32, 25, 
+y <- c(28, 26, 33, 24, 34, -44, 27, 16, 40, -2, 29, 22, 24, 21, 25,
+       30, 23, 29, 31, 19, 24, 20, 36, 32, 36, 28, 25, 21, 28, 29,
+       37, 25, 28, 26, 30, 32, 36, 26, 30, 22, 36, 23, 27, 27, 28,
+       27, 31, 27, 26, 33, 26, 32, 32, 24, 39, 28, 24, 25, 32, 25,
        29, 27, 28, 29, 16, 23)
 n <- length(y)
 ```
@@ -791,14 +791,14 @@ parameters {
 transformed parameters {
   real<lower=0> sigma_theta;
   vector[N] theta;
-  
+
   theta = mu_theta + xi * eta;
   sigma_theta = abs(xi) / sigma_eta;
 }
 model {
   mu_theta ~ normal(0, 100);
   sigma_eta ~ inv_gamma(1, 1); //prior distribution can be changed to uniform
-  
+
   eta ~ normal(0, sigma_eta);
   xi ~ normal(0, 5);
   y ~ normal(theta, sigma_y);
@@ -825,9 +825,9 @@ n_env <- 3
 n_sites <- 20
 
 # n_sites x n_env matrix of environmental variables
-env <- matrix(rnorm(n_sites * n_env), nrow = n_sites) 
+env <- matrix(rnorm(n_sites * n_env), nrow = n_sites)
 # n_sites observations of species presence or absence
-occupancy <- rbinom(n_sites, 1, 0.5) 
+occupancy <- rbinom(n_sites, 1, 0.5)
 ```
 
 #### greta code
@@ -859,9 +859,9 @@ n_env <- 3
 n_sites <- 20
 
 # n_sites x n_env matrix of environmental variables
-env <- matrix(rnorm(n_sites * n_env), nrow = n_sites) 
+env <- matrix(rnorm(n_sites * n_env), nrow = n_sites)
 # n_sites observations of species abundance
-occupancy <- rpois(n_sites, 5) 
+occupancy <- rpois(n_sites, 5)
 ```
 
 #### greta code
@@ -890,7 +890,7 @@ n_sites <- 20
 n_obs <- 5
 
 # n_sites x n_env matrix of environmental variables
-env <- matrix(rnorm(n_sites * n_env), nrow = n_sites) 
+env <- matrix(rnorm(n_sites * n_env), nrow = n_sites)
 # n_sites observations of species presence or absence over n_obs visits
 occupancy <- rbinom(n_sites, n_obs, 0.5)
 ```
@@ -979,7 +979,7 @@ occupancy <- matrix(rbinom(n_sites * n_species, 1, 0.5), nrow = n_sites)
 
 ``` r
 global_alpha <- normal(0, 10, dim = 1)
-global_alpha_sd <- uniform(0, 10, dim = 1) 
+global_alpha_sd <- uniform(0, 10, dim = 1)
 alpha <- normal(global_alpha, global_alpha_sd, dim = n_species)
 
 global_betas <- normal(0, 10, dim = n_env)
@@ -1017,7 +1017,7 @@ n_traits <- 1
 
 # n_sites x n_env matrix of environmental variables
 env <- matrix(rnorm(n_sites * n_env), nrow = n_sites)
-# n_species * n_traits matix of trait variables
+# n_species * n_traits matrix of trait variables
 traits <- matrix(rnorm(n_species * n_traits), nrow = n_species)
 # n_sites * n_species matrix of observed occupancy
 occupancy <- matrix(rbinom(n_sites * n_species, 1, 0.5), nrow = n_sites)
@@ -1037,10 +1037,10 @@ n_traits <- ncol(traits)
 # sub-model parameters have normal prior distributions
 g <- normal(0, 10, dim = c(n_env, n_traits))
 # parameters of the base model are a function of the parameters of the sub-model
-beta <-  g %*% t(traits) 
+beta <-  g %*% t(traits)
 
 # use the coefficients to get the model linear predictor
-linear_predictor <- env %*% beta 
+linear_predictor <- env %*% beta
 
 # use the logit link to get probabilities of occupancy
 p <- ilogit(linear_predictor)
@@ -1115,7 +1115,7 @@ model {
   for (i in 1:n_obs) {
     z[i, first_obs[i]] <- 1   # state at first capture must be 1!
     for (t in (first_obs[i] + 1):n_time) {
-      mu1[i, t] <- phi[t - 1] * z[i, t - 1] 
+      mu1[i, t] <- phi[t - 1] * z[i, t - 1]
       z[i, t] ~ dbern(mu1[i, t])   # true state
       mu2[i, t] <- p[t - 1] * z[i, t]
       y[i, t] ~ dbern(mu2[i, t])      # observed state
@@ -1131,7 +1131,7 @@ model {
 ```
 /**
  * Cormack-Jolly-Seber Model
- * 
+ *
  * following section 1.2.1 of:
  * https://www.maths.otago.ac.nz/home/resources/theses/PhD_Matthew_Schofield.pdf
  *
@@ -1145,7 +1145,7 @@ transformed data {
   array[I] int<lower=0, upper=K + 1> first; // first[i]: ind i first capture
   array[I] int<lower=0, upper=K + 1> last; // last[i]:  ind i last capture
   array[K] int<lower=0, upper=I> n_captured; // n_capt[k]: num aptured at k
-  
+
   first = rep_array(K + 1, I);
   last = rep_array(0, I);
   for (i in 1 : I) {
@@ -1160,7 +1160,7 @@ transformed data {
       }
     }
   }
-  
+
   n_captured = rep_array(0, K);
   for (i in 1 : I) {
     for (k in 1 : K) {
@@ -1171,7 +1171,7 @@ transformed data {
 parameters {
   vector<lower=0, upper=1>[K - 1] phi; // phi[k]: Pr[alive at k + 1 | alive at k]
   vector<lower=0, upper=1>[K] p; // p[k]: Pr[capture at k]
-  
+
   // note:  p[1] not used in model and hence not identified
 }
 transformed parameters {
@@ -1206,9 +1206,9 @@ generated quantities {
   // phi[K-1] and p(K) not identified, but product is
   real beta;
   vector<lower=0>[K] pop_hat; // population
-  
+
   beta = phi[K - 1] * p[K];
-  
+
   for (k in 1 : K) {
     pop_hat[k] = n_captured[k] / p[k];
   }
