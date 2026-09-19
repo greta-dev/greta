@@ -127,7 +127,7 @@ NULL
 #' draws <- mcmc(m, chains = 1, initial_values = initials(mu = -1))
 #'
 #' # if there are multiple chains, a list of initial values should be passed,
-#' # othewise the same initial values will be used for all chains
+#' # otherwise the same initial values will be used for all chains
 #' inits <- list(initials(sigma = 0.5), initials(sigma = 1))
 #' draws <- mcmc(m, chains = 2, initial_values = inits)
 #'

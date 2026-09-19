@@ -14,7 +14,7 @@ n_traits <- 1
 
 # n_sites x n_env matrix of environmental variables
 env <- matrix(rnorm(n_sites * n_env), nrow = n_sites)
-# n_species * n_traits matix of trait variables
+# n_species * n_traits matrix of trait variables
 traits <- matrix(rnorm(n_species * n_traits), nrow = n_species)
 # n_sites * n_species matrix of observed occupancy
 occupancy <- matrix(rbinom(n_sites * n_species, 1, 0.5), nrow = n_sites)
@@ -33,10 +33,10 @@ n_traits <- ncol(traits)
 # sub-model parameters have normal prior distributions
 g <- normal(0, 10, dim = c(n_env, n_traits))
 # parameters of the base model are a function of the parameters of the sub-model
-beta <-  g %*% t(traits) 
+beta <-  g %*% t(traits)
 
 # use the coefficients to get the model linear predictor
-linear_predictor <- env %*% beta 
+linear_predictor <- env %*% beta
 
 # use the logit link to get probabilities of occupancy
 p <- ilogit(linear_predictor)

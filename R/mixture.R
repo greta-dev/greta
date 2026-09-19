@@ -28,7 +28,7 @@
 #' @export
 #' @examples
 #' \dontrun{
-#' # a scalar variable following a strange bimodal distibution
+#' # a scalar variable following a strange bimodal distribution
 #' weights <- uniform(0, 1, dim = 3)
 #' a <- mixture(normal(-3, 0.5),
 #'   normal(3, 0.5),

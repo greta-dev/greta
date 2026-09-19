@@ -452,7 +452,7 @@ check_n_realisations <- function(
     if (not_scalar) {
       cli::cli_abort(
         c(
-          "{.code n_realisations is not a positive scalar interger}",
+          "{.code n_realisations is not a positive scalar integer}",
           "{.code n_realisations} must be a positive scalar integer giving \\
             the number of rows of the output",
           "x" = "We see {.code n_realisations} = {.code {target}} \\
