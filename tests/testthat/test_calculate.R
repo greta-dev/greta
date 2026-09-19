@@ -461,13 +461,15 @@ test_that("calculate errors nicely if nsim is invalid", {
 test_that("calculate() ignores a user object called batch_size", {
   skip_if_not(check_tf_version())
 
-  # greta-dev/greta#634: an object of this name in the caller's environment used
-  # to be picked up by lexical scoping inside the tf_environment, which is why
-  # that name is `.batch_size`, not `batch_size`. See if this errors.
-  batch_size <- 14
   x <- normal(0, 1)
   m <- model(x)
   draws <- mcmc(m, chains = 1, warmup = 10, n_samples = 10, verbose = FALSE)
 
+  # greta-dev/greta#634: an object of this name used to be picked up by lexical
+  # scoping inside the tf_environment, which is why that name is `.batch_size`.
+  # It has to go in the global environment: the tf_environment parent chain
+  # does not reach this frame, so a local `batch_size <- 14` does not reproduce
+  # it and makes this test vacuous.
+  rlang::local_bindings(batch_size = 14, .env = globalenv())
   expect_ok(calculate(x, values = draws, nsim = 1))
 })
