@@ -73,5 +73,9 @@ test_that("samplers pass geweke tests", {
 
   geweke_qq(geweke_hmc_slice, title = "slice sampler Geweke test")
 
-  testthat::expect_gte(geweke_hmc_slice$p.value, 0.005)
+  # check_geweke() returns the two sets of draws, not a test: without this the
+  # assertion reads a NULL p.value and errors instead of checking the sampler
+  geweke_stat_slice <- geweke_ks(geweke_hmc_slice)
+
+  testthat::expect_gte(geweke_stat_slice$p.value, 0.005)
 })
