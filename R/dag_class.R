@@ -16,6 +16,12 @@ dag_class <- R6Class(
     compile = NA,
     trace_names = NULL,
 
+    # one tf$Variable per data node, keyed by tf_name. These live on the dag
+    # rather than in tf_environment because the three tf_function assembly
+    # sites swap that environment out per trace, and a variable has to outlive
+    # the trace that reads it. greta-dev/greta#739
+    data_variables = list(),
+
     # create a dag from some target nodes
     initialize = function(
       target_greta_arrays,
@@ -37,6 +43,89 @@ dag_class <- R6Class(
       self$define_tf_log_prob_function()
     },
 
+    # back each data node with a tf$Variable, so set_data_value() can swap its
+    # value without retracing anything that reads it: a tf_function captures a
+    # variable by reference, where a constant is baked into the trace.
+    # greta-dev/greta#739
+    define_data_variables = function() {
+      # two dags want constants instead, and get them by having no variable to
+      # find. as_tf_function() builds its sub-dag inside a trace, where
+      # creating a variable is an error - asked of TF directly, since that
+      # sub-dag is built before as_tf_function() sets its flag. calculate()
+      # rebuilds a dag per call and never swaps data
+      if (tf$inside_function() || !is.null(greta_stash$data_as_constants)) {
+        return(invisible(self))
+      }
+
+      data_nodes <- self$node_list[self$node_types == "data"]
+
+      for (name in names(data_nodes)) {
+        value <- add_first_dim(data_nodes[[name]]$value())
+        variable <- self$data_variables[[name]]
+
+        if (is.null(variable)) {
+          self$data_variables[[name]] <- tf$Variable(
+            initial_value = value,
+            dtype = tf_float(),
+            # data is not a parameter: were it trainable, opt() would optimise
+            # the data alongside the free state
+            trainable = FALSE
+          )
+        } else {
+          # refresh rather than replace, so that setting a node's value and
+          # rebuilding still changes what the graph computes. Without this the
+          # variable keeps its original value and the rebuild silently has no
+          # effect - the two ways of changing data have to agree
+          variable$assign(value)
+        }
+      }
+
+      invisible(self)
+    },
+
+    # swap the value behind a data greta array, without retracing anything that
+    # reads it
+    set_data_value = function(x, value) {
+      node <- if (is.greta_array(x)) get_node(x) else x
+
+      if (!is.data_node(node)) {
+        cli::cli_abort("{.arg x} must be data.")
+      }
+
+      variable <- self$data_variables[[node$unique_name]]
+      if (is.null(variable)) {
+        cli::cli_abort(
+          c(
+            "this model holds its data as constants, so it cannot be swapped.",
+            i = "{.fn calculate} and {.fn as_tf_function} build dags that way \\
+                 deliberately."
+          )
+        )
+      }
+
+      # a variable's shape is fixed, which is the price of not retracing. Catch
+      # that here rather than letting TensorFlow raise it
+      value <- as_2d_array(value)
+      if (!identical(dim(value), node$dim)) {
+        cli::cli_abort(
+          c(
+            "{.arg value} must have the same dimensions as the data it \\
+             replaces.",
+            x = "Replacing data of dimension {.val {pretty_dim(node$dim)}} \\
+                 with a value of dimension {.val {pretty_dim(value)}}.",
+            i = "Changing the dimensions would mean rebuilding the graph."
+          )
+        )
+      }
+
+      # write through to the node as well. The node is the source of truth: a
+      # later rebuild refreshes variables from it, so without this the rebuild
+      # would quietly revert the value set here
+      node$value(value)
+      variable$assign(add_first_dim(value))
+      invisible(self)
+    },
+
     define_tf_trace_values_batch = function() {
       self$tf_trace_values_batch <- tensorflow::tf_function(
         f = self$define_trace_values_batch
@@ -44,6 +133,11 @@ dag_class <- R6Class(
     },
 
     define_tf_log_prob_function = function() {
+      # refresh the variables from the node values, so that the older way of
+      # changing data - set the node value, then rebuild - still works. This is
+      # a no-op after set_data_value(), which writes through to the node
+      self$define_data_variables()
+
       # no input_signature, so this retraces once per distinct batch shape and
       # then caches - bounded by how many chain counts a session uses, not by
       # how often it is called. Measured, so it is not the source of the
@@ -70,11 +164,6 @@ dag_class <- R6Class(
     # does not - it builds into the live environment and leaves its tensors there.
     new_tf_environment = function() {
       self$tf_environment <- new.env()
-      # vestigial TF1 feed_dict plumbing - written, never read:
-      # greta-dev/greta#739
-      self$tf_environment$all_forward_data_list <- list()
-      self$tf_environment$all_sampling_data_list <- list()
-      self$tf_environment$hybrid_data_list <- list()
     },
 
     # return a list of nodes connected to those in the target node list
@@ -552,19 +641,6 @@ dag_class <- R6Class(
 
       parameters
     },
-    # vestigial TF1 feed_dict plumbing. The lists are written by node_types.R
-    # and sampler_class.R and read by nothing - get_tf_data_list() has no
-    # callers in greta or in any extension package, and removing both writers
-    # leaves the test suite green. greta-dev/greta#739 to remove or repurpose.
-    get_tf_data_list = function() {
-      data_list_name <- glue::glue("{self$mode}_data_list")
-      self$tf_environment[[data_list_name]]
-    },
-    set_tf_data_list = function(element_name, value) {
-      data_list_name <- glue::glue("{self$mode}_data_list")
-      self$tf_environment[[data_list_name]][[element_name]] <- value
-    },
-
     # get adjusted joint log density across the whole dag
     log_density = function() {
       res <- cleanly(self$tf_environment$joint_density_adj)
