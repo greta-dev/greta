@@ -16,10 +16,8 @@ dag_class <- R6Class(
     compile = NA,
     trace_names = NULL,
 
-    # one tf$Variable per data node, keyed by tf_name. These live on the dag
-    # rather than in tf_environment because the three tf_function assembly
-    # sites swap that environment out per trace, and a variable has to outlive
-    # the trace that reads it. greta-dev/greta#739
+    # one tf$Variable per mutable data node, keyed by unique_name. Not held in
+    # tf_environment, which is swapped out per trace. greta-dev/greta#739
     data_variables = list(),
 
     # create a dag from some target nodes
@@ -48,19 +46,19 @@ dag_class <- R6Class(
     # variable by reference, where a constant is baked into the trace.
     # greta-dev/greta#739
     define_data_variables = function() {
-      # two dags want constants instead, and get them by having no variable to
-      # find. as_tf_function() builds its sub-dag inside a trace, where
-      # creating a variable is an error - asked of TF directly, since that
-      # sub-dag is built before as_tf_function() sets its flag. calculate()
-      # rebuilds a dag per call and never swaps data
+      # calculate() and as_tf_function() set the flag before building their dag,
+      # so its data nodes find no variable and fall back to constants.
+      # tf$inside_function() is the backstop: creating a tf$Variable inside a
+      # trace is an error
       if (tf$inside_function() || !is.null(greta_stash$data_as_constants)) {
         return(invisible(self))
       }
 
       data_nodes <- self$node_list[self$node_types == "data"]
+      mutable_nodes <- Filter(function(node) node$mutable, data_nodes)
 
-      for (name in names(data_nodes)) {
-        value <- add_first_dim(data_nodes[[name]]$value())
+      for (name in names(mutable_nodes)) {
+        value <- add_first_dim(mutable_nodes[[name]]$value())
         variable <- self$data_variables[[name]]
 
         if (is.null(variable)) {
@@ -85,44 +83,26 @@ dag_class <- R6Class(
 
     # swap the value behind a data greta array, without retracing anything that
     # reads it
-    set_data_value = function(x, value) {
+    set_data_value = function(
+      x,
+      value,
+      arg = rlang::caller_arg(x),
+      call = rlang::current_env()
+    ) {
       node <- if (is.greta_array(x)) get_node(x) else x
+      check_can_replace_data(node, self, arg = arg, call = call)
 
-      if (!is.data_node(node)) {
-        cli::cli_abort("{.arg x} must be data.")
-      }
+      # coerced the way as_data() coerces, so the replacement clears the same
+      # bar the original did. Assigned unchecked, a missing value goes straight
+      # into the variable and every density downstream returns NA
+      value <- get_node(as_data(value))$value()
+      check_replacement_dim(value, node, call = call)
 
-      variable <- self$data_variables[[node$unique_name]]
-      if (is.null(variable)) {
-        cli::cli_abort(
-          c(
-            "this model holds its data as constants, so it cannot be swapped.",
-            i = "{.fn calculate} and {.fn as_tf_function} build dags that way \\
-                 deliberately."
-          )
-        )
-      }
-
-      # a variable's shape is fixed, which is the price of not retracing. Catch
-      # that here rather than letting TensorFlow raise it
-      value <- as_2d_array(value)
-      if (!identical(dim(value), node$dim)) {
-        cli::cli_abort(
-          c(
-            "{.arg value} must have the same dimensions as the data it \\
-             replaces.",
-            x = "Replacing data of dimension {.val {pretty_dim(node$dim)}} \\
-                 with a value of dimension {.val {pretty_dim(value)}}.",
-            i = "Changing the dimensions would mean rebuilding the graph."
-          )
-        )
-      }
-
-      # write through to the node as well. The node is the source of truth: a
-      # later rebuild refreshes variables from it, so without this the rebuild
-      # would quietly revert the value set here
+      # the node is the source of truth: a later rebuild refreshes variables
+      # from it, so without this write-through the rebuild would quietly revert
+      # the value set here
       node$value(value)
-      variable$assign(add_first_dim(value))
+      self$data_variables[[node$unique_name]]$assign(add_first_dim(value))
       invisible(self)
     },
 

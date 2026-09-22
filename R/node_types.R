@@ -2,6 +2,7 @@ data_node <- R6Class(
   "data_node",
   inherit = node,
   public = list(
+    mutable = FALSE,
     initialize = function(data) {
       # coerce to an array with 2+ dimensions
       data <- as_2d_array(data)
@@ -43,7 +44,7 @@ data_node <- R6Class(
         }
 
         # expand up to batch size - so we can run multiple chains
-        tiling <- c(tfe$.batch_size, rep(1L, n_dim(self$value())))
+        tiling <- c(tfe$.batch_size, rep(1L, length(self$dim)))
         batched_tensor <- tf$tile(unbatched_tensor, tiling)
       }
 

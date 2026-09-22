@@ -10,6 +10,11 @@
 #'   converted if they contain missing (`NA`) or infinite (`-Inf` or
 #'   `Inf`) values.
 #' @return A data `greta_array` object.
+#'
+#' @seealso [as_data_mutable()] to declare data you intend to replace later
+#'   with [`data_values<-`], so the same model can be fitted to more than one
+#'   dataset without being rebuilt; `vignette("mutable_data", "greta")` works
+#'   that through end to end.
 #' @export
 #' @examples
 #' \dontrun{

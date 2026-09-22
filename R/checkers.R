@@ -983,12 +983,16 @@ check_if_greta_array_in_mcmc <- function(x, call = rlang::caller_env()) {
   }
 }
 
-check_if_greta_model <- function(x, call = rlang::caller_env()) {
+check_if_greta_model <- function(
+  x,
+  arg = rlang::caller_arg(x),
+  call = rlang::caller_env()
+) {
   if (!is.greta_model(x)) {
     cli::cli_abort(
       message = c(
-        "{.var x} must be a {.cls greta_model}",
-        "But {.var x} is {.cls {class(x)}}"
+        "{.arg {arg}} must be a {.cls greta_model}",
+        "But {.arg {arg}} is {.cls {class(x)}}"
       ),
       call = call
     )
@@ -2220,6 +2224,65 @@ inform_if_local_parallel_multiple_samplers <- function(
   }
 }
 
+
+check_can_replace_data <- function(
+  node,
+  dag,
+  arg = rlang::caller_arg(node),
+  call = rlang::caller_env()
+) {
+  if (!is.data_node(node)) {
+    cli::cli_abort("{.arg {arg}} must be data", call = call)
+  }
+
+  # checked before mutability, so that a greta array declared with
+  # as_data_mutable() but belonging to another model is not reported as
+  # something the user forgot to declare
+  if (!node_in_dag(node, dag)) {
+    cli::cli_abort("{.arg {arg}} is not part of this model", call = call)
+  }
+
+  if (!node$mutable) {
+    cli::cli_abort(
+      message = c(
+        "{.arg {arg}} is not mutable data, so it cannot be replaced",
+        i = "Declare it with {.fn as_data_mutable} rather than {.fn as_data}"
+      ),
+      call = call
+    )
+  }
+
+  # the graph already reads a constant for it, so a variable assigned now would
+  # not be read
+  if (is.null(dag$data_variables[[node$unique_name]])) {
+    cli::cli_abort(
+      message = c(
+        "{.arg {arg}} was declared mutable after this model was built",
+        i = "Build the model again to replace its values"
+      ),
+      call = call
+    )
+  }
+}
+
+check_replacement_dim <- function(
+  value,
+  node,
+  arg = rlang::caller_arg(value),
+  call = rlang::caller_env()
+) {
+  if (!identical(dim(value), node$dim)) {
+    cli::cli_abort(
+      message = c(
+        "{.arg {arg}} must have the same dimensions as the data it replaces",
+        "x" = "We see dimensions: {.val {pretty_dim(value)}}",
+        "i" = "But we expect dimensions: {.val {pretty_dim(node$dim)}}",
+        "i" = "Changing the dimensions would mean rebuilding the graph"
+      ),
+      call = call
+    )
+  }
+}
 
 checks_module <- function() {
   module(
