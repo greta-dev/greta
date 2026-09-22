@@ -650,10 +650,13 @@ compare_iid_samples <- function(
   testthat::expect_gte(test_result$p.value, p_value_threshold)
 }
 
-# Are the Geweke checks switched on? They rebuild the log prob tf_function once
-# per iteration, so they run in hours rather than minutes and cannot sit in the
-# ordinary suite. CI sets GRETA_GEWEKE, so nobody has to remember to; see
-# release_bullets() for running them by hand.
+# Are the Geweke checks switched on? They are stochastic - each sampler is
+# checked at p >= 0.005, so across three roughly one run in 70 fails by chance -
+# which is why they stay out of R CMD check, where that would read as a random
+# CRAN failure. Speed is no longer the reason: since #739 gave them a data
+# interface they take about 40 seconds rather than half an hour. CI sets
+# GRETA_GEWEKE, so nobody has to remember to; see release_bullets() for running
+# them by hand.
 skip_if_not_geweke <- function() {
   if (identical(Sys.getenv("GRETA_GEWEKE"), "true")) {
     return(invisible(TRUE))
