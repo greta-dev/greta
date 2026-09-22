@@ -6,20 +6,13 @@
 # from its target: TensorFlow Probability 0.25.0 silently changed how
 # lkj_correlation() and wishart() draw, and nothing else in the suite noticed.
 #
-# It runs here rather than in the ordinary suite because it is stochastic. Each
-# sampler is checked at p >= 0.005, so across three roughly one run in 70 fails
-# by chance. That is tolerable for a check nobody has to merge past, and not
-# tolerable inside R CMD check, where it would surface as a random CRAN
-# failure. Being slow is no longer a reason: the three samplers take about 40
-# seconds at niter = 2000, down from roughly half an hour, because the loop no
-# longer rebuilds the log prob tf_function once per iteration -- see #739.
+# Runs here and not in the ordinary suite because it is stochastic, with each
+# sampler checked at p >= 0.005, so a small chance of failure. The loop no
+# longer rebuilds log prob tf_function per iteration, see #842
 #
-# On pull requests that touch the code it tests, and weekly as a backstop for
-# anything that reaches main another way. Tuesday, so a failure is waiting at
-# the start of a working week rather than over a weekend, and away from
-# install-check's Saturday run so two reds are never read as one problem.
-#
-# Deliberately not a required check, for the one-in-70 reason above.
+# Runs on PRs touching the code it tests, plus weekly as a backup, on Tuesday,
+# so a failure is at the start of a working week rather a weekend, and away from
+# install-check's Saturday run so there is some separation.
 
 on:
   pull_request:
@@ -37,14 +30,12 @@ jobs:
   geweke-checks:
     name: samplers sample from the right distribution
     runs-on: ubuntu-latest
-    # generous next to a 40 second test, because the bulk of the job is
-    # installing dependencies on a cache miss
+    # The bulk of the job is installing dependencies on a cache miss
     timeout-minutes: 60
 
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
-      # quoted: the gate compares against the string "true", and an unquoted
-      # YAML boolean is a needless thing to have to reason about
+      # quoted: the gate compares against the string "true"
       GRETA_GEWEKE: 'true'
 
     steps:
@@ -59,7 +50,6 @@ jobs:
         with:
           extra-packages: local::. any::devtools
 
-      # the same command release_bullets() puts on the release checklist, so
-      # what CI runs and what a maintainer runs by hand cannot drift apart
+      # release_bullets() puts on checklist, linking CI and maintainer runs
       - name: Run the Geweke checks
         run: Rscript -e 'devtools::test(filter = "posteriors_geweke")'
