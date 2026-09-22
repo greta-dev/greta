@@ -1,4 +1,11 @@
 
 *DS_Store
+
+# Rendered vignettes. The .Rmd is the source; these regenerate.
 *.html
+
+# knitr's purled code from each vignette, regenerated on every build.
+# EXCEPTION: precompute.R is source, not output - it is what knits the
+# expensive .Rmd.orig vignettes into the .Rmd files we commit.
 *.R
+!precompute.R
