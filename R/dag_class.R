@@ -412,72 +412,56 @@ dag_class <- R6Class(
     ) {
       which_objective <- match.arg(which_objective)
 
-      ga_names <- names(nodes)
-
-      ## TF1/2 retracing
-      ## This is a location where retracting happens in `opt`
-      hessian_list <- lapply(
-        X = nodes,
-        self$calculate_one_hessian,
-        free_state = free_state,
-        which_objective = which_objective
-      )
-      # assign names and return
-      names(hessian_list) <- ga_names
-      hessian_list
-    },
-
-    calculate_one_hessian = function(
-      node,
-      free_state,
-      which_objective = c(
-        "adjusted",
-        "unadjusted"
-      )
-    ) {
-      which_objective <- match.arg(which_objective)
-
-      # temporarily define a new environment
+      # one graph build for all the targets, rather than one each.
+      # define_tf() and define_joint_density() cost O(model size), so calling
+      # them per node made opt(hessian = TRUE) quadratic in the number of
+      # targets, and traced a fresh pfor every time. greta-dev/greta#546
       tfe_old <- self$tf_environment
       on.exit(self$tf_environment <- tfe_old)
       tfe <- self$tf_environment <- new.env()
-
-      # put the free state in the environment, and build out the tf graph
       tfe$free_state <- free_state
 
-      # get names and dimensions of target greta arrays
-      ga_dim <- node$dim
-      tf_name <- self$tf_name(node)
-
-      # we now make all of the operations define themselves now
-      with(tf$GradientTape() %as% tape_1, {
+      # tape_1 is persistent because TensorFlow refuses a jacobian with
+      # experimental_use_pfor set to FALSE on a tape that is not - a
+      # requirement of the call below, rather than a convenience. tape_2 is
+      # read once, so it needs no such thing
+      with(tf$GradientTape(persistent = TRUE) %as% tape_1, {
+        # only these two create tensors, so only these two need recording;
+        # fetching them afterwards is just a lookup
         with(tf$GradientTape() %as% tape_2, {
           self$define_tf()
-          # define the densities
           self$define_joint_density()
-
-          xs <- get(tf_name, tfe)
-
-          objectives <- list(
-            adjusted = tfe$joint_density_adj,
-            unadjusted = tfe$joint_density
-          )
-
-          # return either of the densities, or a list of both
-          y <- switch(
-            which_objective,
-            adjusted = objectives$adjusted,
-            unadjusted = objectives$unadjusted
-          )
         })
-        g <- tape_2$gradient(y, xs)
+
+        xs_list <- lapply(nodes, self$get_tf_object)
+        y <- switch(
+          which_objective,
+          adjusted = tfe$joint_density_adj,
+          unadjusted = tfe$joint_density
+        )
+
+        # one backward pass over the tape for all the targets, not one each:
+        # gradient() takes a structure of sources and returns one to match.
+        # Unnamed, because reticulate turns a named list into a Python dict,
+        # and model(z, z) really does give two targets called "z"
+        g_list <- tape_2$gradient(y, unname(xs_list))
+        names(g_list) <- names(nodes)
       })
-      h <- tape_1$jacobian(g, xs)
 
-      # reshape from tensor to R dimensions
-      hessian <- array(h$numpy(), dim = hessian_dims(ga_dim))
-
-      hessian
+      # Map() takes its names from g_list
+      Map(
+        function(g, xs, node) {
+          h <- tape_1$jacobian(
+            g,
+            xs,
+            experimental_use_pfor = prod(node$dim) >= pfor_min_elements()
+          )
+          array(as.array(h), dim = hessian_dims(node$dim))
+        },
+        g_list,
+        xs_list,
+        nodes
+      )
     },
 
     ###<<<
