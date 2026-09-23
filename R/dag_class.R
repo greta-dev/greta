@@ -421,13 +421,14 @@ dag_class <- R6Class(
       tfe <- self$tf_environment <- new.env()
       tfe$free_state <- free_state
 
-      # both tapes are persistent because each is read once per target, and
-      # because TensorFlow refuses a jacobian with experimental_use_pfor set
-      # to FALSE on a tape that is not
+      # tape_1 is persistent because TensorFlow refuses a jacobian with
+      # experimental_use_pfor set to FALSE on a tape that is not - a
+      # requirement of the call below, rather than a convenience. tape_2 is
+      # read once, so it needs no such thing
       with(tf$GradientTape(persistent = TRUE) %as% tape_1, {
         # only these two create tensors, so only these two need recording;
         # fetching them afterwards is just a lookup
-        with(tf$GradientTape(persistent = TRUE) %as% tape_2, {
+        with(tf$GradientTape() %as% tape_2, {
           self$define_tf()
           self$define_joint_density()
         })
@@ -439,9 +440,15 @@ dag_class <- R6Class(
           unadjusted = tfe$joint_density
         )
 
-        g_list <- lapply(xs_list, function(xs) tape_2$gradient(y, xs))
+        # one backward pass over the tape for all the targets, not one each:
+        # gradient() takes a structure of sources and returns one to match.
+        # Unnamed, because reticulate turns a named list into a Python dict,
+        # and model(z, z) really does give two targets called "z"
+        g_list <- tape_2$gradient(y, unname(xs_list))
+        names(g_list) <- names(nodes)
       })
 
+      # Map() takes its names from g_list
       Map(
         function(g, xs, node) {
           h <- tape_1$jacobian(
