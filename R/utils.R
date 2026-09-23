@@ -475,9 +475,12 @@ build_sampler <- function(
   seed = get_seed(),
   compute_options
 ) {
-  ## TF1/2 retracing
-  ## This is where a retracing warning happens
-  ## in mcmc
+  # TensorFlow's retracing warning can appear from here, and it is a false
+  # positive. TF counts traces against the code location that created the
+  # function, and this line creates one short-lived tf_function per model, so
+  # building several models in a session looks to TF like one function being
+  # retraced. Measured over six models, each was traced exactly once - there
+  # is no repeated tracing to remove. greta-dev/greta#546
   sampler$class$new(
     initial_values,
     model,
