@@ -12,6 +12,27 @@ log_prob_at <- function(dag, free_state = matrix(0.5, 1, 1)) {
   as.numeric(dag$tf_log_prob_function_adjusted(free_state))
 }
 
+test_that("declaring data mutable backs it with a tf$Variable that follows it", {
+  skip_if_not(check_tf_version())
+
+  fixture <- mutable_model(rep(1, 5))
+  m <- fixture$model
+  key <- get_node(fixture$x)$unique_name
+
+  # the variable is what makes the data mutable: the graph holds a reference to
+  # it, so its value is the whole mechanism, and checking it needs no sampler
+  variable_value <- function() {
+    as.numeric(m$dag$data_variables[[key]]$numpy())
+  }
+
+  expect_equal(variable_value(), rep(1, 5))
+
+  data_values(m, fixture$x) <- rep(7, 5)
+
+  expect_equal(variable_value(), rep(7, 5))
+  expect_equal(as.numeric(get_node(fixture$x)$value()), rep(7, 5))
+})
+
 test_that("data can be swapped without retracing the log prob function", {
   skip_if_not(check_tf_version())
 
@@ -53,24 +74,35 @@ test_that("set_data_value() errors informatively on bad input", {
 test_that("swapped data reaches the sampler, not just the log prob", {
   skip_if_not(check_tf_version())
 
-  # a tight likelihood, so the posterior for z sits wherever the data is
+  # the posterior for z sits wherever the data is, but not so tightly that the
+  # chain cannot walk there: sd 1 over 10 observations puts the posterior sd
+  # near 0.32, and the swap below moves the mean about six of those
   x <- as_data_mutable(rep(0, 10))
   z <- normal(0, 10)
-  distribution(x) <- normal(z, 0.1)
+  distribution(x) <- normal(z, 1)
   m <- model(z)
 
   draws <- mcmc(m, chains = 1, warmup = 200, n_samples = 100, verbose = FALSE)
   before <- mean(as.matrix(draws))
 
-  # move the data a long way. extra_samples() goes through the sampler's own
-  # traced function, not tf_log_prob_function, so this is the path that would
-  # silently keep sampling against stale data
-  m$dag$set_data_value(x, as.matrix(rep(5, 10)))
+  # extra_samples() goes through the sampler's own traced function, not
+  # tf_log_prob_function, so this is the path that would silently keep sampling
+  # against stale data. Keep the move modest: extra_samples() resumes with a
+  # step size tuned for the old posterior, and a jump of tens of posterior sds
+  # freezes the chain at 100% rejection, which looks exactly like stale data
+  m$dag$set_data_value(x, as.matrix(rep(2, 10)))
+
+  # the deterministic half: the variable the already-traced sampler reads now
+  # holds the new data, whatever the chain below then makes of it
+  key <- get_node(x)$unique_name
+  expect_equal(as.numeric(m$dag$data_variables[[key]]$numpy()), rep(2, 10))
+
   after_draws <- extra_samples(draws, n_samples = 300, verbose = FALSE)
   after <- mean(tail(as.matrix(after_draws), 100))
 
-  expect_lt(abs(before), 1)
-  expect_gt(after, 3)
+  # measured over 8 runs: before spans -0.05 to 0.11, after 1.90 to 2.01
+  expect_lt(abs(before), 0.5)
+  expect_gt(after, 1)
 })
 
 test_that("setting a node value and rebuilding still changes the graph", {

@@ -3,6 +3,18 @@ data_node <- R6Class(
   inherit = node,
   public = list(
     mutable = FALSE,
+
+    # say so when printed, using the same word set_data_value()'s error uses:
+    # whether an array can be replaced is invisible otherwise, and printing it
+    # is the first thing anyone does after hitting "is not mutable data"
+    cli_description = function() {
+      text <- super$cli_description()
+      if (self$mutable) {
+        text <- paste("mutable", text)
+      }
+      text
+    },
+
     initialize = function(data) {
       # coerce to an array with 2+ dimensions
       data <- as_2d_array(data)
