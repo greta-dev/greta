@@ -412,78 +412,49 @@ dag_class <- R6Class(
     ) {
       which_objective <- match.arg(which_objective)
 
-      ga_names <- names(nodes)
-
-      ## TF1/2 retracing
-      ## This is a location where retracting happens in `opt`
-      hessian_list <- lapply(
-        X = nodes,
-        self$calculate_one_hessian,
-        free_state = free_state,
-        which_objective = which_objective
-      )
-      # assign names and return
-      names(hessian_list) <- ga_names
-      hessian_list
-    },
-
-    calculate_one_hessian = function(
-      node,
-      free_state,
-      which_objective = c(
-        "adjusted",
-        "unadjusted"
-      )
-    ) {
-      which_objective <- match.arg(which_objective)
-
-      # temporarily define a new environment
+      # one graph build for all the targets, rather than one each.
+      # define_tf() and define_joint_density() cost O(model size), so calling
+      # them per node made opt(hessian = TRUE) quadratic in the number of
+      # targets, and traced a fresh pfor every time. greta-dev/greta#546
       tfe_old <- self$tf_environment
       on.exit(self$tf_environment <- tfe_old)
       tfe <- self$tf_environment <- new.env()
-
-      # put the free state in the environment, and build out the tf graph
       tfe$free_state <- free_state
 
-      # get names and dimensions of target greta arrays
-      ga_dim <- node$dim
-      tf_name <- self$tf_name(node)
-
-      # we now make all of the operations define themselves now.
-      # persistent, which TensorFlow requires before it will take a jacobian
-      # without pfor - see the call below
+      # both tapes are persistent because each is read once per target, and
+      # because TensorFlow refuses a jacobian with experimental_use_pfor set
+      # to FALSE on a tape that is not
       with(tf$GradientTape(persistent = TRUE) %as% tape_1, {
+        # only these two create tensors, so only these two need recording;
+        # fetching them afterwards is just a lookup
         with(tf$GradientTape(persistent = TRUE) %as% tape_2, {
           self$define_tf()
-          # define the densities
           self$define_joint_density()
-
-          xs <- get(tf_name, tfe)
-
-          objectives <- list(
-            adjusted = tfe$joint_density_adj,
-            unadjusted = tfe$joint_density
-          )
-
-          # return either of the densities, or a list of both
-          y <- switch(
-            which_objective,
-            adjusted = objectives$adjusted,
-            unadjusted = objectives$unadjusted
-          )
         })
-        g <- tape_2$gradient(y, xs)
+
+        xs_list <- lapply(nodes, self$get_tf_object)
+        y <- switch(
+          which_objective,
+          adjusted = tfe$joint_density_adj,
+          unadjusted = tfe$joint_density
+        )
+
+        g_list <- lapply(xs_list, function(xs) tape_2$gradient(y, xs))
       })
-      h <- tape_1$jacobian(
-        g,
-        xs,
-        experimental_use_pfor = prod(ga_dim) >= pfor_min_elements()
+
+      Map(
+        function(g, xs, node) {
+          h <- tape_1$jacobian(
+            g,
+            xs,
+            experimental_use_pfor = prod(node$dim) >= pfor_min_elements()
+          )
+          array(as.array(h), dim = hessian_dims(node$dim))
+        },
+        g_list,
+        xs_list,
+        nodes
       )
-
-      # reshape from tensor to R dimensions
-      hessian <- array(h$numpy(), dim = hessian_dims(ga_dim))
-
-      hessian
     },
 
     ###<<<
