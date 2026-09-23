@@ -449,9 +449,11 @@ dag_class <- R6Class(
       ga_dim <- node$dim
       tf_name <- self$tf_name(node)
 
-      # we now make all of the operations define themselves now
-      with(tf$GradientTape() %as% tape_1, {
-        with(tf$GradientTape() %as% tape_2, {
+      # we now make all of the operations define themselves now.
+      # persistent, which TensorFlow requires before it will take a jacobian
+      # without pfor - see the call below
+      with(tf$GradientTape(persistent = TRUE) %as% tape_1, {
+        with(tf$GradientTape(persistent = TRUE) %as% tape_2, {
           self$define_tf()
           # define the densities
           self$define_joint_density()
@@ -472,7 +474,11 @@ dag_class <- R6Class(
         })
         g <- tape_2$gradient(y, xs)
       })
-      h <- tape_1$jacobian(g, xs)
+      h <- tape_1$jacobian(
+        g,
+        xs,
+        experimental_use_pfor = prod(ga_dim) >= pfor_min_elements()
+      )
 
       # reshape from tensor to R dimensions
       hessian <- array(h$numpy(), dim = hessian_dims(ga_dim))

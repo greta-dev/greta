@@ -274,6 +274,31 @@ test_that("TF opt returns multiple hessians", {
   expect_true(all(abs(approx_sd - sd) < 1e-9))
 })
 
+test_that("hessians are right on both sides of the pfor threshold", {
+  skip_if_not(check_tf_version())
+
+  # the jacobian vectorises with pfor at pfor_min_elements() and uses a
+  # while_loop below it, so take one target either side. Read the threshold
+  # off rather than hardcoding it: moving it would otherwise stop this test
+  # covering both routes without saying so. An IID normal's hessian is
+  # diagonal with entries 1 / sd^2 whichever route computed it
+  recovered_sd <- function(d) {
+    sd <- runif(d)
+    x <- rnorm(d, 2, 0.1)
+    z <- variable(dim = d)
+    distribution(x) <- normal(z, sd)
+    m <- model(z)
+    o <- opt(m, hessian = TRUE, optimiser = adam())
+    list(recovered = sqrt(1 / diag(drop(o$hessian$z))), sd = sd)
+  }
+
+  while_loop <- recovered_sd(pfor_min_elements() - 95)
+  expect_equal(while_loop$recovered, while_loop$sd)
+
+  pfor <- recovered_sd(pfor_min_elements() + 20)
+  expect_equal(pfor$recovered, pfor$sd)
+})
+
 test_that("TFP opt returns a hessian", {
   skip_if_not(check_tf_version())
 

@@ -1055,3 +1055,16 @@ user_agrees <- function(ask, question) {
   }
   yesno::yesno(question)
 }
+
+# how many elements a target greta array needs before dag$hessians() asks
+# TensorFlow to vectorise its jacobian with pfor. pfor traces a fresh function
+# on every call, so it only pays once there is enough to vectorise over.
+# Measured on TensorFlow 2.21.0, macOS arm64: twenty scalar targets took 1.12s
+# by while_loop against pfor's 12.09s, while one target of 400 elements went
+# the other way, 2.38s against 2.07s, and the crossover sat between 20 and 100
+# elements. That will move with TensorFlow releases and nothing will say so,
+# so re-measure before trusting it outside the range in DESCRIPTION.
+# greta-dev/greta#546
+pfor_min_elements <- function() {
+  100L
+}
