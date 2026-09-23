@@ -103,32 +103,6 @@ jobs:
       - name: Install miniconda
         run: reticulate::install_miniconda()
 
-      # TEMPORARY, greta-dev/greta#842. test_functions.R fails on macOS with
-      # "fields must be installed" while fields is installed and every other
-      # Suggests works. requireNamespace(quietly = TRUE) throws the reason
-      # away, so the logs cannot say why. Print it, before and after greta
-      # touches python, then delete this step.
-      - name: Why can fields not load?
-        if: always()
-        run: |
-          report <- function(when) {
-            try(unloadNamespace("fields"), silent = TRUE)
-            msg <- tryCatch(
-              {
-                loadNamespace("fields")
-                "OK"
-              },
-              error = conditionMessage
-            )
-            cat("fields ", when, ": ", msg, "\n\n", sep = "")
-          }
-          cat("libPaths:\n"); print(.libPaths())
-          cat("\nfound at: ", find.package("fields", quiet = TRUE), "\n\n")
-          report("before greta python")
-          try(greta::greta_sitrep(), silent = TRUE)
-          report("after greta python")
-        shell: Rscript {0}
-
       - uses: r-lib/actions/check-r-package@v2
         with:
           upload-snapshots: true
