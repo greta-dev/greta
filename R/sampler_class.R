@@ -471,9 +471,8 @@ sampler <- R6Class(
       dag <- self$model$dag
       tfe <- dag$tf_environment
 
-      # seeds TensorFlow from self$seed, which came from R's RNG - this is what
-      # makes set.seed() reach the sampler. It has to happen here, during
-      # tracing, because that is when the kernel's ops derive their seeds
+      # here, during tracing, because that is when the kernel's ops derive
+      # their seeds from the global one
       self$set_tf_seed()
 
       sampler_kernel <- self$define_tf_kernel(

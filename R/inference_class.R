@@ -83,24 +83,14 @@ inference <- R6Class(
       }
     },
 
-    # Seed TensorFlow from the seed this sampler drew from R's RNG, so that
-    # set.seed() reaches the sampler. Called while the draws function is being
-    # traced, which is when the kernel's stateful ops derive their seeds from
-    # the global one - setting it later would be too late.
+    # Seeds TensorFlow from the seed this sampler drew from R's RNG, which is
+    # what makes set.seed() reach the sampler. Only the Python side: re-seeding
+    # R here would be circular, and would reset the draws HMC takes for its
+    # leapfrog count mid-run. Inlined rather than sharing a helper with
+    # set_all_seeds(), because this runs in future workers, which resolve free
+    # functions against their own installed greta.
     set_tf_seed = function() {
-      # Python and TensorFlow only - deliberately not set_all_seeds(), which
-      # calculate() uses.
-      #
-      # calculate() takes a `seed` argument that has to determine the result
-      # whatever R's stream was doing, so it seeds R too. mcmc() draws its seed
-      # *from* that stream, so the stream is already the source of truth and
-      # re-seeding it here would be circular - it would also reset the draws
-      # HMC takes from R for its leapfrog count partway through a run.
-      #
-      # Not tensorflow::set_random_seed() either: that sets
-      # CUDA_VISIBLE_DEVICES = -1 unless told otherwise and never puts it back,
-      # so one CPU run would hide the GPU from every later one. See #839.
-      reticulate::py_set_seed(self$seed)
+      reticulate::py_set_seed(self$seed, disable_hash_randomization = FALSE)
       tf$random$set_seed(self$seed)
     },
 
