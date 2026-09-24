@@ -759,13 +759,9 @@ p_theta_greta <- function(
     # sample x given theta
     x <- p_x_bar_theta(theta[i - 1])
 
-    # replace x in the node, and in the graph. The data node is backed by a
-    # tf$Variable, so assigning to it changes what the already-traced log prob
-    # computes: no rebuild, which is what made this loop slow.
-    # greta-dev/greta#739
-    model$dag$set_data_value(data, as.matrix(x))
+    data_values(model, data) <- x
 
-    # take anoteher sample
+    # take another sample
     draws <- extra_samples(
       draws,
       n_samples = 1,
