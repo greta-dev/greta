@@ -69,3 +69,39 @@
   )
   invisible(model)
 }
+
+# the data nodes `data_values<-` is allowed to change. Everything else a model
+# holds is a tf$constant, folded into the trace and not addressable afterwards
+mutable_data_nodes <- function(dag) {
+  data_nodes <- dag$node_list[dag$node_types == "data"]
+  is_mutable <- vapply(data_nodes, \(node) node$mutable, logical(1))
+  data_nodes[is_mutable]
+}
+
+new_data_variables <- function(values) {
+  lapply(values, new_data_variable)
+}
+
+new_data_variable <- function(value) {
+  tf$Variable(
+    initial_value = value,
+    dtype = tf_float(),
+    # data is not a parameter: were it trainable, opt() would optimise the data
+    # alongside the free state
+    trainable = FALSE
+  )
+}
+
+# refresh rather than replace, so that setting a node's value and rebuilding
+# still changes what the graph computes. A new variable would leave the traced
+# graph reading the old one, so the rebuild would silently have no effect - the
+# two ways of changing data have to agree
+refresh_data_variables <- function(variables, values) {
+  to_refresh <- variables[names(values)]
+  mapply(refresh_data_variable, to_refresh, values, SIMPLIFY = FALSE)
+  invisible(NULL)
+}
+
+refresh_data_variable <- function(variable, value) {
+  variable$assign(value)
+}

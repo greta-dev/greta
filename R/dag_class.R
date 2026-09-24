@@ -54,29 +54,20 @@ dag_class <- R6Class(
         return(invisible(self))
       }
 
-      data_nodes <- self$node_list[self$node_types == "data"]
-      mutable_nodes <- Filter(function(node) node$mutable, data_nodes)
+      node_values <- lapply(mutable_data_nodes(self), function(node) {
+        add_first_dim(node$value())
+      })
 
-      for (name in names(mutable_nodes)) {
-        value <- add_first_dim(mutable_nodes[[name]]$value())
-        variable <- self$data_variables[[name]]
+      has_data_variable <- names(node_values) %in% names(self$data_variables)
 
-        if (is.null(variable)) {
-          self$data_variables[[name]] <- tf$Variable(
-            initial_value = value,
-            dtype = tf_float(),
-            # data is not a parameter: were it trainable, opt() would optimise
-            # the data alongside the free state
-            trainable = FALSE
-          )
-        } else {
-          # refresh rather than replace, so that setting a node's value and
-          # rebuilding still changes what the graph computes. Without this the
-          # variable keeps its original value and the rebuild silently has no
-          # effect - the two ways of changing data have to agree
-          variable$assign(value)
-        }
-      }
+      self$data_variables <- c(
+        self$data_variables,
+        new_data_variables(node_values[!has_data_variable])
+      )
+      refresh_data_variables(
+        self$data_variables,
+        node_values[has_data_variable]
+      )
 
       invisible(self)
     },
