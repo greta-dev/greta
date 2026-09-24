@@ -180,6 +180,35 @@ test_that("mcmc() advances R's RNG rather than resetting it", {
   expect_false(identical(first, second))
 })
 
+test_that("calculate(nsim = ) keeps the same RNG contract as mcmc()", {
+  skip_if_not(check_tf_version())
+  x <- normal(0, 1)
+  draw <- function(...) as.numeric(calculate(x, nsim = 1, ...)[[1]])
+
+  # it draws its own seed from R's stream, so the same seed gives the same
+  # result and two unseeded calls differ
+  set.seed(1)
+  one <- draw()
+  set.seed(1)
+  two <- draw()
+  expect_identical(one, two)
+  expect_false(identical(draw(), draw()))
+
+  # and it advances the stream by that one draw rather than reseeding it from
+  # the seed it drew, which is what set_all_seeds() would otherwise leave behind
+  set.seed(1)
+  after_calculate <- {
+    invisible(draw())
+    runif(1)
+  }
+  set.seed(1)
+  after_one_draw <- {
+    invisible(get_seed())
+    runif(1)
+  }
+  expect_identical(after_calculate, after_one_draw)
+})
+
 test_that("chains are seeded distinctly and reproducibly", {
   skip_if_not(check_tf_version())
   x <- normal(0, 1)
