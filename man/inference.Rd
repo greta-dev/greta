@@ -221,11 +221,15 @@ parameters are in a vector, then split the vector up to define the model.
 The parameter vector can then be passed to model. See example.
 }
 \note{
-\code{set.seed()} is enough to make MCMC reproducible: greta draws its own
-seed from R's random number generator and passes that to TensorFlow, so
-both the initial values and the sampler are seeded.
-\code{\link[tensorflow:set_random_seed]{tensorflow::set_random_seed()}} also works, and gives the same result,
-because it sets R's seed too. See examples below.
+\code{set.seed()} is all you need to make MCMC reproducible: greta draws
+its own seed from R's random number generator and passes it to TensorFlow,
+so both the initial values and the sampler are seeded. See examples below.
+
+\code{\link[tensorflow:set_random_seed]{tensorflow::set_random_seed()}} gives identical results, because it sets
+R's seed too. It also disables the GPU for the rest of the session unless
+you pass \code{disable_gpu = FALSE} - its way of removing a source of
+non-reproducibility - where greta chooses the device per call with
+\code{compute_options}. So \code{set.seed()} is the better fit here.
 
 Note that this covers the random numbers, not the arithmetic. On a GPU,
 some TensorFlow operations accumulate in a non-deterministic order, so
@@ -300,7 +304,7 @@ m3 <- model(params)
 o <- opt(m3, hessian = TRUE)
 o$hessian
 
-# using set.seed or tensorflow::set_random_seed to set RNG for MCMC
+# set.seed() makes MCMC reproducible
 a <- normal(0, 1)
 y <- normal(a, 1)
 m <- model(y)
@@ -311,13 +315,13 @@ set.seed(12345)
 two <- mcmc(m, n_samples = 1, chains = 1)
 # same
 all.equal(as.numeric(one), as.numeric(two))
-tensorflow::set_random_seed(12345)
+
+# tensorflow::set_random_seed() gives the same draws, since it sets R's seed
+# too. Pass disable_gpu = FALSE, or it hides the GPU for the rest of the
+# session
+tensorflow::set_random_seed(12345, disable_gpu = FALSE)
 one_tf <- mcmc(m, n_samples = 1, chains = 1)
-tensorflow::set_random_seed(12345)
-two_tf <- mcmc(m, n_samples = 1, chains = 1)
-# same
-all.equal(as.numeric(one_tf), as.numeric(two_tf))
-# and the same as each other, since set_random_seed() sets R's seed too
+# same again
 all.equal(as.numeric(one), as.numeric(one_tf))
 
 }
