@@ -291,6 +291,11 @@ calculate_greta_mcmc_list <- function(
   # this is the free state MCMC object
   draws <- model_info$raw_draws
 
+  # calculate() rebuilds a dag per call and never swaps data, so data folds in
+  # as constants here, as it always has. greta-dev/greta#739
+  greta_stash$data_as_constants <- TRUE
+  on.exit(greta_stash$data_as_constants <- NULL, add = TRUE)
+
   # build a new dag from the targets
   dag <- dag_class$new(target, tf_float = tf_float)
   dag$mode <- ifelse(stochastic, "hybrid", "all_forward")
@@ -397,6 +402,10 @@ calculate_list <- function(target, values, nsim, tf_float, env) {
   }
 
   all_greta_arrays <- c(fixed_greta_arrays, target)
+
+  # as above: a throwaway dag, so constants rather than variables
+  greta_stash$data_as_constants <- TRUE
+  on.exit(greta_stash$data_as_constants <- NULL, add = TRUE)
 
   dag <- dag_class$new(all_greta_arrays, tf_float = tf_float)
 

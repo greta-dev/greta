@@ -650,10 +650,13 @@ compare_iid_samples <- function(
   testthat::expect_gte(test_result$p.value, p_value_threshold)
 }
 
-# Are the Geweke checks switched on? They rebuild the log prob tf_function once
-# per iteration, so they run in hours rather than minutes and cannot sit in the
-# ordinary suite. CI sets GRETA_GEWEKE, so nobody has to remember to; see
-# release_bullets() for running them by hand.
+# Are the Geweke checks switched on? They are stochastic - each sampler is
+# checked at p >= 0.005, so across three roughly one run in 70 fails by chance -
+# which is why they stay out of R CMD check, where that would read as a random
+# CRAN failure. Speed is no longer the reason: since #739 gave them a data
+# interface they take about 40 seconds rather than half an hour. CI sets
+# GRETA_GEWEKE, so nobody has to remember to; see release_bullets() for running
+# them by hand.
 skip_if_not_geweke <- function() {
   if (identical(Sys.getenv("GRETA_GEWEKE"), "true")) {
     return(invisible(TRUE))
@@ -756,19 +759,9 @@ p_theta_greta <- function(
     # sample x given theta
     x <- p_x_bar_theta(theta[i - 1])
 
-    # replace x in the node
-    dag <- model$dag
-    x_node <- get_node(data)
-    x_node$value(as.matrix(x))
+    data_values(model, data) <- x
 
-    # rewrite the log prob tf function, and the tf function for the posterior
-    # samples, now using this value of x (slow, but necessary in eager mode)
-    dag$tf_log_prob_function <- NULL
-    dag$define_tf_log_prob_function()
-    sampler <- attr(draws, "model_info")$samplers[[1]]
-    sampler$define_tf_evaluate_sample_batch()
-
-    # take anoteher sample
+    # take another sample
     draws <- extra_samples(
       draws,
       n_samples = 1,

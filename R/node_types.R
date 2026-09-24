@@ -2,6 +2,19 @@ data_node <- R6Class(
   "data_node",
   inherit = node,
   public = list(
+    mutable = FALSE,
+
+    # say so when printed, using the same word set_data_value()'s error uses:
+    # whether an array can be replaced is invisible otherwise, and printing it
+    # is the first thing anyone does after hitting "is not mutable data"
+    cli_description = function() {
+      text <- super$cli_description()
+      if (self$mutable) {
+        text <- paste("mutable", text)
+      }
+      text
+    },
+
     initialize = function(data) {
       # coerce to an array with 2+ dimensions
       data <- as_2d_array(data)
@@ -12,7 +25,6 @@ data_node <- R6Class(
     tf = function(dag) {
       tfe <- dag$tf_environment
       tf_name <- dag$tf_name(self)
-      unbatched_name <- glue::glue("{tf_name}_unbatched")
 
       mode <- dag$how_to_define(self)
 
@@ -22,42 +34,30 @@ data_node <- R6Class(
       }
 
       # if we're defining the forward mode graph, create either a constant or a
-      # placeholder
+      # variable
       if (mode == "forward") {
-        value <- self$value()
-        ndim <- n_dim(value)
-        shape <- to_shape(c(1, dim(value)))
-        value <- add_first_dim(value)
+        # calculate() needs the value folded into the trace, so it keeps the
+        # constant. Everywhere else the node reads its tf$Variable, which a
+        # tf_function captures by reference: assigning a new value then changes
+        # what the function computes without retracing it. greta-dev/greta#739
+        variable <- dag$data_variables[[self$unique_name]]
 
-        # under some circumstances we define data as constants, but normally as
-        # placeholders
-        using_constants <- !is.null(greta_stash$data_as_constants)
-
-        if (using_constants) {
-          unbatched_tensor <- tf$constant(
-            value = value,
+        unbatched_tensor <- if (
+          !is.null(greta_stash$data_as_constants) || is.null(variable)
+        ) {
+          value <- self$value()
+          tf$constant(
+            value = add_first_dim(value),
             dtype = tf_float(),
-            shape = shape
+            shape = to_shape(c(1, dim(value)))
           )
         } else {
-          # not a constant, so in principle substitutable - but still baked in
-          # at trace time. Swapping data without a rebuild is
-          # greta-dev/greta#739
-          unbatched_tensor <- tensorflow::as_tensor(
-            x = value,
-            shape = shape,
-            dtype = tf_float()
-          )
-          # write-only, see get_tf_data_list() in dag_class.R
-          dag$set_tf_data_list(unbatched_name, value)
+          variable
         }
 
         # expand up to batch size - so we can run multiple chains
-        tiling <- c(tfe$.batch_size, rep(1L, ndim))
+        tiling <- c(tfe$.batch_size, rep(1L, length(self$dim)))
         batched_tensor <- tf$tile(unbatched_tensor, tiling)
-
-        # put unbatched tensor in environment so it can be set
-        assign(unbatched_name, unbatched_tensor, envir = tfe)
       }
 
       assign(tf_name, batched_tensor, envir = tfe)

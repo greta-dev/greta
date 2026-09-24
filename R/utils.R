@@ -658,6 +658,15 @@ as_tf_function <- function(r_fun, ...) {
       }
     )
 
+    # this sub-dag defines its data as constants rather than tf$Variables, so
+    # the flag is set before it is built, not just before its nodes define
+    # themselves: dag_class$new() reads it in the constructor. Set after, this
+    # leaks a fresh variable per data node on every call that runs eagerly.
+    # greta-dev/greta#739
+    greta_stash$data_as_constants <- TRUE
+    # TODO explore changin this to previous state
+    on.exit(greta_stash$data_as_constants <- NULL)
+
     # create a sub-dag for these operations, from ga_dummies to ga_out
     if (!is.list(ga_out)) {
       ga_out <- list(ga_out)
@@ -680,15 +689,6 @@ as_tf_function <- function(r_fun, ...) {
     for (i in seq_along(tf_names)) {
       assign(tf_names[[i]], tensor_inputs[[i]], envir = sub_tfe)
     }
-
-    # have output node define_tf in the new environment, with data defined as
-    # constants
-    # trying to not get them to use placeholders
-    # (TF can have data as a placeholder or a constant)
-    # (using a constant is expensive, normally)
-    greta_stash$data_as_constants <- TRUE
-    # TODO explore changin this to previous state
-    on.exit(greta_stash$data_as_constants <- NULL)
 
     tf_out <- list()
     for (i in seq_along(ga_out)) {

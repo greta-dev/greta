@@ -1,3 +1,12 @@
+test_that("printing says whether data is mutable", {
+  skip_if_not(check_tf_version())
+
+  # whether an array can be replaced is otherwise invisible, and printing it is
+  # the first thing anyone does after hitting "is not mutable data"
+  expect_snapshot(as_data(matrix(1:4, nrow = 2)))
+  expect_snapshot(as_data_mutable(matrix(1:4, nrow = 2)))
+})
+
 test_that("print and summary work", {
   skip_if_not(check_tf_version())
 

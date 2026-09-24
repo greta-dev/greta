@@ -83,6 +83,8 @@ reference:
     contents:
       - structures
       - as_data
+      - as_data_mutable
+      - data_values
 
   - title: variables & distributions
     desc: Create variables and assign probability distributions over greta arrays
@@ -164,6 +166,7 @@ articles:
   - title: Examples
     contents:
       - example_models
+      - mutable_data
   - title: Analyses
     contents:
       - analyses/eight_schools

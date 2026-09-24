@@ -16,6 +16,10 @@ dag_class <- R6Class(
     compile = NA,
     trace_names = NULL,
 
+    # one tf$Variable per mutable data node, keyed by unique_name. Not held in
+    # tf_environment, which is swapped out per trace. greta-dev/greta#739
+    data_variables = list(),
+
     # create a dag from some target nodes
     initialize = function(
       target_greta_arrays,
@@ -37,6 +41,62 @@ dag_class <- R6Class(
       self$define_tf_log_prob_function()
     },
 
+    # back each data node with a tf$Variable, so set_data_value() can swap its
+    # value without retracing anything that reads it: a tf_function captures a
+    # variable by reference, where a constant is baked into the trace.
+    # greta-dev/greta#739
+    define_data_variables = function() {
+      # calculate() and as_tf_function() set the flag before building their dag,
+      # so its data nodes find no variable and fall back to constants.
+      # tf$inside_function() is the backstop: creating a tf$Variable inside a
+      # trace is an error
+      if (tf$inside_function() || !is.null(greta_stash$data_as_constants)) {
+        return(invisible(self))
+      }
+
+      node_values <- lapply(mutable_data_nodes(self), function(node) {
+        add_first_dim(node$value())
+      })
+
+      has_data_variable <- names(node_values) %in% names(self$data_variables)
+
+      self$data_variables <- c(
+        self$data_variables,
+        new_data_variables(node_values[!has_data_variable])
+      )
+      refresh_data_variables(
+        self$data_variables,
+        node_values[has_data_variable]
+      )
+
+      invisible(self)
+    },
+
+    # swap the value behind a data greta array, without retracing anything that
+    # reads it
+    set_data_value = function(
+      x,
+      value,
+      arg = rlang::caller_arg(x),
+      call = rlang::current_env()
+    ) {
+      node <- if (is.greta_array(x)) get_node(x) else x
+      check_can_replace_data(node, self, arg = arg, call = call)
+
+      # coerced the way as_data() coerces, so the replacement clears the same
+      # bar the original did. Assigned unchecked, a missing value goes straight
+      # into the variable and every density downstream returns NA
+      value <- get_node(as_data(value))$value()
+      check_replacement_dim(value, node, call = call)
+
+      # the node is the source of truth: a later rebuild refreshes variables
+      # from it, so without this write-through the rebuild would quietly revert
+      # the value set here
+      node$value(value)
+      self$data_variables[[node$unique_name]]$assign(add_first_dim(value))
+      invisible(self)
+    },
+
     define_tf_trace_values_batch = function() {
       self$tf_trace_values_batch <- tensorflow::tf_function(
         f = self$define_trace_values_batch
@@ -44,6 +104,11 @@ dag_class <- R6Class(
     },
 
     define_tf_log_prob_function = function() {
+      # refresh the variables from the node values, so that the older way of
+      # changing data - set the node value, then rebuild - still works. This is
+      # a no-op after set_data_value(), which writes through to the node
+      self$define_data_variables()
+
       # no input_signature, so this retraces once per distinct batch shape and
       # then caches - bounded by how many chain counts a session uses, not by
       # how often it is called. Measured, so it is not the source of the
@@ -70,11 +135,6 @@ dag_class <- R6Class(
     # does not - it builds into the live environment and leaves its tensors there.
     new_tf_environment = function() {
       self$tf_environment <- new.env()
-      # vestigial TF1 feed_dict plumbing - written, never read:
-      # greta-dev/greta#739
-      self$tf_environment$all_forward_data_list <- list()
-      self$tf_environment$all_sampling_data_list <- list()
-      self$tf_environment$hybrid_data_list <- list()
     },
 
     # return a list of nodes connected to those in the target node list
@@ -552,19 +612,6 @@ dag_class <- R6Class(
 
       parameters
     },
-    # vestigial TF1 feed_dict plumbing. The lists are written by node_types.R
-    # and sampler_class.R and read by nothing - get_tf_data_list() has no
-    # callers in greta or in any extension package, and removing both writers
-    # leaves the test suite green. greta-dev/greta#739 to remove or repurpose.
-    get_tf_data_list = function() {
-      data_list_name <- glue::glue("{self$mode}_data_list")
-      self$tf_environment[[data_list_name]]
-    },
-    set_tf_data_list = function(element_name, value) {
-      data_list_name <- glue::glue("{self$mode}_data_list")
-      self$tf_environment[[data_list_name]][[element_name]] <- value
-    },
-
     # get adjusted joint log density across the whole dag
     log_density = function() {
       res <- cleanly(self$tf_environment$joint_density_adj)

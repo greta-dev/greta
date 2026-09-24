@@ -1,3 +1,31 @@
+# printing says whether data is mutable
+
+    Code
+      as_data(matrix(1:4, nrow = 2))
+    Message
+      greta array <data>
+      
+    Output
+           [,1] [,2]
+      [1,]    1    3
+      [2,]    2    4
+    Message
+      
+
+---
+
+    Code
+      as_data_mutable(matrix(1:4, nrow = 2))
+    Message
+      greta array <mutable data>
+      
+    Output
+           [,1] [,2]
+      [1,]    1    3
+      [2,]    2    4
+    Message
+      
+
 # print and summary work
 
     Code

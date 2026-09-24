@@ -1,0 +1,186 @@
+---
+title: "Fitting one model to many datasets"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteIndexEntry{Fitting one model to many datasets}
+  %\usepackage[utf8]{inputenc}
+---
+
+
+
+When you write a greta model, like so:
+
+
+``` r
+x <- as_data(seq(0, 1, length.out = 30))
+y <- as_data(rnorm(30))
+
+int <- normal(0, 10)
+coef <- normal(0, 10)
+sd <- cauchy(0, 3, truncation = c(0, Inf))
+
+distribution(y) <- normal(int + coef * x, sd)
+
+m <- model(int, coef, sd)
+```
+
+Your data stays bound to the model. You can't do:
+
+
+``` r
+data_values(m, y) <- rnorm(30)
+#> Error in `data_values<-`:
+#> ! `y` is not mutable data, so it cannot be replaced
+#> ℹ Declare it with `as_data_mutable()` rather than `as_data()`
+```
+
+
+Usually, we don't need to do that, but sometimes it is useful to fit a model to many datasets.
+
+This came up in greta issue #181 from user [@howardnewyork](https://github.com/howardnewyork):
+
+> Is it possible to write a model, compile it, and then feed the compiled model
+> different data sets? This is useful if you are running the same model over
+> 100s of datasets.
+>
+> --- [greta issue #181](https://github.com/greta-dev/greta/issues/181)
+
+This was always possible, but slow, as greta has to construct
+the TensorFlow graph and TensorFlow has to trace it. Depending on what you were doing, this could really add up! We crafted a solution with: `as_data_mutable()`
+
+## Declaring data mutable
+
+Data normally enters greta under the hood as a TensorFlow *constant*. TensorFlow can fold a
+constant into the graph, which makes it fast, but it also means the value is
+baked in: changing it means building the graph again.
+
+`as_data_mutable()` holds the data in a TensorFlow *variable* instead. The
+graph reads a variable __by reference__, so replacing its value changes what the
+model computes without rebuilding anything.
+
+
+``` r
+n <- 30
+x <- as_data(seq(0, 1, length.out = n))
+y <- as_data_mutable(rnorm(n))
+```
+
+Only `y` is declared mutable, because only `y` will be replaced. `x` stays
+constant, and so do the numbers in the priors below.
+
+We made this opt-in, as there is some cost to using variables like this, and
+using constants is much faster. Essentially, variables have to be read, and copied out to
+one batch per chain, on every evaluation, which can add up for larger data. Declaring
+only what you will replace keeps that cost to the one array that needs it.
+
+The rest of the model is written exactly as usual - you can run MCMC on this.
+But we will talk about how to change out the data next.
+
+
+``` r
+int <- normal(0, 10)
+coef <- normal(0, 10)
+sd <- cauchy(0, 3, truncation = c(0, Inf))
+
+distribution(y) <- normal(int + coef * x, sd)
+
+m <- model(int, coef, sd)
+```
+
+## Fitting the same model to different data
+
+To fit the same model to different data, use `data_values()`, specifically `data_values<-`.
+This replaces the values behind a mutable greta array. The model
+object is modified in place, so the next call to `mcmc()` uses the new data.
+
+See for example:
+
+
+``` r
+simulations <- lapply(1:3, function(i) rnorm(n, mean = 2 * i))
+
+estimates <- vapply(
+  simulations,
+  function(d) {
+    data_values(m, y) <- d
+    draws <- mcmc(m, n_samples = 300, warmup = 300, chains = 2, verbose = FALSE)
+    mean(as.matrix(draws)[, "int"])
+  },
+  numeric(1)
+)
+
+round(estimates, 2)
+#> [1] 1.75 3.30 5.69
+```
+
+The posterior mean of the intercept tracks the mean of each dataset, and the
+model was built once.
+
+Note that the loop takes its estimate from each fit *before* moving on. That is
+deliberate. Because `m` is modified in place, it ends the loop holding the last
+dataset, and a saved `draws` object still points at it. The draws are plain
+numbers and keep their values, but `extra_samples()` resumes sampling against
+whatever the model holds now — no errors, and carrying on against the wrong posterior, usually freezing because the step size was tuned for the old one.
+
+If you need to keep whole fits rather than summaries, build a model per dataset.
+
+## The dimensions must be the same as the original data
+
+A TensorFlow variable has a fixed shape. That is the price of not retracing,
+and greta checks it rather than letting TensorFlow raise a less helpful error
+later:
+
+
+``` r
+data_values(m, y) <- rnorm(n + 1)
+#> Error in `data_values<-`:
+#> ! `value` must have the same dimensions as the data it replaces
+#> ✖ We see dimensions: "31x1"
+#> ℹ But we expect dimensions: "30x1"
+#> ℹ Changing the dimensions would mean rebuilding the graph
+```
+
+> If you want to fit the same model to datasets with different dimensions
+> (e.g. different numbers of observations) the easiest thing would be to write
+> a function to build (and possibly fit) a greta model to a given dataset, then
+> loop over that function feeding the datasets.
+>
+> --- Nick Golding, [on issue #181](https://github.com/greta-dev/greta/issues/181#issuecomment-394196667)
+
+## data_values() must be used with as_data_mutable()
+
+Data declared with plain `as_data()` is held as a constant, so it cannot be
+replaced. greta says so, and names the fix:
+
+
+``` r
+data_values(m, x) <- seq(0, 2, length.out = n)
+#> Error in `data_values<-`:
+#> ! `x` is not mutable data, so it cannot be replaced
+#> ℹ Declare it with `as_data_mutable()` rather than `as_data()`
+```
+
+## Other applications
+
+The same mechanism is what **minibatching** needs. Minibatching means fitting to
+a small random subset of the data on each iteration of an optimiser, rather than
+all of it at once, so that a model can be fitted to data far too large to hold
+in one graph. Each iteration needs a different subset swapped in, which is
+exactly what `as_data_mutable()` does.
+
+Nick Golding
+[prototyped this on the greta forum](https://forum.greta-stats.org/t/sparse-matrix-format-for-count-and-binary-data-setting-dtype-of-tensors/124/8),
+reaching into greta's internals to swap the data tensors directly. This is the
+piece that was missing - the minibatching interface itself is still to come.
+
+It is also what makes greta's own correctness checks affordable. Those follow
+Geweke (2004): draw a fresh dataset from the model at every iteration and check
+that the sampler recovers the prior. Rebuilding the graph for each new dataset
+is the dominant cost of running them.
+
+## References
+
+Geweke, J. (2004). Getting it right: joint distribution tests of posterior
+simulators. *Journal of the American Statistical Association*, 99(467),
+799--804.
