@@ -259,8 +259,15 @@ node <- R6Class(
       text
     },
 
+    # a counter rather than random, as TensorFlow and PyTensor name nodes:
+    # random names drew on R's random number stream, so building a model moved
+    # the user's set.seed(), and re-seeding repeated names and merged nodes -
+    # greta-dev/greta#366
     create_unique_name = function() {
-      self$unique_name <- glue::glue("node_{rhex()}")
+      greta_stash$node_count <- greta_stash$node_count + 1L
+      self$unique_name <- glue::glue(
+        "node_{greta_stash$session_token}_{greta_stash$node_count}"
+      )
     },
     plotting_label = function() {
       label <- ""
