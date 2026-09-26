@@ -201,31 +201,14 @@ calculate <- function(
       # check nsim is valid
       nsim <- check_positive_integer(nsim, "nsim")
 
-      # if an RNG seed was provided use it and reset the RNG on exiting
-      if (!is.null(seed)) {
-        no_global_random_seed <- !exists(
-          x = ".Random.seed",
-          envir = .GlobalEnv,
-          inherits = FALSE
-        )
-        if (no_global_random_seed) {
-          runif(1)
-        }
+      tf_seed <- seed %||% get_seed()
 
-        r_seed <- get(".Random.seed", envir = .GlobalEnv)
-        on.exit(assign(".Random.seed", r_seed, envir = .GlobalEnv))
-        tensorflow::set_random_seed(
-          seed = seed,
-          disable_gpu = is_using_cpu(compute_options)
-        )
-      }
+      # preserve the stream from *after* that draw, not before: set_all_seeds()
+      # reseeds R, and restoring to before would hand the next unseeded call
+      # the same seed and make it repeat itself
+      withr::local_preserve_seed()
 
-      if (is.null(seed)) {
-        tensorflow::set_random_seed(
-          seed = get_seed(),
-          disable_gpu = is_using_cpu(compute_options)
-        )
-      }
+      set_all_seeds(tf_seed)
     }
 
     # set precision

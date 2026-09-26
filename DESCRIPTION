@@ -50,6 +50,7 @@ Imports:
     tools,
     utils,
     whisker,
+    withr,
     yesno
 Suggests:
     bayesplot,
@@ -76,7 +77,6 @@ Suggests:
     tibble,
     tidyr,
     truncdist,
-    withr,
     rstudioapi
 VignetteBuilder: 
     knitr
