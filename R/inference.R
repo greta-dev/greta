@@ -112,7 +112,10 @@ NULL
 #'   Note that this covers the random numbers, not the arithmetic. On a GPU,
 #'   some TensorFlow operations accumulate in a non-deterministic order, so
 #'   results can still vary slightly between runs with the same seed. Seeded
-#'   runs on CPU (the default) are reproducible.
+#'   runs on CPU (the default) are reproducible. For identical runs on the same
+#'   GPU, call `tensorflow::tf$config$experimental$enable_op_determinism()`
+#'   before sampling: TensorFlow then uses deterministic versions of those
+#'   operations, which is slower, and errors on any operation that has none.
 #'
 #' @return `mcmc`, `stashed_samples` & `extra_samples` - a
 #'   `greta_mcmc_list` object that can be analysed using functions from the

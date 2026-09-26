@@ -234,7 +234,10 @@ non-reproducibility - where greta chooses the device per call with
 Note that this covers the random numbers, not the arithmetic. On a GPU,
 some TensorFlow operations accumulate in a non-deterministic order, so
 results can still vary slightly between runs with the same seed. Seeded
-runs on CPU (the default) are reproducible.
+runs on CPU (the default) are reproducible. For identical runs on the same
+GPU, call \code{tensorflow::tf$config$experimental$enable_op_determinism()}
+before sampling: TensorFlow then uses deterministic versions of those
+operations, which is slower, and errors on any operation that has none.
 }
 \examples{
 \dontrun{
