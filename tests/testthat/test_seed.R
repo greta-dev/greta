@@ -283,6 +283,32 @@ test_that("parallel chains are seeded distinctly and reproducibly", {
   expect_false(identical(one[[1]], one[[2]]))
 })
 
+test_that("opt() is reproducible from set.seed() and advances the stream", {
+  skip_if_not(check_tf_version())
+
+  # opt()'s only randomness is its starting point, drawn by rnorm() in
+  # check_initial_values(). Estimating sigma and stopping short of convergence
+  # is what keeps that visible: on a quadratic objective, or run to the
+  # optimum, every seed lands in the same place and the test asserts nothing
+  y <- c(2.6, 1.1, 3.4, 0.9)
+  sigma <- lognormal(0, 1)
+  distribution(y) <- normal(0, sigma)
+  m <- model(sigma)
+
+  draw <- function() unlist(opt(m, max_iterations = 2)$par)
+
+  set.seed(1)
+  before <- rng_seed()
+  one <- draw()
+  expect_false(identical(before, rng_seed()))
+
+  set.seed(1)
+  expect_identical(one, draw())
+
+  set.seed(2)
+  expect_false(identical(one, draw()))
+})
+
 test_that("simulate uses the local RNG seed", {
   skip_if_not(check_tf_version())
 
