@@ -65,6 +65,11 @@
   load TensorFlow Probability, because greta pins it to the 0.25 series
   whatever the TensorFlow version
   ([\#810](https://github.com/greta-dev/greta/issues/810)).
+- `[<-` on a greta array now fills a matrix or array replacement column
+  by column, as R does. Previously a model could compute with different
+  values from the ones printed: in `x[c(1, 3), ] <- y` with a 2 x 2 `y`,
+  `y[1, 2]` and `y[2, 1]` swapped places. Vector replacements were
+  unaffected ([\#844](https://github.com/greta-dev/greta/issues/844)).
 - [`adamax()`](https://greta-dev.github.io/greta/dev/reference/optimisers.md)
   now defaults to a `learning_rate` of 0.1, up from 0.001, which was too
   small to reach the optimum of even a five-parameter model within 2000
