@@ -68,6 +68,7 @@ Suggests:
     MCMCpack,
     mockery,
     mvtnorm,
+    pkgload,
     purrr,
     rmarkdown,
     rmutil,

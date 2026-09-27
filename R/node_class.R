@@ -259,8 +259,16 @@ node <- R6Class(
       text
     },
 
+    # counted, not random, so building a model leaves R's random number stream
+    # alone and a re-seeded model cannot repeat a name - greta-dev/greta#366
     create_unique_name = function() {
-      self$unique_name <- glue::glue("node_{rhex()}")
+      greta_stash$node_count <- greta_stash$node_count + 1L
+      # sprintf() for speed, as it runs for every node creation
+      self$unique_name <- sprintf(
+        "node_%s_%d",
+        greta_stash$session_token,
+        greta_stash$node_count
+      )
     },
     plotting_label = function() {
       label <- ""

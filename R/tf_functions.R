@@ -492,7 +492,9 @@ tf_flatten <- function(x, extra_ones = 0) {
   tf$reshape(x, tensorflow::as_tensor(to_shape(out_dim)))
 }
 
-# replace elements in a tensor with another tensor
+# replace elements in a tensor with another tensor. Everything is row-major, as
+# TensorFlow flattens: `index` holds 0-based positions in flattened `x`, and
+# `index[k]` receives the k-th element of `replacement` in row-major order
 tf_replace <- function(x, replacement, index, dims) {
   # flatten original tensor and new values
   x_flat <- tf_flatten(x, 1)

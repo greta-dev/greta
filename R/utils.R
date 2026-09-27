@@ -249,11 +249,6 @@ hessian_dims <- function(dim) {
   rep(dim, 2)
 }
 
-# generate a random 8-digit hexadecimal string
-rhex <- function() {
-  paste(as.raw(sample.int(256L, 4, TRUE) - 1L), collapse = "")
-}
-
 # stop TensorFlow messaging about deprecations etc.
 #' @importFrom reticulate py_set_attr import
 disable_tensorflow_logging <- function(disable = TRUE) {
@@ -303,7 +298,6 @@ misc_module <- function() {
     match_batches,
     split_chains,
     hessian_dims,
-    rhex,
     disable_tensorflow_logging,
     pad_vector
   )

@@ -297,6 +297,53 @@ test_that("replace works like R", {
   compare_op(x, greta_out)
 })
 
+test_that("replace fills a matrix or array replacement column-major, like R", {
+  skip_if_not(check_tf_version())
+
+  # greta-dev/greta#844. Replacements are non-square, and the 3-d one has
+  # unequal first and last dimensions: for a square matrix or a cube, the
+  # correct reordering is its own inverse, so a reversed one would still pass
+  x <- randn(4, 3)
+  y <- matrix(1:6, 2, 3)
+  check_expr(
+    {
+      x[c(1, 3), ] <- y
+      x
+    },
+    swap = c("x", "y")
+  )
+
+  x <- randn(2, 3, 3)
+  check_expr({
+    x[, 1:2, ] <- array(1:12, c(2, 2, 3))
+    x
+  })
+
+  x <- randn(10)
+  check_expr({
+    x[1:6] <- matrix(1:6, 2, 3)
+    x
+  })
+
+  x <- randn(4, 2)
+  check_expr({
+    x[,] <- matrix(1:4, 2, 2)
+    x
+  })
+
+  # from https://github.com/greta-dev/greta/issues/844
+  y <- matrix(1:4, 2, 2)
+  r <- matrix(0, 4, 2)
+  r[c(1, 3), ] <- y
+  r_subassign <- r
+
+  g <- zeros(4, 2)
+  g[c(1, 3), ] <- y
+  greta_subassign <- calculate(g)[[1]]
+
+  expect_identical(greta_subassign, r_subassign)
+})
+
 test_that("rep works like R", {
   skip_if_not(check_tf_version())
 
