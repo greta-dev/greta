@@ -942,8 +942,9 @@ check_mvn_samples <- function(sampler, n_effective = 3000) {
   # get absolute errors between posterior means and true values, and scale them
   # by time-series Monte Carlo standard errors (the expected amount of
   # uncertainty in the MCMC estimate), to give the number of standard errors
-  # away from truth. There's a 1/100 chance of any one of these scaled errors
-  # being greater than qnorm(0.99) if the sampler is correct
+  # away from truth. For a correct sampler each is roughly the absolute value of
+  # a standard normal draw, so any one of the five exceeds qnorm(0.99) about 2
+  # times in 100, not 1
   errors <- scaled_error(stat_draws, stat_truth)
   errors
 }
