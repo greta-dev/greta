@@ -85,10 +85,8 @@ test_that("cpu_only() and gpu_only() can both be used in one session", {
   x <- normal(0, 1)
   m <- model(x)
 
-  # seeding must not switch the GPU off behind the user's back.
-  # tensorflow::set_random_seed() sets CUDA_VISIBLE_DEVICES = -1 unless told
-  # otherwise and never puts it back, so using it here would mean one CPU run
-  # hid the GPU from every later one - see greta-dev/greta#285
+  # tensorflow::set_random_seed() would set CUDA_VISIBLE_DEVICES = -1 for the
+  # rest of the session, hiding the GPU from every later run
   before <- Sys.getenv("CUDA_VISIBLE_DEVICES")
 
   expect_ok(mcmc(

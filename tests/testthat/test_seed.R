@@ -1,12 +1,3 @@
-# Move TensorFlow's global seed to somewhere arbitrary. Tests that check
-# mcmc() is reproducible have to do this between the two runs, or they pass on
-# whatever seed an earlier test left set - the calculate() tests in this file
-# set one as a side effect. Drawn rather than hardcoded, because two tests
-# using the same constant makes the second one a no-op.
-perturb_tf_seed <- function() {
-  tensorflow::tf$random$set_seed(sample.int(1e6, 1))
-}
-
 test_that("calculate uses the local RNG seed", {
   skip_if_not(check_tf_version())
 
@@ -129,16 +120,14 @@ test_that("mcmc samples are the same when the R seed is the same, also with tf s
 
   expect_identical(as.numeric(one_tf), as.numeric(two_tf))
 
-  # and the two routes agree, as ?mcmc promises: set_random_seed() calls
-  # set.seed() internally, so both paths hand mcmc() the same seed. Before
-  # greta seeded TensorFlow at all, these differed, and this test asserted
-  # that they must - see greta-dev/greta#285
+  # set_random_seed() calls set.seed() internally, so both paths hand mcmc()
+  # the same seed
   expect_identical(as.numeric(one), as.numeric(one_tf))
 
   expect_identical(as.numeric(two), as.numeric(two_tf))
 })
 
-test_that("mcmc seeds TensorFlow from set.seed(), not from session state", {
+test_that("mcmc draws do not depend on TensorFlow's global seed", {
   skip_if_not(check_tf_version())
   a <- normal(0, 1)
   y <- normal(a, 1)
@@ -147,8 +136,8 @@ test_that("mcmc seeds TensorFlow from set.seed(), not from session state", {
   set.seed(12345)
   one <- mcmc(m, warmup = 10, n_samples = 1, chains = 1, verbose = FALSE)
 
-  # mcmc() draws its own seed from R's RNG, so if it passes that to TensorFlow
-  # this is overwritten and the draws still match
+  # the sampler's seed comes from R's RNG, not TensorFlow's global seed, so
+  # moving the global seed must not change the draws
   perturb_tf_seed()
 
   set.seed(12345)
@@ -183,7 +172,7 @@ test_that("mcmc() advances R's RNG rather than resetting it", {
 test_that("calculate(nsim = ) keeps the same RNG contract as mcmc()", {
   skip_if_not(check_tf_version())
   x <- normal(0, 1)
-  draw <- function(...) as.numeric(calculate(x, nsim = 1, ...)[[1]])
+  draw <- function() as.numeric(calculate(x, nsim = 1)[[1]])
 
   # it draws its own seed from R's stream, so the same seed gives the same
   # result and two unseeded calls differ
@@ -197,15 +186,11 @@ test_that("calculate(nsim = ) keeps the same RNG contract as mcmc()", {
   # and it advances the stream by that one draw rather than reseeding it from
   # the seed it drew, which is what set_all_seeds() would otherwise leave behind
   set.seed(1)
-  after_calculate <- {
-    invisible(draw())
-    runif(1)
-  }
+  draw()
+  after_calculate <- rng_seed()
   set.seed(1)
-  after_one_draw <- {
-    invisible(get_seed())
-    runif(1)
-  }
+  get_seed()
+  after_one_draw <- rng_seed()
   expect_identical(after_calculate, after_one_draw)
 })
 
@@ -255,32 +240,6 @@ test_that("chains stay distinct from identical starting values", {
   )
 
   expect_length(unique(lapply(draws, as.vector)), 4L)
-})
-
-test_that("parallel chains are seeded distinctly and reproducibly", {
-  skip_if_not(check_tf_version())
-  skip_on_cran()
-  op <- future::plan()
-  withr::defer(future::plan(op))
-  future::plan(future::multisession, workers = 2)
-
-  x <- normal(0, 1)
-  m <- model(x)
-  draw <- function() {
-    d <- mcmc(m, warmup = 10, n_samples = 3, chains = 2, verbose = FALSE)
-    lapply(d, as.vector)
-  }
-
-  # the seeds are drawn in this session and travel to the workers on the
-  # sampler objects, so the workers do not need seeding themselves
-  set.seed(2026)
-  one <- draw()
-  perturb_tf_seed()
-  set.seed(2026)
-  two <- draw()
-
-  expect_identical(one, two)
-  expect_false(identical(one[[1]], one[[2]]))
 })
 
 test_that("opt() is reproducible from set.seed() and advances the stream", {

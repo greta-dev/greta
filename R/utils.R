@@ -864,16 +864,14 @@ cpu_only <- function() {
   "CPU"
 }
 
-# Seed R, Python and TensorFlow, for calculate(): sampling under nsim draws
-# from R's RNG as well as TensorFlow's. Not tensorflow::set_random_seed(),
-# which leaves CUDA_VISIBLE_DEVICES and PYTHONHASHSEED set for the whole
-# session. greta-dev/greta#285, #839
+# for calculate(): sampling under nsim draws from R's RNG as well as
+# TensorFlow's. Not tensorflow::set_random_seed(), which leaves
+# CUDA_VISIBLE_DEVICES and PYTHONHASHSEED set for the whole session
 set_all_seeds <- function(seed) {
   seed <- as.integer(seed)
   set.seed(seed)
   reticulate::py_set_seed(seed, disable_hash_randomization = FALSE)
   tf$random$set_seed(seed)
-  invisible(NULL)
 }
 
 compute_text <- function(n_cores, compute_options) {

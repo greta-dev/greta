@@ -83,17 +83,6 @@ inference <- R6Class(
       }
     },
 
-    # Seeds TensorFlow from the seed this sampler drew from R's RNG, which is
-    # what makes set.seed() reach the sampler. Only the Python side: re-seeding
-    # R here would be circular, and would reset the draws HMC takes for its
-    # leapfrog count mid-run. Inlined rather than sharing a helper with
-    # set_all_seeds(), because this runs in future workers, which resolve free
-    # functions against their own installed greta.
-    set_tf_seed = function() {
-      reticulate::py_set_seed(self$seed, disable_hash_randomization = FALSE)
-      tf$random$set_seed(self$seed)
-    },
-
     # check and try to autofill a single set of initial values (single vector on
     # free state scale)
     check_initial_values = function(inits, call = rlang::caller_env()) {

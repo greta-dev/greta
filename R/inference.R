@@ -100,22 +100,20 @@ NULL
 #'   memory usage.
 #'
 #' @note `set.seed()` is all you need to make MCMC reproducible: greta draws
-#'   its own seed from R's random number generator and passes it to TensorFlow,
-#'   so both the initial values and the sampler are seeded. See examples below.
+#'   its own seed from R's random number generator and passes it to the
+#'   sampler, so both the initial values and the sampler are seeded. See
+#'   examples below. The draws also depend on how sampling is split between
+#'   progress updates, so a run is repeated exactly only with the same
+#'   `verbose`, `pb_update` and `one_by_one`.
 #'
-#'   [tensorflow::set_random_seed()] gives identical results, because it sets
-#'   R's seed too. It also disables the GPU for the rest of the session unless
-#'   you pass `disable_gpu = FALSE` - its way of removing a source of
-#'   non-reproducibility - where greta chooses the device per call with
-#'   `compute_options`. So `set.seed()` is the better fit here.
+#'   [tensorflow::set_random_seed()] gives identical results, but hides the GPU
+#'   for the rest of the session unless you pass `disable_gpu = FALSE`.
 #'
-#'   Note that this covers the random numbers, not the arithmetic. On a GPU,
-#'   some TensorFlow operations accumulate in a non-deterministic order, so
-#'   results can still vary slightly between runs with the same seed. Seeded
-#'   runs on CPU (the default) are reproducible. For identical runs on the same
-#'   GPU, call `tensorflow::tf$config$experimental$enable_op_determinism()`
-#'   before sampling: TensorFlow then uses deterministic versions of those
-#'   operations, which is slower, and errors on any operation that has none.
+#'   Seeding covers the random numbers, not the arithmetic: on a GPU some
+#'   TensorFlow operations are non-deterministic, so results can vary slightly
+#'   between runs with the same seed. Call
+#'   `tensorflow::tf$config$experimental$enable_op_determinism()` before
+#'   sampling to make GPU runs repeatable, at some cost in speed.
 #'
 #' @return `mcmc`, `stashed_samples` & `extra_samples` - a
 #'   `greta_mcmc_list` object that can be analysed using functions from the
@@ -202,9 +200,7 @@ NULL
 #' # same
 #' all.equal(as.numeric(one), as.numeric(two))
 #'
-#' # tensorflow::set_random_seed() gives the same draws, since it sets R's seed
-#' # too. Pass disable_gpu = FALSE, or it hides the GPU for the rest of the
-#' # session
+#' # tensorflow::set_random_seed() gives the same draws
 #' tensorflow::set_random_seed(12345, disable_gpu = FALSE)
 #' one_tf <- mcmc(m, n_samples = 1, chains = 1)
 #' # same again

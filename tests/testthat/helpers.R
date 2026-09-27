@@ -23,15 +23,20 @@ rng_seed <- function() {
 
 # seed a statistical test so that it does not inherit whatever random state
 # earlier test files left, which any change elsewhere in greta can shift. R's
-# seed is restored when the caller exits. set.seed() alone does not reach the
-# sampler until greta-dev/greta#285 is fixed, so TensorFlow is seeded too
+# seed is restored when the caller exits
 local_greta_seed <- function(
   seed = 2026 - 09 - 27,
   .local_envir = parent.frame()
 ) {
-  seed <- as.integer(seed)
   withr::local_seed(seed, .local_envir = .local_envir)
-  tensorflow::tf$random$set_seed(seed)
+}
+
+# Move TensorFlow's global seed to somewhere arbitrary, between two runs that
+# should match, to show mcmc() does not depend on it. Drawn rather than
+# hardcoded, because two tests using the same constant makes the second one a
+# no-op.
+perturb_tf_seed <- function() {
+  tensorflow::tf$random$set_seed(sample.int(1e6, 1))
 }
 
 # run func(...) in a fresh R session with the greta under test: the source tree

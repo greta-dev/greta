@@ -98,27 +98,47 @@ test_that("mcmc errors for invalid parallel plans", {
 test_that("mcmc works in parallel", {
   skip_if_not(check_tf_version())
 
-  m <- model(normal(0, 1))
-
   op <- future::plan()
   # put the future plan back as we found it
   withr::defer(future::plan(op))
-  future::plan(future::multisession)
+  # two workers, so every run below reuses ones that have already loaded
+  # TensorFlow
+  future::plan(future::multisession, workers = 2)
 
-  # one chain
+  # one chain. The target is so wide that rwmh accepts every proposal, so each
+  # step is the proposal noise alone, and extra_samples() in a worker must draw
+  # new noise rather than replaying the first run's
+  x <- normal(0, 1e6)
+  wide <- model(x)
   expect_ok(
-    draws <- mcmc(m, warmup = 10, n_samples = 10, chains = 1, verbose = FALSE)
+    draws <- mcmc(
+      wide,
+      sampler = rwmh(),
+      warmup = 0,
+      n_samples = 5,
+      chains = 1,
+      initial_values = initials(x = 0),
+      verbose = FALSE
+    )
   )
-
   expect_true(inherits(draws, "greta_mcmc_list"))
-  expect_true(coda::niter(draws) == 10)
-  rm(draws)
+  expect_true(coda::niter(draws) == 5)
 
-  # multiple chains
-  expect_ok(
-    draws <- mcmc(m, warmup = 10, n_samples = 10, chains = 2, verbose = FALSE)
-  )
+  draws <- extra_samples(draws, 5, verbose = FALSE)
+  steps <- diff(as.vector(draws[[1]]))
+  expect_false(isTRUE(all.equal(steps[1:4], steps[6:9])))
 
-  expect_true(inherits(draws, "greta_mcmc_list"))
-  expect_true(coda::niter(draws) == 10)
+  # multiple chains, seeded distinctly and reproducibly
+  m <- model(normal(0, 1))
+  draw <- function() {
+    mcmc(m, warmup = 10, n_samples = 10, chains = 2, verbose = FALSE)
+  }
+  expect_ok(one <- withr::with_seed(2026, draw()))
+  expect_true(inherits(one, "greta_mcmc_list"))
+  expect_true(coda::niter(one) == 10)
+
+  perturb_tf_seed()
+  two <- withr::with_seed(2026, draw())
+  expect_identical(lapply(one, as.vector), lapply(two, as.vector))
+  expect_false(identical(as.vector(one[[1]]), as.vector(one[[2]])))
 })

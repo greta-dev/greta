@@ -195,8 +195,6 @@ calculate <- function(
       "Perhaps you forgot to explicitly name other arguments?"
     )
 
-    # checks and RNG seed setting if we're sampling
-    # REFACTOR: check_rng_seed(nim, seed, compute_option)
     if (!is.null(nsim)) {
       # check nsim is valid
       nsim <- check_positive_integer(nsim, "nsim")
