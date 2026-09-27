@@ -22,15 +22,10 @@ init_greta_stash <- function() {
   )
   stash$callbacks <- list(parallel_progress = progress_bars)
 
-  # node names are a count, which restarts in every session. The token keeps
-  # them distinct when a greta array saved in one session meets new ones in
-  # another - without it, readRDS() plus a new array can merge the two
+  # nodes named by count and token: unique across and within sessions
   stash$node_count <- 0L
-  stash$session_token <- substr(
-    rlang::hash(list(Sys.getpid(), Sys.time())),
-    1,
-    8
-  )
+  session_hash <- rlang::hash(list(Sys.getpid(), Sys.time()))
+  stash$session_token <- substr(session_hash, 1, 8)
 
   stash$install_miniconda_notes <- greta_note_msg
   stash$install_miniconda_error <- greta_note_msg

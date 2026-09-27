@@ -21,6 +21,31 @@ rng_seed <- function() {
   get(".Random.seed", envir = .GlobalEnv)
 }
 
+# run func(...) in a fresh R session with the greta under test: the source tree
+# under devtools::test(), the installed build under R CMD check. A bare
+# library(greta) would load whatever was last installed
+in_fresh_greta <- function(func, ...) {
+  # so callr does not serialise the caller's environment, and the greta arrays
+  # in it. func therefore sees only its arguments, not the caller's variables
+  environment(func) <- globalenv()
+  callr::r(
+    function(func, args, greta_path, dev) {
+      if (dev) {
+        pkgload::load_all(greta_path, quiet = TRUE)
+      } else {
+        library(greta, lib.loc = dirname(greta_path))
+      }
+      do.call(func, args)
+    },
+    args = list(
+      func = func,
+      args = list(...),
+      greta_path = getNamespaceInfo("greta", "path"),
+      dev = pkgload::is_dev_package("greta")
+    )
+  )
+}
+
 # evaluate a greta_array, node, or tensor
 grab <- function(x, dag = NULL) {
   if (inherits(x, "node")) {
