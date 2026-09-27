@@ -225,8 +225,9 @@ The parameter vector can then be passed to model. See example.
 its own seed from R's random number generator and passes it to the
 sampler, so both the initial values and the sampler are seeded. See
 examples below. The draws also depend on how sampling is split between
-progress updates, so a run is repeated exactly only with the same
-\code{verbose}, \code{pb_update} and \code{one_by_one}.
+progress updates, and on how chains are split between parallel workers,
+so a run is repeated exactly only with the same \code{verbose}, \code{pb_update},
+\code{one_by_one} and future plan (including its number of workers).
 
 \code{\link[tensorflow:set_random_seed]{tensorflow::set_random_seed()}} gives identical results, but hides the GPU
 for the rest of the session unless you pass \code{disable_gpu = FALSE}.

@@ -103,8 +103,9 @@ NULL
 #'   its own seed from R's random number generator and passes it to the
 #'   sampler, so both the initial values and the sampler are seeded. See
 #'   examples below. The draws also depend on how sampling is split between
-#'   progress updates, so a run is repeated exactly only with the same
-#'   `verbose`, `pb_update` and `one_by_one`.
+#'   progress updates, and on how chains are split between parallel workers,
+#'   so a run is repeated exactly only with the same `verbose`, `pb_update`,
+#'   `one_by_one` and future plan (including its number of workers).
 #'
 #'   [tensorflow::set_random_seed()] gives identical results, but hides the GPU
 #'   for the rest of the session unless you pass `disable_gpu = FALSE`.
