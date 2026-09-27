@@ -105,7 +105,9 @@ NULL
 #'   examples below. The draws also depend on how sampling is split between
 #'   progress updates, and on how chains are split between parallel workers,
 #'   so a run is repeated exactly only with the same `verbose`, `pb_update`,
-#'   `one_by_one` and future plan (including its number of workers).
+#'   `one_by_one` and future plan (including its number of workers). The
+#'   [Reproducible results](https://greta-dev.github.io/greta/articles/webpages/reproducibility.html)
+#'   article shows each of these, and how greta compares with Stan and PyMC.
 #'
 #'   [tensorflow::set_random_seed()] gives identical results, but hides the GPU
 #'   for the rest of the session unless you pass `disable_gpu = FALSE`.

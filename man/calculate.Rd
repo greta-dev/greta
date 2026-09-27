@@ -26,7 +26,10 @@ to simulate if stochastic greta arrays are present in the model - see
 Details.}
 
 \item{seed}{an optional seed to be used in set.seed immediately before the
-simulation so as to generate a reproducible sample}
+simulation so as to generate a reproducible sample. \code{set.seed()} before
+the call works too; see the
+\href{https://greta-dev.github.io/greta/articles/webpages/reproducibility.html}{Reproducible results}
+article.}
 
 \item{precision}{the floating point precision to use when calculating values.}
 

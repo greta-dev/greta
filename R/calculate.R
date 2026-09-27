@@ -16,7 +16,10 @@
 #'   to simulate if stochastic greta arrays are present in the model - see
 #'   Details.
 #' @param seed an optional seed to be used in set.seed immediately before the
-#'   simulation so as to generate a reproducible sample
+#'   simulation so as to generate a reproducible sample. `set.seed()` before
+#'   the call works too; see the
+#'   [Reproducible results](https://greta-dev.github.io/greta/articles/webpages/reproducibility.html)
+#'   article.
 #' @param precision the floating point precision to use when calculating values.
 #' @param trace_batch_size the number of posterior samples to process at a time
 #'   when `target` is a `greta_mcmc_list` object; reduce this to

@@ -227,7 +227,9 @@ sampler, so both the initial values and the sampler are seeded. See
 examples below. The draws also depend on how sampling is split between
 progress updates, and on how chains are split between parallel workers,
 so a run is repeated exactly only with the same \code{verbose}, \code{pb_update},
-\code{one_by_one} and future plan (including its number of workers).
+\code{one_by_one} and future plan (including its number of workers). The
+\href{https://greta-dev.github.io/greta/articles/webpages/reproducibility.html}{Reproducible results}
+article shows each of these, and how greta compares with Stan and PyMC.
 
 \code{\link[tensorflow:set_random_seed]{tensorflow::set_random_seed()}} gives identical results, but hides the GPU
 for the rest of the session unless you pass \code{disable_gpu = FALSE}.
