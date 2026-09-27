@@ -9,12 +9,7 @@ test_that("samplers are unbiased for bivariate normals", {
   skip_if_not(check_tf_version())
   skip_on_os("windows")
 
-  # seeded here rather than inheriting whatever random state earlier test files
-  # left. set.seed() alone does not reach the sampler until greta-dev/greta#285
-  # is fixed, so TensorFlow is seeded too
-  seed <- as.integer(2026 - 09 - 27)
-  withr::local_seed(seed)
-  tensorflow::tf$random$set_seed(seed)
+  local_greta_seed()
 
   # each score is absolute, so each tail gets half of the error rate, which is
   # then split across the five scores

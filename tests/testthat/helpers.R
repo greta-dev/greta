@@ -21,6 +21,19 @@ rng_seed <- function() {
   get(".Random.seed", envir = .GlobalEnv)
 }
 
+# seed a statistical test so that it does not inherit whatever random state
+# earlier test files left, which any change elsewhere in greta can shift. R's
+# seed is restored when the caller exits. set.seed() alone does not reach the
+# sampler until greta-dev/greta#285 is fixed, so TensorFlow is seeded too
+local_greta_seed <- function(
+  seed = 2026 - 09 - 27,
+  .local_envir = parent.frame()
+) {
+  seed <- as.integer(seed)
+  withr::local_seed(seed, .local_envir = .local_envir)
+  tensorflow::tf$random$set_seed(seed)
+}
+
 # run func(...) in a fresh R session with the greta under test: the source tree
 # under devtools::test(), the installed build under R CMD check. A bare
 # library(greta) would load whatever was last installed
@@ -979,6 +992,8 @@ check_samples <- function(
   one_by_one = FALSE,
   time_limit = 300
 ) {
+  local_greta_seed()
+
   m <- model(x, precision = "single")
   draws <- get_enough_draws(
     model = m,
