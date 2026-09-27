@@ -2,6 +2,19 @@
 
 ## greta (development version)
 
+- Resolve internal issue where building a greta model
+  ([`model()`](https://greta-dev.github.io/greta/dev/reference/model.md))
+  no longer uses R’s random number generator. Previously, we named every
+  node with a random string drawn from R’s RNG stream, so creating greta
+  arrays moved the stream on from where
+  [`set.seed()`](https://rdrr.io/r/base/Random.html) left it, and arrays
+  created after the same seed were given the same names, which
+  [`model()`](https://greta-dev.github.io/greta/dev/reference/model.md)
+  then silently merged into a single variable. Nodes are now named with
+  a counter. Draws from a script that calls
+  [`set.seed()`](https://rdrr.io/r/base/Random.html) before building its
+  model therefore differ from previous versions
+  ([\#366](https://github.com/greta-dev/greta/issues/366)).
 - When greta cannot load Python, TensorFlow, or TensorFlow Probability,
   the error now names which of them failed and reports what went wrong,
   instead of giving the same message whatever the cause. If Python
