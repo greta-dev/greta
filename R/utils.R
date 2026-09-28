@@ -726,9 +726,25 @@ base_remove_empty_string <- function(string) {
 }
 
 
-other_install_fail_msg <- function(error_passed) {
-  # drop ""
-  error_passed <- base_remove_empty_string(error_passed)
+other_install_fail_msg <- function(
+  error_passed,
+  output_notes = "",
+  env_exists = isTRUE(greta_stash$install_env_existed),
+  log_written = FALSE
+) {
+  output <- paste(output_notes, error_passed, sep = "\n")
+
+  # installing again reuses a broken environment as it is, so a failure with
+  # one in place before the install began is the case for starting again
+  # (greta-dev/greta#684)
+  reinstall_advice <- if (env_exists) {
+    c(
+      "i" = "The {.val greta-env-tf2} conda environment was already there \\
+      when installation began, and may be left over from an earlier attempt. \\
+      {.run greta::reinstall_greta_deps()} removes it and miniconda, and \\
+      installs both again."
+    )
+  }
 
   tf_pin <- greta_deps_default$tf
   tfp_pin <- greta_deps_default$tfp
@@ -737,7 +753,10 @@ other_install_fail_msg <- function(error_passed) {
     message = c(
       "Stopping as installation of {.pkg greta} dependencies failed",
       "An error occured:",
-      "{error_passed}",
+      install_output_excerpt(error_passed, output_notes),
+      install_failure_advice(output),
+      reinstall_advice,
+      install_log_pointer(log_written),
       "You can perform the installation manually by doing the following:",
       "Restarting R, then running:",
       "{.code Sys.unsetenv('RETICULATE_PYTHON')}",
@@ -757,7 +776,11 @@ other_install_fail_msg <- function(error_passed) {
   )
 }
 
-timeout_install_msg <- function(timeout = 5, py_error = NULL) {
+timeout_install_msg <- function(
+  timeout = 5,
+  py_error = NULL,
+  log_written = FALSE
+) {
   tf_pin <- greta_deps_default$tf
   tfp_pin <- greta_deps_default$tfp
   py_pin <- greta_deps_default$python
@@ -784,27 +807,19 @@ timeout_install_msg <- function(timeout = 5, py_error = NULL) {
         pip = TRUE
         )}",
     "Then select it with {.code greta_set_python('conda')}, restart R, \\
-        and load {.pkg greta} with: {.code library(greta)}"
+        and load {.pkg greta} with: {.code library(greta)}",
+    install_log_pointer(log_written)
   )
 
-  if (nchar(py_error) == 0) {
-    py_error <- NULL
-  }
-
-  if (is.null(py_error)) {
-    cli::format_error(
-      message = msg
-    )
-  } else {
+  if (nzchar(py_error %||% "")) {
     msg <- c(
       msg,
       "Additionally, the following error appeared:",
-      "{py_error}"
-    )
-    cli::format_error(
-      message = msg
+      install_output_excerpt(py_error)
     )
   }
+
+  cli::format_error(message = msg)
 }
 
 is_DiagrammeR_installed <- function() {

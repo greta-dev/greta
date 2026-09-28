@@ -129,7 +129,8 @@ install_greta_deps <- function(
     "i" = "Use {.fun install_greta_deps} to install a conda environment \\
           (e.g. offline, or to pin versions), then select it with \\
           {.code greta_set_python(\"conda\")}.",
-    "i" = "See the installation vignette: {.vignette greta::installation}."
+    "i" = "See the installation vignette: {.vignette greta::installation}.",
+    "i" = "Installing can take a few minutes."
   ))
 
   # set warning message length, restoring the previous value on exit
@@ -141,16 +142,26 @@ install_greta_deps <- function(
     greta_install_miniconda(timeout)
   }
 
-  if (!have_greta_conda_env()) {
+  # recorded before this install can create one, so a failure message only calls
+  # an environment left over when it was (greta-dev/greta#684)
+  greta_stash$install_env_existed <- have_greta_conda_env()
+  on.exit(greta_stash$install_env_existed <- NULL, add = TRUE)
+
+  if (greta_stash$install_env_existed) {
+    # an environment left by an earlier or failed install is reused as it is,
+    # which is often why installing again does not help
+    cli::cli_inform(c(
+      "i" = "Installing into the existing {.val greta-env-tf2} conda \\
+      environment. To start again from a clean one, use \\
+      {.run greta::reinstall_greta_deps()}."
+    ))
+  } else {
     greta_create_conda_env(
       timeout = timeout,
       deps = deps
     )
   }
 
-  # TODO
-  # Issue warning if you already have conda env +/ miniconda
-  # suggest using `reinstall_greta_deps()`
   greta_install_python_deps(
     timeout = timeout,
     deps = deps
@@ -169,17 +180,7 @@ install_greta_deps <- function(
     }
   )
 
-  # TODO
-  # Detect if you have tried to install greta multiple times in the same
-  # session, and suggest that perhaps they want to use
-  # `reinstall_greta_deps()`
-  # perhaps even stopping the session with a "yesno"
-
-  greta_logfile <- sys_get_env("GRETA_INSTALLATION_LOG")
-
-  greta_logfile <- greta_logfile %||% greta_default_logfile()
-
-  write_greta_install_log(path = greta_logfile)
+  write_greta_install_log()
 
   cli::cli_alert_success(
     "Installation of {.pkg greta} dependencies \\

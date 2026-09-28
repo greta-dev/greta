@@ -150,6 +150,19 @@ test_that("a Python failure is diagnosed, and other failures are not", {
   expect_false(calls$diagnosed)
 })
 
+test_that("a known failure in the uv diagnosis gets its advice in the error", {
+  local_mocked_bindings(
+    have_python = function() check_result(FALSE, "python is a no-show"),
+    have_tf = function() check_result(TRUE),
+    have_tfp = function() check_result(TRUE),
+    diagnose_python_load = function(...) {
+      "  x No solution found when resolving dependencies:"
+    },
+    write_greta_install_log = function(...) invisible(NULL)
+  )
+  expect_error(check_tf_version("error"), "uv could not find versions")
+})
+
 test_that("check_tf_version does not diagnose when it is not erroring", {
   calls <- new.env(parent = emptyenv())
   calls$diagnosed <- FALSE

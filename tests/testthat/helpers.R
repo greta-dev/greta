@@ -34,6 +34,24 @@ local_greta_seed <- function(
   tensorflow::tf$random$set_seed(seed)
 }
 
+# set the installation output greta stashes, starting from what a fresh session
+# has, and put the stash back when the caller exits
+local_install_stash <- function(..., .local_envir = parent.frame()) {
+  fields <- install_stash_fields()
+  present <- intersect(fields, ls(greta_stash))
+  old <- mget(present, envir = greta_stash)
+  withr::defer(
+    {
+      rm(list = intersect(fields, ls(greta_stash)), envir = greta_stash)
+      list2env(old, envir = greta_stash)
+    },
+    envir = .local_envir
+  )
+
+  rm(list = present, envir = greta_stash)
+  list2env(list(...), envir = greta_stash)
+}
+
 # run func(...) in a fresh R session with the greta under test: the source tree
 # under devtools::test(), the installed build under R CMD check. A bare
 # library(greta) would load whatever was last installed

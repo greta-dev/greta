@@ -49,7 +49,6 @@ utils::globalVariables(
   c(
     "N",
     "greta_deps_tf_tfp",
-    "greta_logfile",
     "os",
     "python_version_max",
     "python_version_min",
