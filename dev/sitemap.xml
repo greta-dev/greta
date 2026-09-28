@@ -11,6 +11,7 @@
 <url><loc>https://greta-dev.github.io/greta/dev/articles/get_started.html</loc></url>
 <url><loc>https://greta-dev.github.io/greta/dev/articles/index.html</loc></url>
 <url><loc>https://greta-dev.github.io/greta/dev/articles/installation.html</loc></url>
+<url><loc>https://greta-dev.github.io/greta/dev/articles/mutable_data.html</loc></url>
 <url><loc>https://greta-dev.github.io/greta/dev/articles/webpages/contribute.html</loc></url>
 <url><loc>https://greta-dev.github.io/greta/dev/articles/webpages/packages.html</loc></url>
 <url><loc>https://greta-dev.github.io/greta/dev/articles/webpages/reproducibility.html</loc></url>
@@ -23,9 +24,11 @@
 <url><loc>https://greta-dev.github.io/greta/dev/reference/as.greta_model.html</loc></url>
 <url><loc>https://greta-dev.github.io/greta/dev/reference/as.unknowns.html</loc></url>
 <url><loc>https://greta-dev.github.io/greta/dev/reference/as_data.html</loc></url>
+<url><loc>https://greta-dev.github.io/greta/dev/reference/as_data_mutable.html</loc></url>
 <url><loc>https://greta-dev.github.io/greta/dev/reference/calculate.html</loc></url>
 <url><loc>https://greta-dev.github.io/greta/dev/reference/chol.greta_array.html</loc></url>
 <url><loc>https://greta-dev.github.io/greta/dev/reference/chol2symm.html</loc></url>
+<url><loc>https://greta-dev.github.io/greta/dev/reference/data_values.html</loc></url>
 <url><loc>https://greta-dev.github.io/greta/dev/reference/deprecated-installers.html</loc></url>
 <url><loc>https://greta-dev.github.io/greta/dev/reference/dim-set-.unknowns.html</loc></url>
 <url><loc>https://greta-dev.github.io/greta/dev/reference/dim.node.html</loc></url>

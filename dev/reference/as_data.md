@@ -28,6 +28,14 @@ Logical elements are always converted to numerics. R objects cannot be
 converted if they contain missing (`NA`) or infinite (`-Inf` or `Inf`)
 values.
 
+## See also
+
+[`as_data_mutable()`](https://greta-dev.github.io/greta/dev/reference/as_data_mutable.md)
+to declare data you intend to replace later with `data_values<-`, so the
+same model can be fitted to more than one dataset without being rebuilt;
+[`vignette("mutable_data", "greta")`](https://greta-dev.github.io/greta/dev/articles/mutable_data.md)
+works that through end to end.
+
 ## Examples
 
 ``` r

@@ -93,6 +93,23 @@
   now defaults to a `learning_rate` of 0.1, up from 0.001, which was too
   small to reach the optimum of even a five-parameter model within 2000
   iterations ([\#633](https://github.com/greta-dev/greta/issues/633)).
+- [`as_data_mutable()`](https://greta-dev.github.io/greta/dev/reference/as_data_mutable.md)
+  is a new function that declares data you intend to replace later, so
+  the same model can be fitted to many datasets without being rebuilt.
+  It holds the data in a TensorFlow variable rather than a constant,
+  which the model’s graph reads by reference; replacing the value then
+  changes what the model computes with no retracing. It is opt-in
+  because a variable is not free: a constant is folded into the graph
+  once, where a variable is read and copied out to one batch per chain
+  on every evaluation, which does not show for small data or a single
+  chain but is substantial for a large dataset on several chains.
+  Declare only the data you will actually replace; everything else,
+  including the numbers in priors like `normal(0, 10)`, stays constant.
+  The dimensions cannot change. Data declared this way prints as
+  `greta array <mutable data>`, so you can tell at a glance which of
+  your arrays can be replaced. See the “Fitting one model to many
+  datasets” vignette
+  ([\#181](https://github.com/greta-dev/greta/issues/181)).
 - [`calculate()`](https://greta-dev.github.io/greta/dev/reference/calculate.md)
   with `nsim` and no `seed` no longer resets R’s random number
   generator. It picked a seed, called
@@ -105,6 +122,16 @@
   [`mcmc()`](https://greta-dev.github.io/greta/dev/reference/inference.md)
   behaves. `calculate(seed = )` still leaves the generator exactly as it
   found it ([\#285](https://github.com/greta-dev/greta/issues/285)).
+- `data_values<-` is a new replacement function that swaps the values
+  behind a greta array declared with
+  [`as_data_mutable()`](https://greta-dev.github.io/greta/dev/reference/as_data_mutable.md),
+  modifying the model in place so the next call to
+  [`mcmc()`](https://greta-dev.github.io/greta/dev/reference/inference.md),
+  [`opt()`](https://greta-dev.github.io/greta/dev/reference/inference.md)
+  or
+  [`calculate()`](https://greta-dev.github.io/greta/dev/reference/calculate.md)
+  uses the new data
+  ([\#181](https://github.com/greta-dev/greta/issues/181)).
 - greta supports TensorFlow 2.18.0 to 2.21.0, with TensorFlow
   Probability fixed at 0.25.0. The documentation now states the range
   rather than implying that all three versions are a free choice; the

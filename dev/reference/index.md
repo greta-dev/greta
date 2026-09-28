@@ -10,6 +10,10 @@ Create greta arrays representing observed data or fixed values
   : create data greta arrays
 - [`as_data()`](https://greta-dev.github.io/greta/dev/reference/as_data.md)
   : convert other objects to greta arrays
+- [`as_data_mutable()`](https://greta-dev.github.io/greta/dev/reference/as_data_mutable.md)
+  : Declare data you intend to replace
+- [`` `data_values<-`() ``](https://greta-dev.github.io/greta/dev/reference/data_values.md)
+  : Replace a model's data without rebuilding it
 
 ## variables & distributions
 

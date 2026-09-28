@@ -11,6 +11,8 @@
 
 - [Example
   models](https://greta-dev.github.io/greta/dev/articles/example_models.md):
+- [Fitting one model to many
+  datasets](https://greta-dev.github.io/greta/dev/articles/mutable_data.md):
 
 ### Analyses
 
