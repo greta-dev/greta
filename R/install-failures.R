@@ -1,3 +1,57 @@
+# Failures seen in pip, conda and uv output during installation, each with what
+# to do about it. `pattern` is matched as a fixed string against the output, so
+# it has to be text the tool prints verbatim.
+known_install_failures <- function() {
+  list(
+    # pip refuses to install outside a virtualenv when the user has set
+    # PIP_REQUIRE_VIRTUALENV, and a conda environment is not a virtualenv
+    # (greta-dev/greta#719)
+    list(
+      pattern = "Could not find an activated virtualenv (required)",
+      advice = c(
+        "!" = "pip is set to refuse installs outside a virtualenv, with \\
+        {.envvar PIP_REQUIRE_VIRTUALENV}. greta installs into a conda \\
+        environment, which pip does not count as one.",
+        "i" = "For this session, run \\
+        {.code Sys.setenv(PIP_REQUIRE_VIRTUALENV = \"false\")} and install \\
+        again. To make it permanent, turn it off where it is set: in a shell \\
+        startup file such as {.file ~/.bashrc} or {.file ~/.zshrc}, or in \\
+        pip's own configuration, which {.code pip config list} shows."
+      )
+    ),
+    # pip finds no wheel for this Python: TensorFlow publishes wheels for a
+    # narrow range of Python versions (greta-dev/greta#663)
+    list(
+      pattern = "Could not find a version that satisfies the requirement",
+      advice = c(
+        "!" = "pip found no release of a package that works with this \\
+        Python. TensorFlow publishes wheels for a narrow range of Python \\
+        versions, so the Python version is likely too new or too old for \\
+        the TensorFlow version requested.",
+        "i" = "Try another {.arg python_version} in {.fun greta_deps_spec}, \\
+        then {.run greta::reinstall_greta_deps()}."
+      )
+    ),
+    list(
+      pattern = "No solution found when resolving",
+      advice = c(
+        "!" = "uv could not find versions of Python, TensorFlow and \\
+        TensorFlow Probability that work together.",
+        "i" = "Check the versions requested with {.run greta::greta_sitrep()}."
+      )
+    )
+  )
+}
+
+# Advice for each known failure found in `output`, as cli bullets
+install_failure_advice <- function(output) {
+  found <- Filter(
+    \(failure) any(grepl(failure$pattern, output, fixed = TRUE)),
+    known_install_failures()
+  )
+  unlist(lapply(found, `[[`, "advice"))
+}
+
 # The lines of `output` that report an error. Each tool starts such a line with
 # its marker: pip "ERROR:", R "Error in" or "Error :", conda and Python
 # "CondaError:" or "ModuleNotFoundError:", uv "error:".

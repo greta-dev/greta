@@ -138,11 +138,18 @@ install_log_steps <- function() {
   )
 }
 
-# What the logfile lists under "Problems found": the lines that report an
-# error, each once, and at most 50 of them
+# What the logfile lists under "Problems found": advice for any known failure,
+# then the lines that report an error, each once, and at most 50 of them
 install_log_problems <- function(steps) {
+  output <- vapply(steps, \(step) step$output, character(1))
+  advice_text <- vapply(
+    install_failure_advice(output),
+    \(bullet) cli::ansi_strip(cli::format_inline(bullet)),
+    character(1),
+    USE.NAMES = FALSE
+  )
   error_lines <- unique(unlist(lapply(steps, \(step) step$error_lines)))
-  utils::head(error_lines, 50)
+  c(advice_text, utils::head(error_lines, 50))
 }
 
 # where the installation logfile goes: GRETA_INSTALLATION_LOG if set, otherwise

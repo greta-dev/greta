@@ -135,7 +135,7 @@ check_tf_version <- function(
           moment."
         )
       )
-      diagnose_python_load()
+      diagnosis <- diagnose_python_load()
       # Silently: write_greta_install_log() narrates itself with progress steps
       # and elapsed times, which belong to an install the user asked for, not to
       # the middle of an error they did not.
@@ -151,7 +151,7 @@ check_tf_version <- function(
         # no pointer and no idea one was intended
         install_log_pointer(log_written)
       }
-      cli_msg <- c(cli_msg, log_pointer)
+      cli_msg <- c(cli_msg, install_failure_advice(diagnosis), log_pointer)
     }
 
     # a removal earlier this session may have deleted the environment greta

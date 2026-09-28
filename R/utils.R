@@ -731,6 +731,8 @@ other_install_fail_msg <- function(
   output_notes = "",
   log_written = FALSE
 ) {
+  output <- paste(output_notes, error_passed, sep = "\n")
+
   tf_pin <- greta_deps_default$tf
   tfp_pin <- greta_deps_default$tfp
   py_pin <- greta_deps_default$python
@@ -739,6 +741,7 @@ other_install_fail_msg <- function(
       "Stopping as installation of {.pkg greta} dependencies failed",
       "An error occured:",
       install_output_excerpt(error_passed, output_notes),
+      install_failure_advice(output),
       install_log_pointer(log_written),
       "You can perform the installation manually by doing the following:",
       "Restarting R, then running:",

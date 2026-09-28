@@ -1,3 +1,20 @@
+test_that("known install failures are recognised in the output", {
+  virtualenv <- "ERROR: Could not find an activated virtualenv (required)."
+  expect_match(
+    install_failure_advice(virtualenv),
+    "PIP_REQUIRE_VIRTUALENV",
+    all = FALSE
+  )
+
+  no_wheel <- paste(
+    "ERROR: Could not find a version that satisfies the requirement",
+    "tensorflow==2.15.0.* (from versions: 2.16.1, 2.17.0)"
+  )
+  expect_match(install_failure_advice(no_wheel), "python_version", all = FALSE)
+
+  expect_length(install_failure_advice("Successfully installed numpy"), 0)
+})
+
 test_that("install_error_lines() keeps only the lines reporting an error", {
   reported <- c(
     "ERROR: No matching distribution found for tensorflow",
@@ -43,6 +60,7 @@ test_that("an install step that errors is a failure, though it wrote output", {
       )
     )
   )
+  expect_match(conditionMessage(error), "PIP_REQUIRE_VIRTUALENV", fixed = TRUE)
   # braces in install output are shown, not read as cli markup
   expect_match(conditionMessage(error), "tensorflow {cuda}", fixed = TRUE)
   expect_match(greta_stash$conda_install_error, "activated virtualenv")

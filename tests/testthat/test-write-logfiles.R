@@ -20,6 +20,8 @@ test_that("the logfile escapes install output and keeps it out of summaries", {
   expect_match(html, "tensorflow&lt;2.16", fixed = TRUE)
   summaries <- regmatches(html, gregexpr("<summary>.*?</summary>", html))[[1]]
   expect_false(any(grepl("<pre>", summaries, fixed = TRUE)))
+  expect_match(html, "Problems found", fixed = TRUE)
+  expect_match(html, "PIP_REQUIRE_VIRTUALENV", fixed = TRUE)
 })
 
 test_that("the logfile lists a step's first error line, after its output", {

@@ -31,6 +31,19 @@ test_that("install failure message is captured", {
   )
 })
 
+test_that("install failure message shows error lines and advice", {
+  withr::local_envvar(
+    GRETA_INSTALLATION_LOG = "greta-installation-logfile.html"
+  )
+  expect_snapshot(
+    cat(other_install_fail_msg(
+      "ERROR: Could not find an activated virtualenv (required).",
+      output_notes = "Collecting tensorflow",
+      log_written = TRUE
+    ))
+  )
+})
+
 test_that("install failure messages point to the logfile only if it was written", {
   withr::local_envvar(
     GRETA_INSTALLATION_LOG = "greta-installation-logfile.html"
