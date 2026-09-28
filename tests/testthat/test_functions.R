@@ -574,8 +574,9 @@ test_that("chol2symm inverts chol", {
   x <- rWishart(1, 10, diag(9))[,, 1]
   u <- chol(x)
 
-  # rebuilding x from u rounds to about 2e-15 relative error at most, measured
-  # over 2000 draws. .Machine$double.eps failed on 3% of them
+  # rebuilding x from u carries rounding error of up to 3.8e-16 as all.equal()
+  # measures it, so .Machine$double.eps failed on 3% of 2000 draws. Measured in
+  # https://github.com/greta-dev/greta.benchmarks/tree/main/2026-09-28-chol2symm-tolerance-i842
   tolerance <- 1e-12
 
   # check the R version
