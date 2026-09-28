@@ -21,3 +21,26 @@ test_that("the logfile escapes install output and keeps it out of summaries", {
   summaries <- regmatches(html, gregexpr("<summary>.*?</summary>", html))[[1]]
   expect_false(any(grepl("<pre>", summaries, fixed = TRUE)))
 })
+
+test_that("the logfile lists a step's first error line, after its output", {
+  logfile <- withr::local_tempfile(fileext = ".html")
+  local_install_stash(
+    conda_install_notes = "Collecting tensorflow",
+    conda_install_error = "ERROR: No matching distribution found"
+  )
+  suppressMessages(write_greta_install_log(logfile))
+  html <- paste(readLines(logfile), collapse = "\n")
+  expect_match(
+    html,
+    "<li>ERROR: No matching distribution found</li>",
+    fixed = TRUE
+  )
+})
+
+test_that("a logfile before any install lists no problems", {
+  logfile <- withr::local_tempfile(fileext = ".html")
+  local_install_stash()
+  suppressMessages(write_greta_install_log(logfile))
+  html <- paste(readLines(logfile), collapse = "\n")
+  expect_no_match(html, "Problems found", fixed = TRUE)
+})

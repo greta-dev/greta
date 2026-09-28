@@ -34,7 +34,7 @@ greta_create_conda_env <- function(timeout = 5, deps = greta_deps_spec()) {
     stderr = stderr_file
   )
 
-  install_conda_create <- new_install_process(
+  new_install_process(
     callr_process = callr_conda_create,
     stdout_file = stdout_file,
     stderr_file = stderr_file,
@@ -42,9 +42,7 @@ greta_create_conda_env <- function(timeout = 5, deps = greta_deps_spec()) {
     cli_start_msg = glue::glue(
       "Creating conda environment (Python {deps$python_version})"
     ),
-    cli_end_msg = "greta-env-tf2 environment created!"
+    cli_end_msg = "greta-env-tf2 environment created!",
+    stash_as = "conda_create"
   )
-
-  greta_stash$conda_create_notes <- install_conda_create$output_notes
-  greta_stash$conda_create_error <- install_conda_create$output_error
 }

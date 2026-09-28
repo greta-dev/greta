@@ -136,38 +136,22 @@ check_tf_version <- function(
         )
       )
       diagnose_python_load()
-      logfile <- greta_install_logfile()
       # Silently: write_greta_install_log() narrates itself with progress steps
       # and elapsed times, which belong to an install the user asked for, not to
       # the middle of an error they did not.
-      #
-      # The reason is kept rather than collapsed to FALSE. Discarding it is the
-      # habit this whole change exists to correct, and the logfile is where the
-      # explanation was meant to go -- so failing to write it is worth saying,
-      # instead of leaving the user with no pointer and no idea one was intended.
-      log_written <- tryCatch(
-        {
-          suppressMessages(write_greta_install_log(path = logfile))
-          check_result(TRUE)
-        },
-        error = function(e) check_result(FALSE, conditionMessage(e))
-      )
+      log_written <- write_install_log_quietly()
 
-      if (isTRUE(log_written)) {
-        cli_msg <- c(
-          cli_msg,
+      log_pointer <- if (isTRUE(log_written)) {
+        c(
           "i" = "What Python and uv reported is in \\
           {.run greta::open_greta_install_log()}."
         )
       } else {
-        cli_msg <- c(
-          cli_msg,
-          "i" = paste0(
-            "greta could not write its logfile: ",
-            cli_escape(check_reason(log_written))
-          )
-        )
+        # failing to write it is worth saying, instead of leaving the user with
+        # no pointer and no idea one was intended
+        install_log_pointer(log_written)
       }
+      cli_msg <- c(cli_msg, log_pointer)
     }
 
     # a removal earlier this session may have deleted the environment greta

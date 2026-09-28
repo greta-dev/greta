@@ -12,7 +12,18 @@
       
     Condition
       Error in `new_install_process()`:
-      ! Stopping as installation of greta dependencies took longer than 0.001 minutes You can increase the timeout time by increasing the `timeout` argument. For example, to wait 5 minutes: `install_greta_deps(timeout = 5)` Alternatively, you can perform the entire installation with: `reticulate::install_miniconda()` Then: `reticulate::conda_create(envname = 'greta-env-tf2', python_version = '3.12')` Then: `reticulate::py_install( packages = c( 'numpy', 'tensorflow==2.21.0', 'tensorflow-probability[tf]==0.25.0' ), envname = 'greta-env-tf2', pip = TRUE )` Then select it with `greta_set_python('conda')`, restart R, and load greta with: `library(greta)`
+      ! Stopping as installation of greta dependencies took longer than 0.001 minutes
+      You can increase the timeout time by increasing the `timeout` argument.
+      For example, to wait 5 minutes:
+      `install_greta_deps(timeout = 5)`
+      Alternatively, you can perform the entire installation with:
+      `reticulate::install_miniconda()`
+      Then:
+      `reticulate::conda_create(envname = 'greta-env-tf2', python_version = '3.12')`
+      Then:
+      `reticulate::py_install( packages = c( 'numpy', 'tensorflow==2.21.0', 'tensorflow-probability[tf]==0.25.0' ), envname = 'greta-env-tf2', pip = TRUE )`
+      Then select it with `greta_set_python('conda')`, restart R, and load greta with: `library(greta)`
+      i The full output is in the logfile, '<logfile>'. Open it with `greta::open_greta_install_log()`.
 
 # install timeout message is captured
 
@@ -48,7 +59,7 @@
       `reticulate::py_install( packages = c( 'numpy', 'tensorflow==2.21.0', 'tensorflow-probability[tf]==0.25.0' ), envname = 'greta-env-tf2', pip = TRUE )`
       Then select it with `greta_set_python('conda')`, restart R, and load greta with: `library(greta)`
       Additionally, the following error appeared:
-      could not resolve env
+      > could not resolve env
 
 # install failure message is captured
 
@@ -57,7 +68,7 @@
     Output
       Stopping as installation of greta dependencies failed
       An error occured:
-      could not resolve env
+      > could not resolve env
       You can perform the installation manually by doing the following:
       Restarting R, then running:
       `Sys.unsetenv('RETICULATE_PYTHON')`

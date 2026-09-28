@@ -43,6 +43,14 @@ write_greta_install_log <- function(path = greta_install_logfile()) {
 <h2>Created: {{sys_date}}</h2>
 <p>Use this logfile to explore potential issues in installation with greta.
 Search it for "error" with Cmd/Ctrl+F.</p>
+{{#has_problems}}
+<h2>Problems found</h2>
+<ul>
+{{#problems}}
+<li>{{.}}</li>
+{{/problems}}
+</ul>
+{{/has_problems}}
 {{#steps}}
 <h2>{{title}}</h2>
 {{#has_notes}}
@@ -51,16 +59,21 @@ Search it for "error" with Cmd/Ctrl+F.</p>
 <pre><code>{{notes}}</code></pre>
 </details>
 {{/has_notes}}
-<details>
+<details{{#open}} open{{/open}}>
 <summary>Errors and messages</summary>
 <pre><code>{{errors}}</code></pre>
 </details>
 {{/steps}}
 '
 
+  steps <- install_log_steps()
+  problems <- install_log_problems(steps)
+
   greta_install_data <- list(
     sys_date = Sys.time(),
-    steps = install_log_steps()
+    has_problems = length(problems) > 0,
+    problems = problems,
+    steps = steps
   )
 
   writeLines(whisker::whisker.render(template, greta_install_data), path)
@@ -88,16 +101,22 @@ install_stash_fields <- function() {
 # failed resolution is too long for an error message and belongs here.
 install_log_steps <- function() {
   step <- function(title, notes, errors) {
+    ran <- !is.null(errors)
     notes <- paste(notes %||% character(), collapse = "\n")
     errors <- paste(
       errors %||% "This step has not run in this R session.",
       collapse = "\n"
     )
+    output <- if (ran) paste(notes, errors, sep = "\n") else ""
+    error_lines <- install_error_lines(output)
     list(
       title = title,
       notes = notes,
       errors = errors,
-      has_notes = nzchar(notes)
+      has_notes = nzchar(notes),
+      output = output,
+      error_lines = error_lines,
+      open = length(error_lines) > 0
     )
   }
 
@@ -117,6 +136,13 @@ install_log_steps <- function() {
     )),
     conda_steps
   )
+}
+
+# What the logfile lists under "Problems found": the lines that report an
+# error, each once, and at most 50 of them
+install_log_problems <- function(steps) {
+  error_lines <- unique(unlist(lapply(steps, \(step) step$error_lines)))
+  utils::head(error_lines, 50)
 }
 
 # where the installation logfile goes: GRETA_INSTALLATION_LOG if set, otherwise
