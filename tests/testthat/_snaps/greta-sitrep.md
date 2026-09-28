@@ -34,8 +34,8 @@
     Code
       check_tf_version("error")
     Message
-      i Initialising python and checking dependencies, this may take a moment.
-      x Initialising python and checking dependencies, this may take a moment. ... ...
+      i Initialising Python
+      x Initialising Python ... failed
       
     Condition
       Error in `check_tf_version()`:

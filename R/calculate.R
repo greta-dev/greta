@@ -16,7 +16,10 @@
 #'   to simulate if stochastic greta arrays are present in the model - see
 #'   Details.
 #' @param seed an optional seed to be used in set.seed immediately before the
-#'   simulation so as to generate a reproducible sample
+#'   simulation so as to generate a reproducible sample. `set.seed()` before
+#'   the call works too; see the
+#'   [Reproducible results](https://greta-dev.github.io/greta/articles/webpages/reproducibility.html)
+#'   article.
 #' @param precision the floating point precision to use when calculating values.
 #' @param trace_batch_size the number of posterior samples to process at a time
 #'   when `target` is a `greta_mcmc_list` object; reduce this to
@@ -195,37 +198,18 @@ calculate <- function(
       "Perhaps you forgot to explicitly name other arguments?"
     )
 
-    # checks and RNG seed setting if we're sampling
-    # REFACTOR: check_rng_seed(nim, seed, compute_option)
     if (!is.null(nsim)) {
       # check nsim is valid
       nsim <- check_positive_integer(nsim, "nsim")
 
-      # if an RNG seed was provided use it and reset the RNG on exiting
-      if (!is.null(seed)) {
-        no_global_random_seed <- !exists(
-          x = ".Random.seed",
-          envir = .GlobalEnv,
-          inherits = FALSE
-        )
-        if (no_global_random_seed) {
-          runif(1)
-        }
+      tf_seed <- seed %||% get_seed()
 
-        r_seed <- get(".Random.seed", envir = .GlobalEnv)
-        on.exit(assign(".Random.seed", r_seed, envir = .GlobalEnv))
-        tensorflow::set_random_seed(
-          seed = seed,
-          disable_gpu = is_using_cpu(compute_options)
-        )
-      }
+      # preserve the stream from *after* that draw, not before: set_all_seeds()
+      # reseeds R, and restoring to before would hand the next unseeded call
+      # the same seed and make it repeat itself
+      withr::local_preserve_seed()
 
-      if (is.null(seed)) {
-        tensorflow::set_random_seed(
-          seed = get_seed(),
-          disable_gpu = is_using_cpu(compute_options)
-        )
-      }
+      set_all_seeds(tf_seed)
     }
 
     # set precision

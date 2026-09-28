@@ -55,6 +55,8 @@ navbar:
           href: articles/webpages/why_greta.html
         - text: technical details
           href: articles/webpages/technical_details.html
+        - text: reproducible results
+          href: articles/webpages/reproducibility.html
         - text: software
           href: articles/webpages/software.html
         - text: contribute to greta
@@ -176,6 +178,7 @@ articles:
       - webpages/packages
       - webpages/why_greta
       - webpages/technical_details
+      - webpages/reproducibility
       - webpages/software
       - webpages/contribute
   - title: FAQ

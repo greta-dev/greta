@@ -60,8 +60,8 @@ installs or checks its dependencies (TensorFlow and TensorFlow Probability).
 You'll see a short progress message:
 
 ```
-#> ℹ Initialising python and checking dependencies, this may take a moment.
-#> ✔ Initialising python and checking dependencies ... done!
+#> ℹ Initialising Python
+#> ✔ Python, TensorFlow and TFP are ready
 ```
 
 After that, your greta code returns as normal. If Python can't be found, or the
@@ -100,3 +100,7 @@ If these instructions do not work for you, please post on the [greta forum](http
 # I get the message: "Your CPU supports instructions that this TensorFlow binary was not compiled to use: AVX AVX2"
 
 Briefly, this is a warning that you can safely ignore. Less briefly, it means that there can be some optimisations made with a special install of tensorflow that mean it will run faster on your machine. For more details, see [this stack overflow thread](https://stackoverflow.com/a/47227886/3764040). We have noted this issue in [this github issue](https://github.com/greta-dev/greta/issues/472), and might in the future make it easier to resolve.
+
+# How do I make my results reproducible?
+
+Call `set.seed()` before `mcmc()` or `calculate()`. greta takes its random numbers from R's, so the same seed gives the same starting values and the same draws. To repeat a run exactly, also keep `verbose`, `pb_update`, `one_by_one` and the future plan (including its number of workers) the same. See the ["Reproducible results"](webpages/reproducibility.html) article for examples, and for how this compares with Stan and PyMC.

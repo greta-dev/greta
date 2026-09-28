@@ -54,11 +54,10 @@ check_tf_version <- function(
 
   alert <- match.arg(alert)
 
+  # cli cuts a status line to the width of the console, so it is kept short
+  # enough to survive a narrow one (greta-dev/greta#670)
   if (!greta_stash$python_has_been_initialised) {
-    cli_process_start(
-      msg = "Initialising python and checking dependencies, this may take a \\
-      moment."
-    )
+    cli_process_start(msg = "Initialising Python")
   }
 
   # A list, not c(): each result carries the reason it failed as an attribute,
@@ -74,7 +73,7 @@ check_tf_version <- function(
   requirements_valid_py_not_init <- all(requirements_valid) && py_not_init
   if (requirements_valid_py_not_init) {
     cli_process_done(
-      msg_done = "Initialising python and checking dependencies ... done!"
+      msg_done = "Python, TensorFlow and TFP are ready"
     )
     cat("\n")
     greta_stash$python_has_been_initialised <- TRUE
@@ -136,40 +135,23 @@ check_tf_version <- function(
           moment."
         )
       )
-      diagnose_python_load()
-      logfile <- sys_get_env("GRETA_INSTALLATION_LOG") %||%
-        greta_default_logfile()
+      diagnosis <- diagnose_python_load()
       # Silently: write_greta_install_log() narrates itself with progress steps
       # and elapsed times, which belong to an install the user asked for, not to
       # the middle of an error they did not.
-      #
-      # The reason is kept rather than collapsed to FALSE. Discarding it is the
-      # habit this whole change exists to correct, and the logfile is where the
-      # explanation was meant to go -- so failing to write it is worth saying,
-      # instead of leaving the user with no pointer and no idea one was intended.
-      log_written <- tryCatch(
-        {
-          suppressMessages(write_greta_install_log(path = logfile))
-          check_result(TRUE)
-        },
-        error = function(e) check_result(FALSE, conditionMessage(e))
-      )
+      log_written <- write_install_log_quietly()
 
-      if (isTRUE(log_written)) {
-        cli_msg <- c(
-          cli_msg,
+      log_pointer <- if (isTRUE(log_written)) {
+        c(
           "i" = "What Python and uv reported is in \\
           {.run greta::open_greta_install_log()}."
         )
       } else {
-        cli_msg <- c(
-          cli_msg,
-          "i" = paste0(
-            "greta could not write its logfile: ",
-            cli_escape(check_reason(log_written))
-          )
-        )
+        # failing to write it is worth saying, instead of leaving the user with
+        # no pointer and no idea one was intended
+        install_log_pointer(log_written)
       }
+      cli_msg <- c(cli_msg, install_failure_advice(diagnosis), log_pointer)
     }
 
     # a removal earlier this session may have deleted the environment greta

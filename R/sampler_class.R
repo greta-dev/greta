@@ -8,6 +8,7 @@ sampler <- R6Class(
     n_samplers = 1,
     n_chains = 1,
     numerical_rejections = 0,
+    n_bursts = 0L,
     thin = 1,
     warmup = 1,
 
@@ -90,7 +91,9 @@ sampler <- R6Class(
               )
             ),
             dtype = tf_float()
-          )
+          ),
+          # sampler_seed
+          tf$TensorSpec(shape = list(2L), dtype = tf$int32)
         )
       )
     },
@@ -471,17 +474,11 @@ sampler <- R6Class(
       free_state,
       sampler_burst_length,
       sampler_thin,
-      sampler_param_vec
-      # pass values through
+      sampler_param_vec,
+      sampler_seed
     ) {
       dag <- self$model$dag
       tfe <- dag$tf_environment
-
-      # despite the name this sets no TF seed: it stashes self$seed in the tf
-      # environment as `rng_seed`, which nothing reads. sample_chain() below
-      # does take a `seed` argument, which is where seeding would have to go:
-      # see greta-dev/greta#285 and #427
-      self$set_tf_seed()
 
       sampler_kernel <- self$define_tf_kernel(
         sampler_param_vec
@@ -504,7 +501,8 @@ sampler <- R6Class(
         },
         num_burnin_steps = tf$constant(0L, dtype = tf$int32),
         num_steps_between_results = sampler_thin,
-        parallel_iterations = 1L
+        parallel_iterations = 1L,
+        seed = sampler_seed
       )
       return(
         sampler_batch
@@ -519,12 +517,20 @@ sampler <- R6Class(
 
       param_vec <- unlist(self$sampler_parameter_values())
 
+      # a stateless seed, fixed by the sampler's seed and how many bursts it has
+      # run. Seeding TensorFlow's global state would tie the random numbers to
+      # the trace, so a future worker that rebuilds the tf_function for
+      # extra_samples() would replay the first run's random numbers
+      self$n_bursts <- self$n_bursts + 1L
+      burst_seed <- c(self$seed, self$n_bursts)
+
       # run the sampler, handling numerical errors
       batch_results <- self$sample_carefully(
         free_state = self$free_state,
         sampler_burst_length = as.integer(n_samples),
         sampler_thin = as.integer(thin),
-        sampler_param_vec = param_vec
+        sampler_param_vec = param_vec,
+        sampler_seed = burst_seed
       )
 
       # get trace of free state and drop the null dimension
@@ -571,7 +577,8 @@ sampler <- R6Class(
       free_state,
       sampler_burst_length,
       sampler_thin,
-      sampler_param_vec
+      sampler_param_vec,
+      sampler_seed
     ) {
       # tryCatch handling for numerical errors
       dag <- self$model$dag
@@ -591,7 +598,8 @@ sampler <- R6Class(
             sampler_param_vec,
             dtype = tf_float(),
             shape = length(sampler_param_vec)
-          )
+          ),
+          sampler_seed = tensorflow::as_tensor(sampler_seed, dtype = tf$int32)
         )
       ) # closing cleanly
 

@@ -236,6 +236,10 @@ NULL
     new_value <- as.unknowns(new_value)
   }
 
+  # tf_replace() takes the replacement row-major, where R fills it
+  # column-major - greta-dev/greta#844
+  tf_index <- flatten_rowwise(array(index, dim(replacement)))
+
   # create operation node, passing call and dims as additional arguments
   op(
     "replace",
@@ -243,7 +247,7 @@ NULL
     replacement,
     dim = dims,
     operation_args = list(
-      index = index,
+      index = tf_index,
       dims = dims
     ),
     value = new_value,

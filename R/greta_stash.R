@@ -5,15 +5,6 @@
 init_greta_stash <- function() {
   stash <- new.env()
 
-  greta_note_msg <- cli::format_message(
-    c(
-      "If you are reading this, the {.pkg greta} installation or error notes \\
-      have been wiped. This likely means that installation has not happened, \\
-      or it has happened and you've restarted R. See `?install_greta_deps()` \\
-      for more information."
-    )
-  )
-
   stash$python_has_been_initialised <- FALSE
   stash$deps_removed_this_session <- FALSE
   stash$numerical_messages <- c(
@@ -22,13 +13,15 @@ init_greta_stash <- function() {
   )
   stash$callbacks <- list(parallel_progress = progress_bars)
 
-  stash$install_miniconda_notes <- greta_note_msg
-  stash$install_miniconda_error <- greta_note_msg
-  stash$conda_create_notes <- greta_note_msg
-  stash$conda_create_error <- greta_note_msg
-  stash$conda_install_notes <- greta_note_msg
-  stash$conda_install_error <- greta_note_msg
-  stash$tf_num_error <- greta_note_msg
+  # nodes named by count and token: unique across and within sessions
+  stash$node_count <- 0L
+  session_hash <- rlang::hash(list(Sys.getpid(), Sys.time()))
+  stash$session_token <- substr(session_hash, 1, 8)
+
+  stash$tf_num_error <- cli::format_message(
+    "If you are reading this, {.pkg greta} has not recorded a TensorFlow \\
+    numerical error in this R session. They are cleared when R restarts."
+  )
 
   stash
 }
