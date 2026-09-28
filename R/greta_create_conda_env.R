@@ -40,8 +40,7 @@ greta_create_conda_env <- function(timeout = 5, deps = greta_deps_spec()) {
     stderr_file = stderr_file,
     timeout = timeout,
     cli_start_msg = glue::glue(
-      "Creating 'greta-env-tf2' conda environment using python \\
-    v{deps$python_version}, this may take a minute"
+      "Creating conda environment (Python {deps$python_version})"
     ),
     cli_end_msg = "greta-env-tf2 environment created!"
   )

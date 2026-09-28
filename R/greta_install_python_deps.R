@@ -41,10 +41,7 @@ greta_install_python_deps <- function(timeout = 5, deps = greta_deps_spec()) {
     timeout = timeout,
     stdout_file = stdout_file,
     stderr_file = stderr_file,
-    cli_start_msg = glue::glue(
-      "Installing python modules into 'greta-env-tf2' conda environment, \\
-    this may take a few minutes"
-    ),
+    cli_start_msg = "Installing TensorFlow and TFP",
     cli_end_msg = "Python modules installed!"
   )
 

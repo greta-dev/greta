@@ -27,8 +27,7 @@ greta_install_miniconda <- function(timeout = 5) {
     timeout = timeout,
     stdout_file = stdout_file,
     stderr_file = stderr_file,
-    cli_start_msg = "No {.pkg miniconda} detected, installing \\
-                      {.pkg miniconda}, this may take a minute.",
+    cli_start_msg = "Installing {.pkg miniconda}",
     cli_end_msg = "{.pkg miniconda} installed!"
   )
 

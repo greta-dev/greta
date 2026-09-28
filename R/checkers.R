@@ -54,11 +54,10 @@ check_tf_version <- function(
 
   alert <- match.arg(alert)
 
+  # cli cuts a status line to the width of the console, so it is kept short
+  # enough to survive a narrow one (greta-dev/greta#670)
   if (!greta_stash$python_has_been_initialised) {
-    cli_process_start(
-      msg = "Initialising python and checking dependencies, this may take a \\
-      moment."
-    )
+    cli_process_start(msg = "Initialising Python")
   }
 
   # A list, not c(): each result carries the reason it failed as an attribute,
@@ -74,7 +73,7 @@ check_tf_version <- function(
   requirements_valid_py_not_init <- all(requirements_valid) && py_not_init
   if (requirements_valid_py_not_init) {
     cli_process_done(
-      msg_done = "Initialising python and checking dependencies ... done!"
+      msg_done = "Python, TensorFlow and TFP are ready"
     )
     cat("\n")
     greta_stash$python_has_been_initialised <- TRUE

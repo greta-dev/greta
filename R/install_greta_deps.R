@@ -129,7 +129,8 @@ install_greta_deps <- function(
     "i" = "Use {.fun install_greta_deps} to install a conda environment \\
           (e.g. offline, or to pin versions), then select it with \\
           {.code greta_set_python(\"conda\")}.",
-    "i" = "See the installation vignette: {.vignette greta::installation}."
+    "i" = "See the installation vignette: {.vignette greta::installation}.",
+    "i" = "Installing can take a few minutes."
   ))
 
   # set warning message length, restoring the previous value on exit

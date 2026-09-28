@@ -6,8 +6,9 @@
       i Most users do not need `install_greta_deps()`: greta installs TensorFlow and TensorFlow Probability automatically (via uv) on first use.
       i Use `install_greta_deps()` to install a conda environment (e.g. offline, or to pin versions), then select it with `greta_set_python("conda")`.
       i See the installation vignette: `vignette(greta::installation)`.
-      i Creating 'greta-env-tf2' conda environment using python v3.12, this may tak...
-      x Creating 'greta-env-tf2' conda environment using python v3.12, this may tak...
+      i Installing can take a few minutes.
+      i Creating conda environment (Python 3.12)
+      x Creating conda environment (Python 3.12) ... failed
       
     Condition
       Error in `new_install_process()`:
