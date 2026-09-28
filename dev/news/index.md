@@ -23,6 +23,12 @@
   uv reported in the installation logfile, which you can read with
   [`open_greta_install_log()`](https://greta-dev.github.io/greta/dev/reference/open_greta_install_log.md)
   ([\#825](https://github.com/greta-dev/greta/issues/825)).
+- greta’s progress messages while loading Python and installing
+  dependencies are now short enough to fit a narrow console. cli cuts a
+  progress line to the console’s width, so “Initialising python and
+  checking dependencies, this may take a moment.” was shown as
+  “Initialising python and checking depend…”, including when it failed
+  ([\#670](https://github.com/greta-dev/greta/issues/670)).
 - greta now uses the Keras 3 optimiser API, which is what lets it move
   off the TensorFlow 2.15 ceiling it was previously capped at; the Keras
   2 `tf.keras.optimizers.legacy` API it used before does not exist in
@@ -131,6 +137,26 @@
   is unchanged — HMC is valid for any fixed number of steps, so this
   affects mixing rather than the distribution being sampled
   ([\#745](https://github.com/greta-dev/greta/issues/745)).
+- [`install_greta_deps()`](https://greta-dev.github.io/greta/dev/reference/install_greta_deps.md)
+  now stops when an installation step fails. It used to judge a step
+  only by whether it printed anything, so a pip error such as “Could not
+  find an activated virtualenv (required)” was followed by “Python
+  modules installed!”. The error now shows the lines that report an
+  error, advice for failures greta recognises - pip’s
+  `PIP_REQUIRE_VIRTUALENV` setting, or a Python version TensorFlow has
+  no release for - and where the logfile is, which is now written when
+  installation fails as well as when it succeeds. The error also no
+  longer breaks when install output contains braces. When greta cannot
+  load Python, the error now includes the same advice for anything it
+  recognises in what uv reported
+  ([\#663](https://github.com/greta-dev/greta/issues/663),
+  [\#719](https://github.com/greta-dev/greta/issues/719)).
+- [`install_greta_deps()`](https://greta-dev.github.io/greta/dev/reference/install_greta_deps.md)
+  now says when it is installing into an existing `greta-env-tf2` conda
+  environment, and a failed installation with one in place suggests
+  [`reinstall_greta_deps()`](https://greta-dev.github.io/greta/dev/reference/install_greta_deps.md),
+  since installing again reuses a broken environment as it is
+  ([\#684](https://github.com/greta-dev/greta/issues/684)).
 - `install_tensorflow()` is no longer re-exported by greta. It was
   [`tensorflow::install_tensorflow()`](https://rdrr.io/pkg/tensorflow/man/install_tensorflow.html)
   under greta’s name, and it bypasses every version check greta makes,
@@ -156,6 +182,20 @@
   iterations; results also shift slightly because Keras 3 implements
   Nadam differently to the Keras 2 optimiser greta used before
   ([\#633](https://github.com/greta-dev/greta/issues/633)).
+- [`open_greta_install_log()`](https://greta-dev.github.io/greta/dev/reference/open_greta_install_log.md)
+  and
+  [`write_greta_install_log()`](https://greta-dev.github.io/greta/dev/reference/write_greta_install_log.md)
+  now use the path in `GRETA_INSTALLATION_LOG`; they used the variable’s
+  name as the path, so a logfile set with
+  [`greta_set_install_logfile()`](https://greta-dev.github.io/greta/dev/reference/greta_set_install_logfile.md)
+  was written to a file called `GRETA_INSTALLATION_LOG` in the working
+  directory instead. The logfile itself now starts with a “Problems
+  found” section listing advice and every line that reports an error,
+  keeps each step’s output out of its section heading, and escapes
+  install output so that text such as `tensorflow<2.16` is shown rather
+  than read as HTML
+  ([\#663](https://github.com/greta-dev/greta/issues/663),
+  [\#713](https://github.com/greta-dev/greta/issues/713)).
 - [`opt()`](https://greta-dev.github.io/greta/dev/reference/inference.md)
   with a Keras optimiser (such as
   [`adam()`](https://greta-dev.github.io/greta/dev/reference/optimisers.md)

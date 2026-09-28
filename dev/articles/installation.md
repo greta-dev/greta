@@ -45,8 +45,8 @@ a session triggers a one-off setup step. greta prints a short progress
 message while it downloads and configures Python, TensorFlow, and
 TensorFlow Probability:
 
-    #> ℹ Initialising python and checking dependencies, this may take a moment.
-    #> ✔ Initialising python and checking dependencies ... done!
+    #> ℹ Initialising Python
+    #> ✔ Python, TensorFlow and TFP are ready
 
 This requires an internet connection and can take a few minutes,
 depending on your connection speed. It only happens **once** – greta

@@ -58,8 +58,8 @@ The first time you use greta in a session, Python is initialised and
 greta installs or checks its dependencies (TensorFlow and TensorFlow
 Probability). You’ll see a short progress message:
 
-    #> ℹ Initialising python and checking dependencies, this may take a moment.
-    #> ✔ Initialising python and checking dependencies ... done!
+    #> ℹ Initialising Python
+    #> ✔ Python, TensorFlow and TFP are ready
 
 After that, your greta code returns as normal. If Python can’t be found,
 or the dependencies can’t be resolved, greta raises an error describing
