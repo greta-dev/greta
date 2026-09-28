@@ -279,8 +279,18 @@ sampler <- R6Class(
           pb_sampling <- NULL
         }
 
-        # split up warmup iterations into bursts of sampling
-        burst_lengths <- self$burst_lengths(n_samples, ideal_burst_size)
+        # split the sampling iterations into bursts, each a whole number of
+        # draws: a burst shorter than thin asks TensorFlow for no draws, which
+        # errors. greta-dev/greta#318
+        burst_draws <- self$burst_lengths(
+          n_samples %/% thin,
+          max(1, ideal_burst_size %/% thin)
+        )
+        burst_lengths <- burst_draws * thin
+        # the iterations past the last draw keep nothing, but the final burst
+        # carries them so the progress bar reaches n_samples
+        n_bursts <- length(burst_lengths)
+        burst_lengths[n_bursts] <- burst_lengths[n_bursts] + n_samples %% thin
         completed_iterations <- cumsum(burst_lengths)
 
         for (burst in seq_along(burst_lengths)) {
@@ -500,7 +510,9 @@ sampler <- R6Class(
           kernel_results
         },
         num_burnin_steps = tf$constant(0L, dtype = tf$int32),
-        num_steps_between_results = sampler_thin,
+        # TFP keeps one draw in num_steps_between_results + 1, so passing thin
+        # itself ran thin + 1 iterations per draw - twice the work at thin = 1
+        num_steps_between_results = tf$subtract(sampler_thin, 1L),
         parallel_iterations = 1L,
         seed = sampler_seed
       )
@@ -583,8 +595,10 @@ sampler <- R6Class(
       # tryCatch handling for numerical errors
       dag <- self$model$dag
       tfe <- dag$tf_environment
-      # legacy: previously we used `n_samples` not `sampler_burst_length`
-      n_samples <- sampler_burst_length
+      # draws this burst returns: one_by_one runs a burst per draw, which is
+      # thin iterations long, so it is draws and not iterations that says a
+      # numerical error can be treated as a single bad proposal
+      n_draws <- sampler_burst_length %/% sampler_thin
 
       result <- cleanly(
         self$tf_evaluate_sample_batch(
@@ -606,19 +620,19 @@ sampler <- R6Class(
       # if it's fine, batch_results is the output
       # if it's a non-numerical error, it will error
       # if it's a numerical error, batch_results will be an error object
-      self$check_for_free_state_error(result, n_samples)
+      self$check_for_free_state_error(result, n_draws)
 
       result
     },
 
-    check_for_free_state_error = function(result, n_samples) {
+    check_for_free_state_error = function(result, n_draws) {
       # if it's fine, batch_results is the output
       # if it's a non-numerical error, it will error
       # if it's a numerical error, batch_results will be an error object
       if (inherits(result, "error")) {
         # simple case that this is a single bad sample. Mock up a result and
         # pass it back
-        if (n_samples == 1L) {
+        if (n_draws == 1L) {
           result <- list(
             all_states = self$free_state,
             trace = list(

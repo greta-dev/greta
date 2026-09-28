@@ -25,9 +25,9 @@ NULL
 #'   details). If NULL (default), it sets them to 2 cores.
 #' @param verbose whether to print progress information to the console
 #' @param pb_update how regularly to update the progress bar (in iterations).
-#'   If `pb_update` is less than or equal to `thin`, it will be set
-#'   to `thin + 1` to ensure at least one saved iteration per
-#'   `pb_update` iterations.
+#'   During sampling, updates are rounded to a whole number of thinned draws,
+#'   so if `pb_update` is less than `thin`, the bar updates every `thin`
+#'   iterations.
 #' @param one_by_one whether to run TensorFlow MCMC code one iteration at a
 #'   time, so that greta can handle numerical errors as 'bad' proposals (see
 #'   below).
@@ -238,6 +238,8 @@ mcmc <- function(
 
     chains <- check_positive_integer(chains, "chains")
 
+    thin <- check_thin(thin, n_samples)
+
     # get the dag containing the target nodes
     dag <- model$dag
 
@@ -260,7 +262,6 @@ mcmc <- function(
 
     # now make it finite
     pb_update <- min(pb_update, max(warmup, n_samples))
-    pb_update <- max(pb_update, thin + 1)
 
     run_samplers(
       samplers = samplers,
@@ -496,6 +497,8 @@ extra_samples <- function(
   trace_batch_size = 100,
   compute_options = cpu_only()
 ) {
+  thin <- check_thin(thin, n_samples)
+
   model_info <- get_model_info(draws)
   samplers <- model_info$samplers
 
