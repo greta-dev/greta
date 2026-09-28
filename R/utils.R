@@ -729,9 +729,22 @@ base_remove_empty_string <- function(string) {
 other_install_fail_msg <- function(
   error_passed,
   output_notes = "",
+  env_exists = isTRUE(greta_stash$install_env_existed),
   log_written = FALSE
 ) {
   output <- paste(output_notes, error_passed, sep = "\n")
+
+  # installing again reuses a broken environment as it is, so a failure with
+  # one in place before the install began is the case for starting again
+  # (greta-dev/greta#684)
+  reinstall_advice <- if (env_exists) {
+    c(
+      "i" = "The {.val greta-env-tf2} conda environment was already there \\
+      when installation began, and may be left over from an earlier attempt. \\
+      {.run greta::reinstall_greta_deps()} removes it and miniconda, and \\
+      installs both again."
+    )
+  }
 
   tf_pin <- greta_deps_default$tf
   tfp_pin <- greta_deps_default$tfp
@@ -742,6 +755,7 @@ other_install_fail_msg <- function(
       "An error occured:",
       install_output_excerpt(error_passed, output_notes),
       install_failure_advice(output),
+      reinstall_advice,
       install_log_pointer(log_written),
       "You can perform the installation manually by doing the following:",
       "Restarting R, then running:",

@@ -64,7 +64,7 @@
 # install failure message is captured
 
     Code
-      cat(other_install_fail_msg("could not resolve env"))
+      cat(other_install_fail_msg("could not resolve env", env_exists = FALSE))
     Output
       Stopping as installation of greta dependencies failed
       An error occured:
@@ -86,7 +86,7 @@
     Code
       cat(other_install_fail_msg(
         "ERROR: Could not find an activated virtualenv (required).", output_notes = "Collecting tensorflow",
-        log_written = TRUE))
+        env_exists = FALSE, log_written = TRUE))
     Output
       Stopping as installation of greta dependencies failed
       An error occured:

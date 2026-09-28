@@ -27,7 +27,18 @@ test_that("install timeout message includes an underlying python error", {
 
 test_that("install failure message is captured", {
   expect_snapshot(
-    cat(other_install_fail_msg("could not resolve env"))
+    cat(other_install_fail_msg("could not resolve env", env_exists = FALSE))
+  )
+})
+
+test_that("install failure suggests reinstalling when the env already exists", {
+  expect_match(
+    other_install_fail_msg("could not resolve env", env_exists = TRUE),
+    "reinstall_greta_deps"
+  )
+  expect_no_match(
+    other_install_fail_msg("could not resolve env", env_exists = FALSE),
+    "reinstall_greta_deps"
   )
 })
 
@@ -39,6 +50,7 @@ test_that("install failure message shows error lines and advice", {
     cat(other_install_fail_msg(
       "ERROR: Could not find an activated virtualenv (required).",
       output_notes = "Collecting tensorflow",
+      env_exists = FALSE,
       log_written = TRUE
     ))
   )
@@ -51,6 +63,7 @@ test_that("install failure messages point to the logfile only if it was written"
   failed <- function(log_written) {
     other_install_fail_msg(
       "boom",
+      env_exists = FALSE,
       log_written = log_written
     )
   }
@@ -65,7 +78,7 @@ test_that("install failure messages point to the logfile only if it was written"
 
 test_that("an install failure with no error lines shows the end of stderr", {
   stderr_text <- paste("line", 1:30, collapse = "\n")
-  msg <- other_install_fail_msg(stderr_text)
+  msg <- other_install_fail_msg(stderr_text, env_exists = FALSE)
   expect_match(msg, "line 30", fixed = TRUE)
   expect_no_match(msg, "line 10\\b")
 })
