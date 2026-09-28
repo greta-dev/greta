@@ -56,6 +56,7 @@
   <ul class="dropdown-menu" aria-labelledby="dropdown-more">
 <li><a class="dropdown-item" href="../articles/webpages/why_greta.html">why 'greta'?</a></li>
     <li><a class="dropdown-item" href="../articles/webpages/technical_details.html">technical details</a></li>
+    <li><a class="dropdown-item" href="../articles/webpages/reproducibility.html">reproducible results</a></li>
     <li><a class="dropdown-item" href="../articles/webpages/software.html">software</a></li>
     <li><a class="dropdown-item" href="../articles/webpages/contribute.html">contribute to greta</a></li>
   </ul>
@@ -183,6 +184,17 @@ install of tensorflow that mean it will run faster on your machine. For
 more details, see <a href="https://stackoverflow.com/a/47227886/3764040" class="external-link">this stack overflow
 thread</a>. We have noted this issue in <a href="https://github.com/greta-dev/greta/issues/472" class="external-link">this github
 issue</a>, and might in the future make it easier to resolve.</p>
+</div>
+<div class="section level2">
+<h2 id="how-do-i-make-my-results-reproducible">How do I make my results reproducible?<a class="anchor" aria-label="anchor" href="#how-do-i-make-my-results-reproducible"></a>
+</h2>
+<p>Call <code><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed()</a></code> before <code><a href="../reference/inference.html">mcmc()</a></code> or
+<code><a href="../reference/calculate.html">calculate()</a></code>. greta takes its random numbers from R’s, so
+the same seed gives the same starting values and the same draws. To
+repeat a run exactly, also keep <code>verbose</code>,
+<code>pb_update</code>, <code>one_by_one</code> and the future plan
+(including its number of workers) the same. See the <a href="webpages/reproducibility.html">“Reproducible results”</a> article
+for examples, and for how this compares with Stan and PyMC.</p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

@@ -112,3 +112,16 @@ thread](https://stackoverflow.com/a/47227886/3764040). We have noted
 this issue in [this github
 issue](https://github.com/greta-dev/greta/issues/472), and might in the
 future make it easier to resolve.
+
+## How do I make my results reproducible?
+
+Call [`set.seed()`](https://rdrr.io/r/base/Random.html) before
+[`mcmc()`](https://greta-dev.github.io/greta/dev/reference/inference.md)
+or
+[`calculate()`](https://greta-dev.github.io/greta/dev/reference/calculate.md).
+greta takes its random numbers from R’s, so the same seed gives the same
+starting values and the same draws. To repeat a run exactly, also keep
+`verbose`, `pb_update`, `one_by_one` and the future plan (including its
+number of workers) the same. See the [“Reproducible
+results”](https://greta-dev.github.io/greta/dev/articles/webpages/reproducibility.md)
+article for examples, and for how this compares with Stan and PyMC.

@@ -26,6 +26,8 @@
   'greta'?](https://greta-dev.github.io/greta/dev/articles/webpages/why_greta.md):
 - [Technical
   details](https://greta-dev.github.io/greta/dev/articles/webpages/technical_details.md):
+- [Reproducible
+  results](https://greta-dev.github.io/greta/dev/articles/webpages/reproducibility.md):
 - [software](https://greta-dev.github.io/greta/dev/articles/webpages/software.md):
 - [contribute to
   greta](https://greta-dev.github.io/greta/dev/articles/webpages/contribute.md):

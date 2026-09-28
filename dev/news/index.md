@@ -93,6 +93,18 @@
   now defaults to a `learning_rate` of 0.1, up from 0.001, which was too
   small to reach the optimum of even a five-parameter model within 2000
   iterations ([\#633](https://github.com/greta-dev/greta/issues/633)).
+- [`calculate()`](https://greta-dev.github.io/greta/dev/reference/calculate.md)
+  with `nsim` and no `seed` no longer resets R’s random number
+  generator. It picked a seed, called
+  [`set.seed()`](https://rdrr.io/r/base/Random.html) with it, and left
+  it that way, so every random number drawn afterwards in the session
+  came from a starting point
+  [`calculate()`](https://greta-dev.github.io/greta/dev/reference/calculate.md)
+  had chosen. It now uses up just one random number to pick its seed,
+  and otherwise leaves the generator as it was, which is also how
+  [`mcmc()`](https://greta-dev.github.io/greta/dev/reference/inference.md)
+  behaves. `calculate(seed = )` still leaves the generator exactly as it
+  found it ([\#285](https://github.com/greta-dev/greta/issues/285)).
 - greta supports TensorFlow 2.18.0 to 2.21.0, with TensorFlow
   Probability fixed at 0.25.0. The documentation now states the range
   rather than implying that all three versions are a free choice; the
@@ -176,6 +188,21 @@
   because TensorFlow Probability 0.25.0 changed how it samples them; the
   distributions themselves are unchanged
   ([\#633](https://github.com/greta-dev/greta/issues/633)).
+- [`mcmc()`](https://greta-dev.github.io/greta/dev/reference/inference.md)
+  now respects [`set.seed()`](https://rdrr.io/r/base/Random.html). It
+  always drew its own seed from R’s RNG, but stored it without passing
+  it to TensorFlow. This meant that a run was only reproducible when
+  something else in the session had already set TensorFlow’s global
+  seed, such as a previous
+  [`calculate()`](https://greta-dev.github.io/greta/dev/reference/calculate.md)
+  call. [`set.seed()`](https://rdrr.io/r/base/Random.html) and
+  [`tensorflow::set_random_seed()`](https://rdrr.io/pkg/tensorflow/man/set_random_seed.html)
+  now give identical results, as
+  [`?mcmc`](https://greta-dev.github.io/greta/dev/reference/inference.md)
+  has always said they would. Draws taken with a fixed seed therefore
+  differ from previous versions
+  ([\#285](https://github.com/greta-dev/greta/issues/285),
+  [\#427](https://github.com/greta-dev/greta/issues/427)).
 - [`nadam()`](https://greta-dev.github.io/greta/dev/reference/optimisers.md)
   now defaults to a `learning_rate` of 0.1, up from 0.001, which was too
   small to reach the optimum of even a five-parameter model within 2000

@@ -1,0 +1,298 @@
+# Reproducible results
+
+This page shows how to get the same results from greta twice: what
+[`set.seed()`](https://rdrr.io/r/base/Random.html) fixes, what else has
+to stay the same, and how that compares with other probabilistic
+programming languages.
+
+In short: call [`set.seed()`](https://rdrr.io/r/base/Random.html) before
+[`mcmc()`](https://greta-dev.github.io/greta/dev/reference/inference.md)
+or
+[`calculate()`](https://greta-dev.github.io/greta/dev/reference/calculate.md),
+and keep the other arguments and the future plan the same.
+
+## How R’s random numbers work
+
+R’s random numbers come from one long, fixed sequence.
+[`set.seed()`](https://rdrr.io/r/base/Random.html) chooses where in that
+sequence to start, and each draw takes the next numbers and moves along.
+So the same seed gives the same numbers, and a second draw after it
+gives new ones:
+
+``` r
+
+set.seed(1)
+runif(2)
+```
+
+    [1] 0.2655087 0.3721239
+
+``` r
+
+runif(2)
+```
+
+    [1] 0.5728534 0.9082078
+
+``` r
+
+set.seed(1)
+runif(2)
+```
+
+    [1] 0.2655087 0.3721239
+
+greta takes the random numbers it needs from this same sequence. So
+[`set.seed()`](https://rdrr.io/r/base/Random.html) before a greta call
+fixes its result, and the call moves the sequence along, as
+[`runif()`](https://rdrr.io/r/stats/Uniform.html) did above.
+
+## Seeding `mcmc()`
+
+[`set.seed()`](https://rdrr.io/r/base/Random.html) is all
+[`mcmc()`](https://greta-dev.github.io/greta/dev/reference/inference.md)
+needs.
+[`mcmc()`](https://greta-dev.github.io/greta/dev/reference/inference.md)
+takes a number from R’s sequence and uses it to set up the sampler’s own
+random numbers, so the same seed fixes both the starting values and
+every draw.
+
+``` r
+
+x <- normal(0, 1)
+m <- model(x)
+
+set.seed(2026 - 09 - 27)
+one <- mcmc(m, warmup = 100, n_samples = 100, chains = 2, verbose = FALSE)
+
+set.seed(2026 - 09 - 27)
+two <- mcmc(m, warmup = 100, n_samples = 100, chains = 2, verbose = FALSE)
+
+identical(as.matrix(one), as.matrix(two))
+```
+
+    [1] TRUE
+
+Without a new [`set.seed()`](https://rdrr.io/r/base/Random.html), the
+next run carries on from where the previous one left R’s sequence, so it
+gives different draws, just as the second
+[`runif()`](https://rdrr.io/r/stats/Uniform.html) did:
+
+``` r
+
+three <- mcmc(m, warmup = 100, n_samples = 100, chains = 2, verbose = FALSE)
+identical(as.matrix(two), as.matrix(three))
+```
+
+    [1] FALSE
+
+[`tensorflow::set_random_seed()`](https://rdrr.io/pkg/tensorflow/man/set_random_seed.html)
+sets R’s seed too, so it gives the same draws as
+[`set.seed()`](https://rdrr.io/r/base/Random.html) with the same number:
+
+``` r
+
+tensorflow::set_random_seed(2026 - 09 - 27, disable_gpu = FALSE)
+four <- mcmc(m, warmup = 100, n_samples = 100, chains = 2, verbose = FALSE)
+identical(as.matrix(one), as.matrix(four))
+```
+
+    [1] TRUE
+
+Pass `disable_gpu = FALSE`. Without it, `set_random_seed()` hides the
+GPU for the rest of the R session, including from later runs that ask
+for one with `compute_options = gpu_only()`.
+
+## Seeding `calculate()`
+
+[`calculate()`](https://greta-dev.github.io/greta/dev/reference/calculate.md)
+takes a `seed` argument, which fixes its draws and leaves R’s sequence
+where it was, so random numbers you draw afterwards are not affected:
+
+``` r
+
+y <- normal(0, 1)
+a <- calculate(y, nsim = 3, seed = 1)
+b <- calculate(y, nsim = 3, seed = 1)
+identical(a, b)
+```
+
+    [1] TRUE
+
+Without `seed`, it follows
+[`set.seed()`](https://rdrr.io/r/base/Random.html) like
+[`mcmc()`](https://greta-dev.github.io/greta/dev/reference/inference.md)
+does, taking one number from R’s sequence to set up its own:
+
+``` r
+
+set.seed(1)
+c1 <- calculate(y, nsim = 3)
+set.seed(1)
+c2 <- calculate(y, nsim = 3)
+identical(c1, c2)
+```
+
+    [1] TRUE
+
+## What else has to stay the same
+
+A seed fixes the random numbers. To get the same draws, the sampler also
+has to use them in the same way, and a few arguments change that.
+
+### Progress updates
+
+[`mcmc()`](https://greta-dev.github.io/greta/dev/reference/inference.md)
+runs the sampler in bursts, returning to R between them to update the
+progress bar. Each burst takes its own random numbers, so changing where
+the bursts break changes the draws. `verbose`, `pb_update` and
+`one_by_one` all do that:
+
+``` r
+
+set.seed(2026 - 09 - 27)
+quiet <- mcmc(m, warmup = 100, n_samples = 100, chains = 2, verbose = FALSE)
+
+set.seed(2026 - 09 - 27)
+chatty <- mcmc(m, warmup = 100, n_samples = 100, chains = 2)
+```
+
+``` r
+
+identical(as.matrix(quiet), as.matrix(chatty))
+```
+
+    [1] FALSE
+
+Both runs are equally valid samples from the posterior; they are just
+not the same sample. To repeat a run exactly, repeat these arguments as
+well as the seed.
+
+### Parallel chains and the future plan
+
+greta runs chains in parallel with the
+[future](https://future.futureverse.org/) package. Under the same plan,
+with the same number of workers, seeded runs are reproducible:
+
+``` r
+
+future::plan(future::multisession, workers = 2)
+
+set.seed(2026 - 09 - 27)
+par_one <- mcmc(m, warmup = 100, n_samples = 100, chains = 2, verbose = FALSE)
+```
+
+    running 2 samplers in parallel, on up to 2 CPU cores
+
+``` r
+
+set.seed(2026 - 09 - 27)
+par_two <- mcmc(m, warmup = 100, n_samples = 100, chains = 2, verbose = FALSE)
+```
+
+    running 2 samplers in parallel, on up to 2 CPU cores
+
+``` r
+
+identical(as.matrix(par_one), as.matrix(par_two))
+```
+
+    [1] TRUE
+
+[`extra_samples()`](https://greta-dev.github.io/greta/dev/reference/inference.md)
+carries each chain on from where it stopped, with new random numbers,
+whether it runs in parallel or sequentially:
+
+``` r
+
+more <- extra_samples(par_one, n_samples = 100, verbose = FALSE)
+```
+
+    running 2 samplers in parallel, on up to 2 CPU cores
+
+``` r
+
+coda::niter(more)
+```
+
+    [1] 200
+
+But changing the plan, or its number of workers, changes the draws.
+greta splits chains between samplers by the number of workers:
+sequentially, every chain is in one sampler, while with two workers each
+chain gets its own. Each sampler has its own seed, so the grouping
+decides which random numbers each chain gets:
+
+``` r
+
+future::plan(future::sequential)
+
+set.seed(2026 - 09 - 27)
+seq_one <- mcmc(m, warmup = 100, n_samples = 100, chains = 2, verbose = FALSE)
+
+identical(as.matrix(par_one), as.matrix(seq_one))
+```
+
+    [1] FALSE
+
+So record the plan and its number of workers alongside the seed. A run
+with `plan(multisession)` and no `workers` argument uses as many workers
+as the machine has cores, which differs between machines: set `workers`
+explicitly if the run needs to be repeated elsewhere.
+
+[`hmc()`](https://greta-dev.github.io/greta/dev/reference/samplers.md),
+the default sampler, also differs between plans with a single chain. It
+chooses its number of leapfrog steps from R’s random numbers, and future
+starts each worker at its own place in the sequence, so a chain run in a
+worker gets different leapfrog steps from one run in your session.
+
+## How this compares with other software
+
+The behaviour on this page follows two conventions that are standard in
+probabilistic programming:
+
+- **The seed you set is the only thing that decides the draws.**
+  [`set.seed()`](https://rdrr.io/r/base/Random.html) reaches the
+  sampler, and no setting hidden inside TensorFlow changes the results.
+  PyMC makes the same choice:
+  [`pymc.sample()`](https://www.pymc.io/projects/docs/en/stable/api/generated/pymc.sample.html)
+  ignores settings made elsewhere and takes its seed as an argument.
+- **Continuing a chain continues its random numbers.** A chain resumed
+  with
+  [`extra_samples()`](https://greta-dev.github.io/greta/dev/reference/inference.md)
+  draws new random numbers wherever it runs, rather than replaying the
+  ones it has already used.
+
+In one respect greta does not yet match that standard. In
+[Stan](https://mc-stan.org/docs/reference-manual/reproducibility.html),
+a chain’s random numbers are fixed by the seed and the chain’s index, so
+the same seed gives the same chains however they are run. PyMC seeds
+each chain separately for the same reason, and the future package
+guarantees that [random numbers do not depend on the backend or the
+number of
+workers](https://henrikbengtsson.github.io/future-tutorial-user2022/random-numbers-and-reproducibility.html).
+greta seeds each sampler rather than each chain, which is why the plan
+matters above. Seeding each chain by its index is the behaviour we are
+working towards, in
+[greta-dev/greta#849](https://github.com/greta-dev/greta/issues/849).
+
+Stan’s reproducibility guide also makes a point that applies to greta:
+identical results need the same software as well as the same seed.
+Different versions of greta, TensorFlow or TensorFlow Probability can
+give different draws from the same seed, as can a different operating
+system or processor.
+
+## GPUs
+
+A seed fixes the random numbers, not the arithmetic. On a GPU, some
+TensorFlow operations add numbers up in an order that varies from run to
+run, so results can differ slightly between runs with the same seed. To
+make GPU runs repeatable, turn on TensorFlow’s deterministic operations
+before sampling, at some cost in speed:
+
+``` r
+
+tensorflow::tf$config$experimental$enable_op_determinism()
+```
+
+Runs on the CPU, greta’s default, do not need this.

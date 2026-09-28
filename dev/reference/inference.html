@@ -33,6 +33,7 @@ MCMC or likelihood/posterior optimisation."><meta property="og:image" content="h
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-more" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">more</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-more"><li><a class="dropdown-item" href="../articles/webpages/why_greta.html">why 'greta'?</a></li>
     <li><a class="dropdown-item" href="../articles/webpages/technical_details.html">technical details</a></li>
+    <li><a class="dropdown-item" href="../articles/webpages/reproducibility.html">reproducible results</a></li>
     <li><a class="dropdown-item" href="../articles/webpages/software.html">software</a></li>
     <li><a class="dropdown-item" href="../articles/webpages/contribute.html">contribute to greta</a></li>
   </ul></li>
@@ -306,9 +307,22 @@ The parameter vector can then be passed to model. See example.</p>
     </div>
     <div class="section level2">
     <h2 id="note">Note<a class="anchor" aria-label="anchor" href="#note"></a></h2>
-    <p>to set a seed with MCMC you can use <code><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed()</a></code>, or
-<code><a href="https://rdrr.io/pkg/tensorflow/man/set_random_seed.html" class="external-link">tensorflow::set_random_seed()</a></code>. They both give identical results. See
-examples below.</p>
+    <p><code><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed()</a></code> is all you need to make MCMC reproducible: greta draws
+its own seed from R's random number generator and passes it to the
+sampler, so both the initial values and the sampler are seeded. See
+examples below. The draws also depend on how sampling is split between
+progress updates, and on how chains are split between parallel workers,
+so a run is repeated exactly only with the same <code>verbose</code>, <code>pb_update</code>,
+<code>one_by_one</code> and future plan (including its number of workers). The
+<a href="https://greta-dev.github.io/greta/articles/webpages/reproducibility.html">Reproducible results</a>
+article shows each of these, and how greta compares with Stan and PyMC.</p>
+<p><code><a href="https://rdrr.io/pkg/tensorflow/man/set_random_seed.html" class="external-link">tensorflow::set_random_seed()</a></code> gives identical results, but hides the GPU
+for the rest of the session unless you pass <code>disable_gpu = FALSE</code>.</p>
+<p>Seeding covers the random numbers, not the arithmetic: on a GPU some
+TensorFlow operations are non-deterministic, so results can vary slightly
+between runs with the same seed. Call
+<code>tensorflow::tf$config$experimental$enable_op_determinism()</code> before
+sampling to make GPU runs repeatable, at some cost in speed.</p>
     </div>
 
     <div class="section level2">
@@ -380,7 +394,7 @@ examples below.</p>
 <span class="r-in"><span><span class="va">o</span> <span class="op">&lt;-</span> <span class="fu">opt</span><span class="op">(</span><span class="va">m3</span>, hessian <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">o</span><span class="op">$</span><span class="va">hessian</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># using set.seed or tensorflow::set_random_seed to set RNG for MCMC</span></span></span>
+<span class="r-in"><span><span class="co"># set.seed() makes MCMC reproducible</span></span></span>
 <span class="r-in"><span><span class="va">a</span> <span class="op">&lt;-</span> <span class="fu"><a href="distributions.html">normal</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">y</span> <span class="op">&lt;-</span> <span class="fu"><a href="distributions.html">normal</a></span><span class="op">(</span><span class="va">a</span>, <span class="fl">1</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">m</span> <span class="op">&lt;-</span> <span class="fu"><a href="model.html">model</a></span><span class="op">(</span><span class="va">y</span><span class="op">)</span></span></span>
@@ -391,13 +405,11 @@ examples below.</p>
 <span class="r-in"><span><span class="va">two</span> <span class="op">&lt;-</span> <span class="fu">mcmc</span><span class="op">(</span><span class="va">m</span>, n_samples <span class="op">=</span> <span class="fl">1</span>, chains <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="co"># same</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/all.equal.html" class="external-link">all.equal</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="va">one</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="va">two</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu">tensorflow</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/tensorflow/man/set_random_seed.html" class="external-link">set_random_seed</a></span><span class="op">(</span><span class="fl">12345</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># tensorflow::set_random_seed() gives the same draws</span></span></span>
+<span class="r-in"><span><span class="fu">tensorflow</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/tensorflow/man/set_random_seed.html" class="external-link">set_random_seed</a></span><span class="op">(</span><span class="fl">12345</span>, disable_gpu <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">one_tf</span> <span class="op">&lt;-</span> <span class="fu">mcmc</span><span class="op">(</span><span class="va">m</span>, n_samples <span class="op">=</span> <span class="fl">1</span>, chains <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu">tensorflow</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/tensorflow/man/set_random_seed.html" class="external-link">set_random_seed</a></span><span class="op">(</span><span class="fl">12345</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">two_tf</span> <span class="op">&lt;-</span> <span class="fu">mcmc</span><span class="op">(</span><span class="va">m</span>, n_samples <span class="op">=</span> <span class="fl">1</span>, chains <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="co"># same</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/all.equal.html" class="external-link">all.equal</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="va">one_tf</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="va">two_tf</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="co"># different</span></span></span>
+<span class="r-in"><span><span class="co"># same again</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/all.equal.html" class="external-link">all.equal</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="va">one</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="va">one_tf</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
