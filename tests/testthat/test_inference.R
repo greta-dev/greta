@@ -80,6 +80,43 @@ test_that("mcmc works with cpu and gpu options", {
   )
 })
 
+test_that("cpu_only() and gpu_only() can both be used in one session", {
+  skip_if_not(check_tf_version())
+  x <- normal(0, 1)
+  m <- model(x)
+
+  # tensorflow::set_random_seed() would set CUDA_VISIBLE_DEVICES = -1 for the
+  # rest of the session, hiding the GPU from every later run
+  before <- Sys.getenv("CUDA_VISIBLE_DEVICES")
+
+  expect_ok(mcmc(
+    m,
+    n_samples = 2,
+    warmup = 2,
+    chains = 1,
+    verbose = FALSE,
+    compute_options = cpu_only()
+  ))
+  expect_ok(mcmc(
+    m,
+    n_samples = 2,
+    warmup = 2,
+    chains = 1,
+    verbose = FALSE,
+    compute_options = gpu_only()
+  ))
+  expect_ok(mcmc(
+    m,
+    n_samples = 2,
+    warmup = 2,
+    chains = 1,
+    verbose = FALSE,
+    compute_options = cpu_only()
+  ))
+
+  expect_identical(Sys.getenv("CUDA_VISIBLE_DEVICES"), before)
+})
+
 test_that("mcmc works with multiple chains", {
   skip_if_not(check_tf_version())
 

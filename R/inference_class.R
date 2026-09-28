@@ -83,13 +83,6 @@ inference <- R6Class(
       }
     },
 
-    # set RNG seed for a tensorflow graph. Must be done before definition of a
-    # random tensor
-    set_tf_seed = function() {
-      dag <- self$model$dag
-      dag$tf_environment$rng_seed <- self$seed
-    },
-
     # check and try to autofill a single set of initial values (single vector on
     # free state scale)
     check_initial_values = function(inits, call = rlang::caller_env()) {

@@ -99,9 +99,24 @@ NULL
 #'   argument `trace_batch_size` can be modified to trade-off speed against
 #'   memory usage.
 #'
-#' @note to set a seed with MCMC you can use [set.seed()], or
-#'   [tensorflow::set_random_seed()]. They both give identical results. See
-#'   examples below.
+#' @note `set.seed()` is all you need to make MCMC reproducible: greta draws
+#'   its own seed from R's random number generator and passes it to the
+#'   sampler, so both the initial values and the sampler are seeded. See
+#'   examples below. The draws also depend on how sampling is split between
+#'   progress updates, and on how chains are split between parallel workers,
+#'   so a run is repeated exactly only with the same `verbose`, `pb_update`,
+#'   `one_by_one` and future plan (including its number of workers). The
+#'   [Reproducible results](https://greta-dev.github.io/greta/articles/webpages/reproducibility.html)
+#'   article shows each of these, and how greta compares with Stan and PyMC.
+#'
+#'   [tensorflow::set_random_seed()] gives identical results, but hides the GPU
+#'   for the rest of the session unless you pass `disable_gpu = FALSE`.
+#'
+#'   Seeding covers the random numbers, not the arithmetic: on a GPU some
+#'   TensorFlow operations are non-deterministic, so results can vary slightly
+#'   between runs with the same seed. Call
+#'   `tensorflow::tf$config$experimental$enable_op_determinism()` before
+#'   sampling to make GPU runs repeatable, at some cost in speed.
 #'
 #' @return `mcmc`, `stashed_samples` & `extra_samples` - a
 #'   `greta_mcmc_list` object that can be analysed using functions from the
@@ -176,7 +191,7 @@ NULL
 #' o <- opt(m3, hessian = TRUE)
 #' o$hessian
 #'
-#' # using set.seed or tensorflow::set_random_seed to set RNG for MCMC
+#' # set.seed() makes MCMC reproducible
 #' a <- normal(0, 1)
 #' y <- normal(a, 1)
 #' m <- model(y)
@@ -187,13 +202,11 @@ NULL
 #' two <- mcmc(m, n_samples = 1, chains = 1)
 #' # same
 #' all.equal(as.numeric(one), as.numeric(two))
-#' tensorflow::set_random_seed(12345)
+#'
+#' # tensorflow::set_random_seed() gives the same draws
+#' tensorflow::set_random_seed(12345, disable_gpu = FALSE)
 #' one_tf <- mcmc(m, n_samples = 1, chains = 1)
-#' tensorflow::set_random_seed(12345)
-#' two_tf <- mcmc(m, n_samples = 1, chains = 1)
-#' # same
-#' all.equal(as.numeric(one_tf), as.numeric(two_tf))
-#' # different
+#' # same again
 #' all.equal(as.numeric(one), as.numeric(one_tf))
 #'
 #' }
