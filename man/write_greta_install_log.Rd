@@ -15,6 +15,8 @@ write_greta_install_log(path = greta_install_logfile())
 nothing - writes to file
 }
 \description{
-This can only be run after installation has happened with
-\code{\link[=install_greta_deps]{install_greta_deps()}}, and before restarting R.
+Writes what \code{\link[=install_greta_deps]{install_greta_deps()}} and the loading of Python reported in
+this R session. Steps that have not run in this session are marked as
+such, so run it before restarting R. \code{\link[=install_greta_deps]{install_greta_deps()}} writes it
+itself, whether installation succeeds or fails.
 }

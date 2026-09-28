@@ -15,8 +15,10 @@ greta_set_install_logfile <- function(path) {
 
 #' Write greta dependency installation log file
 #'
-#' This can only be run after installation has happened with
-#'   [install_greta_deps()], and before restarting R.
+#' Writes what [install_greta_deps()] and the loading of Python reported in
+#'   this R session. Steps that have not run in this session are marked as
+#'   such, so run it before restarting R. [install_greta_deps()] writes it
+#'   itself, whether installation succeeds or fails.
 #'
 #' @param path a path with an HTML (.html) extension. Defaults to the
 #'   `GRETA_INSTALLATION_LOG` environment variable if set, otherwise
@@ -34,115 +36,87 @@ write_greta_install_log <- function(path = greta_install_logfile()) {
     msg = "Open with: {.run open_greta_install_log()}"
   )
 
+  # {{ }} rather than {{{ }}}: install output is full of `<` and `>`, as in
+  # "tensorflow<2.16", which unescaped would be read as HTML tags
   template <- '
-  <h1>Greta installation logfile</h1>
-  <h2>Created: {{sys_date}}</h2>
-  <p>Use this logfile to explore potential issues in installation with greta</p>
-  <p>Try opening this in a HTML browser and searching the text for "error" with Cmd/Ctrl+F</p>
-
-  <h2>Managed (uv) environment</h2>
-
-    <details open>
-      <summary>
-        Why Python could not be loaded
-      </summary>
-      <pre>
-        <code>
-          {{{uv_diagnosis}}}
-        </code>
-      </pre>
-    </details>
-
-  <h2>Miniconda</h2>
-
-    <details>
-      <summary>
-        Miniconda Installation Notes
-      <pre>
-        <code>
-          {{{miniconda_notes}}}
-        </code>
-      </pre>
-      </summary>
-    </details>
-
-    <details>
-      <summary>
-        Miniconda Installation Errors
-      </summary>
-      <pre>
-        <code>
-          {{{miniconda_error}}}
-        </code>
-      </pre>
-    </details>
-
-  <h2>Conda Environment</h2>
-
-   <details>
-      <summary>
-      Conda Environment Notes
-      </summary>
-      <pre>
-        <code>
-     {{{conda_create_notes}}}
-        </code>
-      </pre>
-    </details>
-
-    <details>
-      <summary>
-      Conda Environment Errors
-      </summary>
-      <pre>
-        <code>
-      {{{conda_create_error}}}
-        </code>
-      </pre>
-    </details>
-
-  <h2>Python Module Installation</h2>
-
-    <details>
-      <summary>
-        Python Module Installation Notes
-      </summary>
-      <pre>
-        <code>
-  {{{conda_install_notes}}}
-        </code>
-      </pre>
-    </details>
-
-      <details>
-      <summary>
-      Python Module Installation Errors
-      </summary>
-      <pre>
-        <code>
-       {{{conda_install_error}}}
-        </code>
-      </pre>
-    </details>
-  '
+<h1>greta installation logfile</h1>
+<h2>Created: {{sys_date}}</h2>
+<p>Use this logfile to explore potential issues in installation with greta.
+Search it for "error" with Cmd/Ctrl+F.</p>
+{{#steps}}
+<h2>{{title}}</h2>
+{{#has_notes}}
+<details>
+<summary>Output</summary>
+<pre><code>{{notes}}</code></pre>
+</details>
+{{/has_notes}}
+<details>
+<summary>Errors and messages</summary>
+<pre><code>{{errors}}</code></pre>
+</details>
+{{/steps}}
+'
 
   greta_install_data <- list(
     sys_date = Sys.time(),
-    # Written by the load path rather than the install: uv's explanation of a
-    # failed resolution is too long for an error message and belongs here.
-    uv_diagnosis = paste(
-      greta_stash$python_load_diagnosis %||% character(),
-      collapse = "\n"
-    ),
-    miniconda_notes = greta_stash$miniconda_notes,
-    miniconda_error = greta_stash$miniconda_error,
-    conda_create_notes = greta_stash$conda_create_notes,
-    conda_create_error = greta_stash$conda_create_error,
-    conda_install_notes = greta_stash$conda_install_notes,
-    conda_install_error = greta_stash$conda_install_error
+    steps = install_log_steps()
   )
 
   writeLines(whisker::whisker.render(template, greta_install_data), path)
+}
+
+# The install steps whose output greta stashes, by field prefix, with the
+# logfile's heading for each
+install_steps <- c(
+  miniconda = "Miniconda",
+  conda_create = "Conda environment",
+  conda_install = "Python modules"
+)
+
+# Every greta_stash field the logfile reads. A step's output is left unset until
+# it runs, which is how the logfile tells the two apart.
+install_stash_fields <- function() {
+  c(
+    "python_load_diagnosis",
+    paste0(rep(names(install_steps), each = 2), c("_notes", "_error"))
+  )
+}
+
+# One entry per installation step, as the template reads them. The uv diagnosis
+# is written by the load path rather than an install: uv's explanation of a
+# failed resolution is too long for an error message and belongs here.
+install_log_steps <- function() {
+  step <- function(title, notes, errors) {
+    notes <- paste(notes %||% character(), collapse = "\n")
+    errors <- paste(
+      errors %||% "This step has not run in this R session.",
+      collapse = "\n"
+    )
+    list(
+      title = title,
+      notes = notes,
+      errors = errors,
+      has_notes = nzchar(notes)
+    )
+  }
+
+  conda_steps <- lapply(names(install_steps), \(prefix) {
+    step(
+      install_steps[[prefix]],
+      greta_stash[[paste0(prefix, "_notes")]],
+      greta_stash[[paste0(prefix, "_error")]]
+    )
+  })
+
+  c(
+    list(step(
+      "Managed (uv) environment",
+      notes = NULL,
+      errors = greta_stash$python_load_diagnosis
+    )),
+    conda_steps
+  )
 }
 
 # where the installation logfile goes: GRETA_INSTALLATION_LOG if set, otherwise
