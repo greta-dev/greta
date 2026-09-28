@@ -109,23 +109,26 @@ test_that("mcmc works in parallel", {
   # step is the proposal noise alone, and extra_samples() in a worker must draw
   # new noise rather than replaying the first run's
   x <- normal(0, 1e6)
+  n_samples <- 5
   wide <- model(x)
   expect_ok(
     draws <- mcmc(
       wide,
       sampler = rwmh(),
       warmup = 0,
-      n_samples = 5,
+      n_samples = n_samples,
       chains = 1,
       initial_values = initials(x = 0),
       verbose = FALSE
     )
   )
-  expect_true(inherits(draws, "greta_mcmc_list"))
-  expect_true(coda::niter(draws) == 5)
+  expect_s3_class(draws, "greta_mcmc_list")
+  expect_equal(coda::niter(draws), n_samples)
 
-  draws <- extra_samples(draws, 5, verbose = FALSE)
+  draws <- extra_samples(draws, n_samples, verbose = FALSE)
   steps <- diff(as.vector(draws[[1]]))
+  # replayed steps are the same noise added to a different starting point, so
+  # they match only to rounding: identical() would call them different and pass
   expect_false(isTRUE(all.equal(steps[1:4], steps[6:9])))
 
   # multiple chains, seeded distinctly and reproducibly
@@ -134,11 +137,13 @@ test_that("mcmc works in parallel", {
     mcmc(m, warmup = 10, n_samples = 10, chains = 2, verbose = FALSE)
   }
   expect_ok(one <- withr::with_seed(2026, draw()))
-  expect_true(inherits(one, "greta_mcmc_list"))
-  expect_true(coda::niter(one) == 10)
+  expect_s3_class(one, "greta_mcmc_list")
+  expect_equal(coda::niter(one), 10)
 
   perturb_tf_seed()
   two <- withr::with_seed(2026, draw())
-  expect_identical(lapply(one, as.vector), lapply(two, as.vector))
-  expect_false(identical(as.vector(one[[1]]), as.vector(one[[2]])))
+  one_vector <- lapply(one, as.vector)
+  two_vector <- lapply(two, as.vector)
+  expect_identical(one_vector, two_vector)
+  expect_false(identical(one_vector[[1]], one_vector[[2]]))
 })
