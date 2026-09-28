@@ -99,7 +99,8 @@ dag_class <- R6Class(
 
     define_tf_trace_values_batch = function() {
       self$tf_trace_values_batch <- tensorflow::tf_function(
-        f = self$define_trace_values_batch
+        f = self$define_trace_values_batch,
+        input_signature = self$free_state_signature()
       )
     },
 
@@ -109,13 +110,20 @@ dag_class <- R6Class(
       # a no-op after set_data_value(), which writes through to the node
       self$define_data_variables()
 
-      # no input_signature, so this retraces once per distinct batch shape and
-      # then caches - bounded by how many chain counts a session uses, not by
-      # how often it is called. Measured, so it is not the source of the
-      # retracing warnings in greta-dev/greta#546
       self$tf_log_prob_function <- tensorflow::tf_function(
-        f = self$generate_log_prob_function()
+        f = self$generate_log_prob_function(),
+        input_signature = self$free_state_signature()
       )
+    },
+
+    # The free state's shape with the batch dimension left open. Without it,
+    # these functions retrace for every batch size they meet: one row while
+    # checking initial values, all chains inside the sampler, and each chunk of
+    # draws calculate() traces. With it, each traces once per model, as the
+    # sampler's function already does. greta-dev/greta#546
+    free_state_signature = function() {
+      n_free <- length(unlist_tf(self$example_parameters(free = TRUE)))
+      list(tf$TensorSpec(shape = list(NULL, n_free), dtype = tf_float()))
     },
 
     tf_log_prob_function = NULL,

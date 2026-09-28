@@ -158,7 +158,10 @@ test_that("calculate with greta_mcmc_list doesn't lose track of new nodes", {
 
   x <- z^2
   expect_ok(x_draws <- calculate(x, values = draws))
-  expect_identical(as.matrix(x_draws)[, 1], as.matrix(draws)[, 1]^2)
+  # equal, not identical: z comes from a different TensorFlow graph in each,
+  # which can round the last digit differently, where a lost node would give
+  # entirely different values
+  expect_equal(as.matrix(x_draws)[, 1], as.matrix(draws)[, 1]^2)
 
   y <- z * 2
   expect_ok(y_draws <- calculate(y, values = draws))
