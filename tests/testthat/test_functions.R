@@ -570,13 +570,18 @@ test_that("incorrect dimensions are errored about", {
 test_that("chol2symm inverts chol", {
   skip_if_not(check_tf_version())
 
+  withr::local_seed(2026 - 09 - 28)
   x <- rWishart(1, 10, diag(9))[,, 1]
   u <- chol(x)
 
+  # rebuilding x from u rounds to about 2e-15 relative error at most, measured
+  # over 2000 draws. .Machine$double.eps failed on 3% of them
+  tolerance <- 1e-12
+
   # check the R version
-  expect_equal(x, chol2symm(u), tolerance = .Machine$double.eps)
+  expect_equal(x, chol2symm(u), tolerance = tolerance)
 
   # check the greta version
   x2 <- calculate(chol2symm(as_data(u)))[[1]]
-  expect_equal(x2, x, tolerance = .Machine$double.eps)
+  expect_equal(x2, x, tolerance = tolerance)
 })
