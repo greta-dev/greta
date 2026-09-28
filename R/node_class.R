@@ -1,3 +1,7 @@
+node_in_dag <- function(node, dag) {
+  node$unique_name %in% names(dag$node_list)
+}
+
 # base node class
 node <- R6Class(
   "node",
@@ -27,16 +31,14 @@ node <- R6Class(
       self$create_unique_name()
     },
     register = function(dag) {
-      ## TODO add explaining variable
-      if (!(self$unique_name %in% names(dag$node_list))) {
+      if (!node_in_dag(self, dag)) {
         dag$node_list[[self$unique_name]] <- self
       }
     },
 
     # recursively register self and family
     register_family = function(dag) {
-      ## TODO add explaining variable
-      if (!(self$unique_name %in% names(dag$node_list))) {
+      if (!node_in_dag(self, dag)) {
         # add self to list
         self$register(dag)
 

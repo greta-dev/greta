@@ -133,6 +133,19 @@ test_that("matrix functions work as expected", {
   check_op(kronecker, a, a, other_args = list(FUN = "+"))
   check_op(kronecker, a, a, other_args = list(FUN = "-"))
   check_op(kronecker, a, a, other_args = list(FUN = "/"))
+})
+
+test_that("rdist() works as expected", {
+  skip_if_not(check_tf_version())
+
+  # fields is Suggests, so CRAN may not have it. Our runners should, and a red
+  # build is the right answer if they do not
+  skip_on_cran()
+
+  b <- randn(5, 25)
+  e <- randn(10, 25)
+  f <- randn(3, 4, 2)
+
   check_op(rdist, b)
   check_op(rdist, b, e)
   check_op(rdist, f, f)
@@ -557,13 +570,19 @@ test_that("incorrect dimensions are errored about", {
 test_that("chol2symm inverts chol", {
   skip_if_not(check_tf_version())
 
+  withr::local_seed(2026 - 09 - 28)
   x <- rWishart(1, 10, diag(9))[,, 1]
   u <- chol(x)
 
+  # rebuilding x from u carries rounding error of up to 3.8e-16 as all.equal()
+  # measures it, so .Machine$double.eps failed on 3% of 2000 draws. Measured in
+  # https://github.com/greta-dev/greta.benchmarks/tree/main/2026-09-28-chol2symm-tolerance-i842
+  tolerance <- 1e-12
+
   # check the R version
-  expect_equal(x, chol2symm(u), tolerance = .Machine$double.eps)
+  expect_equal(x, chol2symm(u), tolerance = tolerance)
 
   # check the greta version
   x2 <- calculate(chol2symm(as_data(u)))[[1]]
-  expect_equal(x2, x, tolerance = .Machine$double.eps)
+  expect_equal(x2, x, tolerance = tolerance)
 })

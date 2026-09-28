@@ -122,6 +122,12 @@ sampler <- R6Class(
         self$print_sampler_number()
       }
       if (plan_is$parallel) {
+        # the worker gets the dag by serialisation, and a tf$Variable does not
+        # survive that: the list arrives full of dead references. Clearing it
+        # first makes define_data_variables() build new ones rather than try to
+        # assign to the dead ones. greta-dev/greta#739
+        dag$data_variables <- list()
+
         dag$define_tf_trace_values_batch()
 
         dag$define_tf_log_prob_function()
@@ -510,12 +516,6 @@ sampler <- R6Class(
       tfe <- dag$tf_environment
 
       param_vec <- unlist(self$sampler_parameter_values())
-      # combine the sampler information with information on the sampler's tuning
-      # parameters, and make into a dict
-
-      # write-only, see get_tf_data_list() in dag_class.R - this is not the
-      # .batch_size that node definition reads
-      dag$set_tf_data_list(".batch_size", nrow(self$free_state))
 
       # a stateless seed, fixed by the sampler's seed and how many bursts it has
       # run. Seeding TensorFlow's global state would tie the random numbers to

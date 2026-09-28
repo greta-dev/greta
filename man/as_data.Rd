@@ -49,3 +49,9 @@ df <- data.frame(
 (d <- as_data(df))
 }
 }
+\seealso{
+\code{\link[=as_data_mutable]{as_data_mutable()}} to declare data you intend to replace later
+with \code{\link{data_values<-}}, so the same model can be fitted to more than one
+dataset without being rebuilt; \code{vignette("mutable_data", "greta")} works
+that through end to end.
+}
