@@ -938,6 +938,23 @@ check_positive_integer <- function(x, name = "", call = rlang::caller_env()) {
   x
 }
 
+# n_samples = 0 is allowed, to run warmup alone
+check_thin <- function(thin, n_samples, call = rlang::caller_env()) {
+  thin <- check_positive_integer(thin, "thin", call = call)
+  ## claude: add explaining variable
+  if (n_samples > 0 && thin > n_samples) {
+    cli::cli_abort(
+      message = c(
+        "{.arg thin} must not be larger than {.arg n_samples}",
+        "x" = "{.arg thin} is {thin} and {.arg n_samples} is {n_samples}, so \\
+        no draws would be kept"
+      ),
+      call = call
+    )
+  }
+  thin
+}
+
 # batch sizes must be positive numerics, rounded off to integers
 check_trace_batch_size <- function(x, call = rlang::caller_env()) {
   valid <- is.numeric(x) && length(x) == 1 && x >= 1

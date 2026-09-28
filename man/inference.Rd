@@ -75,9 +75,9 @@ details). If NULL (default), it sets them to 2 cores.}
 \item{verbose}{whether to print progress information to the console}
 
 \item{pb_update}{how regularly to update the progress bar (in iterations).
-If \code{pb_update} is less than or equal to \code{thin}, it will be set
-to \code{thin + 1} to ensure at least one saved iteration per
-\code{pb_update} iterations.}
+During sampling, updates are rounded to a whole number of thinned draws,
+so if \code{pb_update} is less than \code{thin}, the bar updates every \code{thin}
+iterations.}
 
 \item{one_by_one}{whether to run TensorFlow MCMC code one iteration at a
 time, so that greta can handle numerical errors as 'bad' proposals (see
