@@ -4,10 +4,12 @@
 \alias{write_greta_install_log}
 \title{Write greta dependency installation log file}
 \usage{
-write_greta_install_log(path = greta_logfile)
+write_greta_install_log(path = greta_install_logfile())
 }
 \arguments{
-\item{path}{a path with an HTML (.html) extension.}
+\item{path}{a path with an HTML (.html) extension. Defaults to the
+\code{GRETA_INSTALLATION_LOG} environment variable if set, otherwise
+"greta-installation-logfile.html" in \code{tools::R_user_dir("greta")}.}
 }
 \value{
 nothing - writes to file

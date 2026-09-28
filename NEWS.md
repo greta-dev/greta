@@ -22,6 +22,7 @@
 * The weekly install check now ends with a single table of every combination it tried and what each resolved to, instead of one block per job, so the versions that work can be read off a run at a glance (#638).
 * `lkj_correlation()` and `wishart()` draws taken with a fixed `seed` now differ from previous versions, because TensorFlow Probability 0.25.0 changed how it samples them; the distributions themselves are unchanged (#633).
 * `nadam()` now defaults to a `learning_rate` of 0.1, up from 0.001, which was too small to reach the optimum of even a five-parameter model within 2000 iterations; results also shift slightly because Keras 3 implements Nadam differently to the Keras 2 optimiser greta used before (#633).
+* `open_greta_install_log()` and `write_greta_install_log()` now use the path in `GRETA_INSTALLATION_LOG`; they used the variable's name as the path, so a logfile set with `greta_set_install_logfile()` was written to a file called `GRETA_INSTALLATION_LOG` in the working directory instead (#713).
 * `opt()` with a Keras optimiser (such as `adam()` or `gradient_descent()`) is faster, as the gradient step is now compiled with `tf_function()` rather than making several R to Python calls per iteration; this measured at roughly twice as fast on a small linear regression (#633).
 
 # greta 0.6.0

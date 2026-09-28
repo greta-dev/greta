@@ -18,11 +18,13 @@ greta_set_install_logfile <- function(path) {
 #' This can only be run after installation has happened with
 #'   [install_greta_deps()], and before restarting R.
 #'
-#' @param path a path with an HTML (.html) extension.
+#' @param path a path with an HTML (.html) extension. Defaults to the
+#'   `GRETA_INSTALLATION_LOG` environment variable if set, otherwise
+#'   "greta-installation-logfile.html" in `tools::R_user_dir("greta")`.
 #'
 #' @return nothing - writes to file
 #' @export
-write_greta_install_log <- function(path = greta_logfile) {
+write_greta_install_log <- function(path = greta_install_logfile()) {
   cli::cli_progress_step(
     msg = "Writing logfile to {.path {path}}",
     msg_done = "Logfile written to {.path {path}}"
@@ -143,17 +145,15 @@ write_greta_install_log <- function(path = greta_logfile) {
   writeLines(whisker::whisker.render(template, greta_install_data), path)
 }
 
-# returns NULL if no envvar
-sys_get_env <- function(envvar) {
-  retrieved_envvar <- Sys.getenv(envvar)
-  env_exists <- nzchar(retrieved_envvar)
-  if (env_exists) {
-    envvar
+# where the installation logfile goes: GRETA_INSTALLATION_LOG if set, otherwise
+# the user directory
+greta_install_logfile <- function() {
+  logfile <- Sys.getenv("GRETA_INSTALLATION_LOG")
+  if (nzchar(logfile)) {
+    logfile
   } else {
-    envvar <- NULL
+    greta_default_logfile()
   }
-
-  envvar
 }
 #' Read a greta logfile
 #'
@@ -169,9 +169,5 @@ sys_get_env <- function(envvar) {
 #' @return opens a URL in your default HTML browser.
 #' @export
 open_greta_install_log <- function() {
-  greta_logfile <- sys_get_env("GRETA_INSTALLATION_LOG")
-
-  greta_logfile <- greta_logfile %||% greta_default_logfile()
-
-  utils::browseURL(greta_logfile)
+  utils::browseURL(greta_install_logfile())
 }

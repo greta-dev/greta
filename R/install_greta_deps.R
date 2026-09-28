@@ -176,11 +176,7 @@ install_greta_deps <- function(
   # `reinstall_greta_deps()`
   # perhaps even stopping the session with a "yesno"
 
-  greta_logfile <- sys_get_env("GRETA_INSTALLATION_LOG")
-
-  greta_logfile <- greta_logfile %||% greta_default_logfile()
-
-  write_greta_install_log(path = greta_logfile)
+  write_greta_install_log()
 
   cli::cli_alert_success(
     "Installation of {.pkg greta} dependencies \\

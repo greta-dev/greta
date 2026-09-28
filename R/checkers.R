@@ -136,8 +136,7 @@ check_tf_version <- function(
         )
       )
       diagnose_python_load()
-      logfile <- sys_get_env("GRETA_INSTALLATION_LOG") %||%
-        greta_default_logfile()
+      logfile <- greta_install_logfile()
       # Silently: write_greta_install_log() narrates itself with progress steps
       # and elapsed times, which belong to an install the user asked for, not to
       # the middle of an error they did not.
