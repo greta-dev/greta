@@ -32,13 +32,13 @@
       x %*% as_data(y)
     Message
       greta array <operation>
-      
+
     Output
            [,1]
-      [1,]  ?  
-      [2,]  ?  
+      [1,]  ?
+      [2,]  ?
     Message
-      
+
 
 ---
 
@@ -46,13 +46,13 @@
       as_data(x) %*% y
     Message
       greta array <operation>
-      
+
     Output
            [,1]
-      [1,]  ?  
-      [2,]  ?  
+      [1,]  ?
+      [2,]  ?
     Message
-      
+
 
 ---
 
@@ -60,13 +60,13 @@
       as_data(x) %*% as_data(y)
     Message
       greta array <operation>
-      
+
     Output
            [,1]
-      [1,]  ?  
-      [2,]  ?  
+      [1,]  ?
+      [2,]  ?
     Message
-      
+
 
 ---
 
@@ -75,11 +75,11 @@
     Output
       $res_1
       , , 1
-      
+
            [,1] [,2]
       [1,]    3    3
-      
-      
+
+
 
 ---
 
@@ -88,11 +88,11 @@
     Output
       $res_2
       , , 1
-      
+
            [,1] [,2]
       [1,]    3    3
-      
-      
+
+
 
 ---
 
@@ -101,9 +101,6 @@
     Output
       $res_3
       , , 1
-      
+
            [,1] [,2]
       [1,]    3    3
-      
-      
-

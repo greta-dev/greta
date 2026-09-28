@@ -111,7 +111,7 @@ avg_effect
 ```
 
 ```
-## 
+##
 ```
 
 ```
@@ -120,7 +120,7 @@ avg_effect
 ```
 
 ```
-## 
+##
 ```
 
 - `avg_stddev`: normal density function (`dnorm`) with a mean of `5` and standard deviation of `1`; controls the amount of variance between schools.
@@ -136,7 +136,7 @@ avg_stddev
 ```
 
 ```
-## 
+##
 ```
 
 ```
@@ -145,7 +145,7 @@ avg_stddev
 ```
 
 ```
-## 
+##
 ```
 
 - `school_effects_standard`: normal density function (`dnorm`) with a mean of `0`, standard deviation of `1` and dimension of `8`
@@ -161,23 +161,23 @@ school_effects_standard
 ```
 
 ```
-## 
+##
 ```
 
 ```
 ##      [,1]
-## [1,]  ?  
-## [2,]  ?  
-## [3,]  ?  
-## [4,]  ?  
-## [5,]  ?  
-## [6,]  ?  
-## [7,]  ?  
+## [1,]  ?
+## [2,]  ?
+## [3,]  ?
+## [4,]  ?
+## [5,]  ?
+## [6,]  ?
+## [7,]  ?
 ## [8,]  ?
 ```
 
 ```
-## 
+##
 ```
 
 - `school_effects`: here we multiply the exponential of `avg_stddev` with `school_effects_standard` and add `avg_effect`
@@ -193,26 +193,26 @@ school_effects
 ```
 
 ```
-## 
+##
 ```
 
 ```
 ##      [,1]
-## [1,]  ?  
-## [2,]  ?  
-## [3,]  ?  
-## [4,]  ?  
-## [5,]  ?  
-## [6,]  ?  
-## [7,]  ?  
+## [1,]  ?
+## [2,]  ?
+## [3,]  ?
+## [4,]  ?
+## [5,]  ?
+## [6,]  ?
+## [7,]  ?
 ## [8,]  ?
 ```
 
 ```
-## 
+##
 ```
 
-An alternative would be to directly use the `lognormal()` density function for `avg_stddev` and use that to calculate `school_effect`: 
+An alternative would be to directly use the `lognormal()` density function for `avg_stddev` and use that to calculate `school_effect`:
 
 
 ``` r
@@ -222,7 +222,7 @@ school_effects <- avg_effect + avg_stddev * school_effects_standard
 
 ### Likelihood
 
-Next, we want to link the variables and priors with the observed dependent data - in this case the school estimate `treatment_effects`. 
+Next, we want to link the variables and priors with the observed dependent data - in this case the school estimate `treatment_effects`.
 We define the likelihood over our observed estimates `treatment_effects` given a random sample from the normal probability distribution with mean `school_effects` and standard deviation `treatment_stddevs`. From this, we would now like to calculate the parameter of that probability distribution by using the `distribution()` function:
 
 
@@ -274,15 +274,15 @@ summary(draws)
 ```
 
 ```
-## 
+##
 ## Iterations = 1:1000
-## Thinning interval = 1 
-## Number of chains = 4 
-## Sample size per chain = 1000 
-## 
+## Thinning interval = 1
+## Number of chains = 4
+## Sample size per chain = 1000
+##
 ## 1. Empirical mean and standard deviation for each variable,
 ##    plus standard error of the mean:
-## 
+##
 ##                                  Mean     SD Naive SE Time-series SE
 ## avg_effect                    5.89908 5.5558  0.08785        0.11112
 ## avg_stddev                   13.43137 7.4654  0.11804        0.29182
@@ -294,9 +294,9 @@ summary(draws)
 ## school_effects_standard[6,1] -0.21868 0.7233  0.01144        0.01376
 ## school_effects_standard[7,1]  0.53469 0.7025  0.01111        0.01242
 ## school_effects_standard[8,1]  0.15830 0.8270  0.01308        0.01543
-## 
+##
 ## 2. Quantiles for each variable:
-## 
+##
 ##                                 2.5%     25%      50%     75%   97.5%
 ## avg_effect                   -5.3597  2.3935  5.80555  9.6195 16.8513
 ## avg_stddev                    4.1107  8.2612 11.77339 16.4969 32.8692
@@ -354,7 +354,7 @@ function is also how you would get posterior predictive values.
 ``` r
 # Calculate school effects on original scale
 school_effects           <- avg_effect + avg_stddev * school_effects_standard
-posterior_school_effects <- calculate(school_effects, values = draws) 
+posterior_school_effects <- calculate(school_effects, values = draws)
 ```
 
 
@@ -391,31 +391,31 @@ colnames(posterior_school_effects) <- N
 # Summarise and combine all chains of interest for plotting
 posterior_summaries <-
   posterior_school_effects |>
-  gather(key = school, value = value) |> 
+  gather(key = school, value = value) |>
   group_by(school) |>
-  summarise_all(funs(mean, sd)) 
+  summarise_all(funs(mean, sd))
 ```
 
 ```
 ## Warning: `funs()` was deprecated in dplyr 0.8.0.
 ## ℹ Please use a list of either functions or lambdas:
-## 
+##
 ## # Simple named list: list(mean = mean, median = median)
-## 
+##
 ## # Auto named with `tibble::lst()`: tibble::lst(mean, median)
-## 
+##
 ## # Using lambdas list(~ mean(., trim = .2), ~ median(., na.rm = TRUE))
 ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was generated.
 ```
 
 ``` r
-school_summaries <- 
-  posterior_summaries |> 
+school_summaries <-
+  posterior_summaries |>
   mutate(tool = "greta") |>
   rbind(edward2_school_means)
 
-population_parameters <- 
-  as.data.frame(as.matrix(draws)) |> 
+population_parameters <-
+  as.data.frame(as.matrix(draws)) |>
   select(avg_effect) |>
   summarise_all(funs(mean, sd)) |>
   mutate(tool = "greta") |>
@@ -425,22 +425,22 @@ population_parameters <-
 ```
 ## Warning: `funs()` was deprecated in dplyr 0.8.0.
 ## ℹ Please use a list of either functions or lambdas:
-## 
+##
 ## # Simple named list: list(mean = mean, median = median)
-## 
+##
 ## # Auto named with `tibble::lst()`: tibble::lst(mean, median)
-## 
+##
 ## # Using lambdas list(~ mean(., trim = .2), ~ median(., na.rm = TRUE))
 ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was generated.
 ```
 
 ``` r
-ggplot(school_summaries, aes(x = school, y = mean, color = tool, shape = tool)) + 
+ggplot(school_summaries, aes(x = school, y = mean, color = tool, shape = tool)) +
   geom_errorbar(aes(ymin = mean - sd, ymax = mean + sd), width = 0.2) +
   geom_point() +
-  geom_hline(data = population_parameters, 
+  geom_hline(data = population_parameters,
              aes(yintercept = mean, linetype = 'Population mean', color = tool)) +
-  scale_linetype_manual(name = "", values = c(2, 2)) 
+  scale_linetype_manual(name = "", values = c(2, 2))
 ```
 
 ![plot of chunk schools-edward2](eight_schools-schools-edward2-1.png)
@@ -457,53 +457,52 @@ sessionInfo()
 ## R version 4.6.1 (2026-06-24)
 ## Platform: aarch64-apple-darwin23
 ## Running under: macOS Tahoe 26.5.1
-## 
+##
 ## Matrix products: default
-## BLAS:   /Library/Frameworks/R.framework/Versions/4.6/Resources/lib/libRblas.0.dylib 
+## BLAS:   /Library/Frameworks/R.framework/Versions/4.6/Resources/lib/libRblas.0.dylib
 ## LAPACK: /Library/Frameworks/R.framework/Versions/4.6/Resources/lib/libRlapack.dylib;  LAPACK version 3.12.1
-## 
+##
 ## locale:
 ## [1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
-## 
+##
 ## time zone: Australia/Hobart
 ## tzcode source: internal
-## 
+##
 ## attached base packages:
-## [1] stats     graphics  grDevices utils     datasets  methods   base     
-## 
+## [1] stats     graphics  grDevices utils     datasets  methods   base
+##
 ## other attached packages:
-##  [1] lubridate_1.9.5  forcats_1.0.1    stringr_1.6.0    dplyr_1.2.1     
-##  [5] purrr_1.2.2      readr_2.2.0      tidyr_1.3.2      tibble_3.3.1    
-##  [9] ggplot2_4.0.3    tidyverse_2.0.0  bayesplot_1.15.0 greta_0.6.0     
-## [13] knitr_1.51      
-## 
+##  [1] lubridate_1.9.5  forcats_1.0.1    stringr_1.6.0    dplyr_1.2.1
+##  [5] purrr_1.2.2      readr_2.2.0      tidyr_1.3.2      tibble_3.3.1
+##  [9] ggplot2_4.0.3    tidyverse_2.0.0  bayesplot_1.15.0 greta_0.6.0
+## [13] knitr_1.51
+##
 ## loaded via a namespace (and not attached):
-##  [1] tidyselect_1.2.1     farver_2.1.2         tensorflow_2.20.0   
-##  [4] S7_0.2.2             fastmap_1.2.0        tensorA_0.36.2.1    
-##  [7] digest_0.6.39        timechange_0.4.0     lifecycle_1.0.5     
-## [10] rsvg_2.7.0           processx_3.9.0       magrittr_2.0.5      
-## [13] posterior_1.7.0      compiler_4.6.1       rlang_1.3.0         
-## [16] progress_1.2.3       tools_4.6.1          yaml_2.3.12         
-## [19] igraph_2.3.3         askpass_1.2.1        prettyunits_1.2.0   
-## [22] labeling_0.4.3       htmlwidgets_1.6.4    curl_7.1.0          
-## [25] reticulate_1.46.0    plyr_1.8.9           RColorBrewer_1.1-3  
-## [28] abind_1.4-8          withr_3.0.3          sys_3.4.3           
-## [31] grid_4.6.1           future_1.70.0        globals_0.19.1      
-## [34] scales_1.4.0         MASS_7.3-66          cli_3.6.6           
-## [37] DiagrammeR_1.0.12    crayon_1.5.3         DiagrammeRsvg_0.1   
-## [40] generics_0.1.4       otel_0.2.0           rstudioapi_0.19.0   
-## [43] reshape2_1.4.5       tzdb_0.5.0           tfruns_1.5.4        
-## [46] visNetwork_2.1.4     parallel_4.6.1       base64enc_0.1-6     
-## [49] vctrs_0.7.3          V8_8.2.0             Matrix_1.7-5        
-## [52] jsonlite_2.0.0       callr_3.8.0          hms_1.1.4           
-## [55] listenv_0.10.1       credentials_2.0.3    glue_1.8.1          
+##  [1] tidyselect_1.2.1     farver_2.1.2         tensorflow_2.20.0
+##  [4] S7_0.2.2             fastmap_1.2.0        tensorA_0.36.2.1
+##  [7] digest_0.6.39        timechange_0.4.0     lifecycle_1.0.5
+## [10] rsvg_2.7.0           processx_3.9.0       magrittr_2.0.5
+## [13] posterior_1.7.0      compiler_4.6.1       rlang_1.3.0
+## [16] progress_1.2.3       tools_4.6.1          yaml_2.3.12
+## [19] igraph_2.3.3         askpass_1.2.1        prettyunits_1.2.0
+## [22] labeling_0.4.3       htmlwidgets_1.6.4    curl_7.1.0
+## [25] reticulate_1.46.0    plyr_1.8.9           RColorBrewer_1.1-3
+## [28] abind_1.4-8          withr_3.0.3          sys_3.4.3
+## [31] grid_4.6.1           future_1.70.0        globals_0.19.1
+## [34] scales_1.4.0         MASS_7.3-66          cli_3.6.6
+## [37] DiagrammeR_1.0.12    crayon_1.5.3         DiagrammeRsvg_0.1
+## [40] generics_0.1.4       otel_0.2.0           rstudioapi_0.19.0
+## [43] reshape2_1.4.5       tzdb_0.5.0           tfruns_1.5.4
+## [46] visNetwork_2.1.4     parallel_4.6.1       base64enc_0.1-6
+## [49] vctrs_0.7.3          V8_8.2.0             Matrix_1.7-5
+## [52] jsonlite_2.0.0       callr_3.8.0          hms_1.1.4
+## [55] listenv_0.10.1       credentials_2.0.3    glue_1.8.1
 ## [58] parallelly_1.47.0    codetools_0.2-20     distributional_0.7.0
-## [61] stringi_1.8.7        gtable_0.3.6         pillar_1.11.1       
-## [64] htmltools_0.5.9      openssl_2.4.1        R6_2.6.1            
-## [67] evaluate_1.0.5       lattice_0.22-9       png_0.1-9           
-## [70] backports_1.5.1      tfautograph_0.3.2    Rcpp_1.1.2          
-## [73] coda_0.19-4.1        checkmate_2.3.4      whisker_0.4.1       
+## [61] stringi_1.8.7        gtable_0.3.6         pillar_1.11.1
+## [64] htmltools_0.5.9      openssl_2.4.1        R6_2.6.1
+## [67] evaluate_1.0.5       lattice_0.22-9       png_0.1-9
+## [70] backports_1.5.1      tfautograph_0.3.2    Rcpp_1.1.2
+## [73] coda_0.19-4.1        checkmate_2.3.4      whisker_0.4.1
 ## [76] xfun_0.60            pkgconfig_2.0.3
 ```
 </div>
-

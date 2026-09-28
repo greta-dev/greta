@@ -39,7 +39,7 @@ greta needs Python, TensorFlow and TensorFlow Probability, but you don't have to
 - Use the base pipe `|>` over magrittr, %>%
 - Put comments above the code they describe rather than trailing
 - give every user-facing change a one-line bullet in `NEWS.md` mentioning the issue number.
-- Tests for `R/thing.R` go in `tests/testthat/test-thing.R`. 
+- Tests for `R/thing.R` go in `tests/testthat/test-thing.R`.
 - Re-run `devtools::document()` after changing any roxygen comment.
 
 ### exposing internals with `module()`

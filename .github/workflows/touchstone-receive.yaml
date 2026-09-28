@@ -4,7 +4,7 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref }}
   cancel-in-progress: true
 
-on: 
+on:
    #pull_request
    issue_comment:
      types: ["created", "edited"]
@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request' || (
           github.event.issue.pull_request &&
-          startsWith(github.event.comment.body, '/benchmark') 
+          startsWith(github.event.comment.body, '/benchmark')
           )
     outputs:
       config: ${{ steps.read_touchstone_config.outputs.config }}

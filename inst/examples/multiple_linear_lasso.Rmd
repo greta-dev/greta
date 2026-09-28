@@ -11,7 +11,7 @@ design <- as.matrix(attitude[, 2:7])
 int <- normal(0, 10)
 sd <- cauchy(0, 3, truncation = c(0, Inf))
 
-tau <- exponential(0.5, dim = ncol(design)) 
+tau <- exponential(0.5, dim = ncol(design))
 coefs <- normal(0, tau)
 mu <- int + design %*% coefs
 

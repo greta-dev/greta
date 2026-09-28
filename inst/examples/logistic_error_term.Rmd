@@ -10,7 +10,7 @@ n_sites <- 20
 n_obs <- 5
 
 # n_sites x n_env matrix of environmental variables
-env <- matrix(rnorm(n_sites * n_env), nrow = n_sites) 
+env <- matrix(rnorm(n_sites * n_env), nrow = n_sites)
 # n_sites observations of species presence or absence over n_obs visits
 occupancy <- rbinom(n_sites, n_obs, 0.5)
 ```

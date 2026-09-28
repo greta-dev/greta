@@ -156,11 +156,11 @@ approach on a machine that has never set greta up before. If your network
 blocks PyPI but allows conda, the conda route via `install_greta_deps()` may
 work where the managed (uv) one does not.
 
-There are three escape routes, in order of robustness: 
+There are three escape routes, in order of robustness:
 
-1. point greta at a Python environment that is already on disk, 
-2. prime the managed (uv) environment once while online, or 
-3. pin dependency versions so an offline environment matches what greta expects. 
+1. point greta at a Python environment that is already on disk,
+2. prime the managed (uv) environment once while online, or
+3. pin dependency versions so an offline environment matches what greta expects.
 `greta_sitrep()` reports whether your current setup is ready to start offline (see the "offline-ready" line in [Did it work?](#did-it-work)).
 
 **Already have a working Python with TF and TFP on disk** (for example,
@@ -485,14 +485,14 @@ one step.
 
 Work through these in order. Most problems are one of the first two.
 
-**I changed something (ran `install_greta_deps()`, or called `greta_set_python()` / `greta_set_deps()`) and greta doesn't seem to have picked it up.** 
+**I changed something (ran `install_greta_deps()`, or called `greta_set_python()` / `greta_set_deps()`) and greta doesn't seem to have picked it up.**
 
-- Restart R. 
+- Restart R.
 - greta resolves its Python backend when the package loads, so a change only takes effect on the next fresh session -- within the same session, greta keeps using whatever it already loaded.
 
-**I'm not sure what greta is using, or whether it's working.** 
+**I'm not sure what greta is using, or whether it's working.**
 
-- Run `greta_sitrep()` (see [Did it work?](#did-it-work)). 
+- Run `greta_sitrep()` (see [Did it work?](#did-it-work)).
 - It reports the resolved backend and the versions of Python, TF, and TFP, which usually points straight at the problem.
 
 **greta says something like `error: Failed to fetch`, or (with `UV_OFFLINE=1` set) `Network connectivity is disabled, but the requested data wasn't found in the cache`.**
@@ -509,16 +509,16 @@ Work through these in order. Most problems are one of the first two.
      see [I already have Python or TensorFlow installed](#i-already-have-python-or-tensorflow-installed) -- and
      restart R.
 
-**I used `install_greta_deps()` and want to see what happened, or it seems to have failed.** 
+**I used `install_greta_deps()` and want to see what happened, or it seems to have failed.**
 
-- Open the logfile with `open_greta_install_log()` and search it (Ctrl/Cmd+F) for "error" or "warn". 
+- Open the logfile with `open_greta_install_log()` and search it (Ctrl/Cmd+F) for "error" or "warn".
 - Even when there's no obvious fix, the logfile is useful to share on a forum or a [greta GitHub issue](https://github.com/greta-dev/greta/issues).
 
-**None of the above helped.** 
+**None of the above helped.**
 
 - Start from a clean slate -- see [Starting over](#starting-over) -- then try `install_greta_deps()` again.
 
-**My network blocks package downloads entirely.** 
+**My network blocks package downloads entirely.**
 
 - See [Using greta offline](#using-greta-offline).
 

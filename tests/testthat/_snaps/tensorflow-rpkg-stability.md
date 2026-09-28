@@ -82,10 +82,10 @@
     Output
       [[1]]
       NULL
-      
+
       [[2]]
       [1] 3
-      
+
 
 ---
 
@@ -285,4 +285,3 @@
       x_extract[1]
     Output
       TensorShape([11])
-

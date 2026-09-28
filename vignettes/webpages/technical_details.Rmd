@@ -34,7 +34,7 @@ class(x)
 ```
 
 ```
-[1] "greta_array" "array"      
+[1] "greta_array" "array"
 ```
 
 ### nodes
@@ -48,7 +48,7 @@ class(x_node)
 ```
 
 ```
-[1] "data_node" "node"      "R6"       
+[1] "data_node" "node"      "R6"
 ```
 
 There is a fourth node type: 'distribution', but these are never directly associated with greta arrays.
@@ -100,7 +100,7 @@ class(x_node$value())
 ```
 
 ```
-[1] "matrix" "array" 
+[1] "matrix" "array"
 ```
 
 ``` r
@@ -109,9 +109,9 @@ z_node$value()
 
 ```
      [,1] [,2] [,3]
-[1,]  ?    ?    ?  
-[2,]  ?    ?    ?  
-[3,]  ?    ?    ?  
+[1,]  ?    ?    ?
+[2,]  ?    ?    ?
+[3,]  ?    ?    ?
 ```
 
 ```
@@ -123,7 +123,7 @@ class(z_node$value())
 ```
 
 ```
-[1] "unknowns" "matrix"   "array"   
+[1] "unknowns" "matrix"   "array"
 ```
 
 ### Tensors
@@ -252,7 +252,7 @@ class(a_node)
 ```
 
 ```
-[1] "variable_node" "node"          "R6"           
+[1] "variable_node" "node"          "R6"
 ```
 
 ``` r
@@ -279,7 +279,7 @@ class(b_node)
 ```
 
 ```
-[1] "variable_node" "node"          "R6"           
+[1] "variable_node" "node"          "R6"
 ```
 
 ``` r
@@ -287,8 +287,8 @@ class(b_node$distribution)
 ```
 
 ```
-[1] "normal_distribution" "distribution_node"   "node"               
-[4] "R6"                 
+[1] "normal_distribution" "distribution_node"   "node"
+[4] "R6"
 ```
 
 ``` r
@@ -297,7 +297,7 @@ class(b_node$distribution$target)
 ```
 
 ```
-[1] "variable_node" "node"          "R6"           
+[1] "variable_node" "node"          "R6"
 ```
 
 When they define themselves as tensors, distribution nodes define the log density of their target node/tensor given the tensors representing their parameters.

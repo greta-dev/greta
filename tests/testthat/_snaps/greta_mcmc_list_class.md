@@ -3,13 +3,13 @@
     Code
       draws
     Message
-      
+
       -- MCMC draws from greta -------------------------------------------------------
       * Iterations = 10
       * Warmup = 10
       * Chains = 2
       * Thinning = 1
-      
+
       -- Chain 1 (iterations 1...5) --------------------------------------------------
     Output
                      z
@@ -23,8 +23,8 @@
       Use `print(n = ...)` to see more draws
       --------------------------------------------------------------------------------
       i View greta draw chain i with:
-      `greta_draws_object[[i]]`. 
-      E.g., view chain 1 with: 
+      `greta_draws_object[[i]]`.
+      E.g., view chain 1 with:
       `greta_draws_object[[1]]`.
       i To see a summary of draws, run:
       `summary(greta_draws_object)`
@@ -34,13 +34,13 @@
     Code
       draws
     Message
-      
+
       -- MCMC draws from greta -------------------------------------------------------
       * Iterations = 20
       * Warmup = 20
       * Chains = 2
       * Thinning = 1
-      
+
       -- Chain 1 (iterations 1...5) --------------------------------------------------
     Output
                      z
@@ -54,8 +54,8 @@
       Use `print(n = ...)` to see more draws
       --------------------------------------------------------------------------------
       i View greta draw chain i with:
-      `greta_draws_object[[i]]`. 
-      E.g., view chain 1 with: 
+      `greta_draws_object[[i]]`.
+      E.g., view chain 1 with:
       `greta_draws_object[[1]]`.
       i To see a summary of draws, run:
       `summary(greta_draws_object)`
@@ -65,13 +65,13 @@
     Code
       print(draws, n = 20)
     Message
-      
+
       -- MCMC draws from greta -------------------------------------------------------
       * Iterations = 20
       * Warmup = 20
       * Chains = 2
       * Thinning = 1
-      
+
       -- Chain 1 (iterations 1...20) -------------------------------------------------
     Output
                       z
@@ -98,8 +98,8 @@
     Message
       --------------------------------------------------------------------------------
       i View greta draw chain i with:
-      `greta_draws_object[[i]]`. 
-      E.g., view chain 1 with: 
+      `greta_draws_object[[i]]`.
+      E.g., view chain 1 with:
       `greta_draws_object[[1]]`.
       i To see a summary of draws, run:
       `summary(greta_draws_object)`
@@ -109,13 +109,13 @@
     Code
       print(draws, n = 19)
     Message
-      
+
       -- MCMC draws from greta -------------------------------------------------------
       * Iterations = 20
       * Warmup = 20
       * Chains = 2
       * Thinning = 1
-      
+
       -- Chain 1 (iterations 1...19) -------------------------------------------------
     Output
                       z
@@ -143,8 +143,8 @@
       Use `print(n = ...)` to see more draws
       --------------------------------------------------------------------------------
       i View greta draw chain i with:
-      `greta_draws_object[[i]]`. 
-      E.g., view chain 1 with: 
+      `greta_draws_object[[i]]`.
+      E.g., view chain 1 with:
       `greta_draws_object[[1]]`.
       i To see a summary of draws, run:
       `summary(greta_draws_object)`
@@ -154,13 +154,13 @@
     Code
       print(draws, n = 21)
     Message
-      
+
       -- MCMC draws from greta -------------------------------------------------------
       * Iterations = 20
       * Warmup = 20
       * Chains = 2
       * Thinning = 1
-      
+
       -- Chain 1 (iterations 1...20) -------------------------------------------------
     Output
                       z
@@ -187,8 +187,8 @@
     Message
       --------------------------------------------------------------------------------
       i View greta draw chain i with:
-      `greta_draws_object[[i]]`. 
-      E.g., view chain 1 with: 
+      `greta_draws_object[[i]]`.
+      E.g., view chain 1 with:
       `greta_draws_object[[1]]`.
       i To see a summary of draws, run:
       `summary(greta_draws_object)`
@@ -198,13 +198,13 @@
     Code
       draws
     Message
-      
+
       -- MCMC draws from greta -------------------------------------------------------
       * Iterations = 2
       * Warmup = 2
       * Chains = 2
       * Thinning = 1
-      
+
       -- Chain 1 (iterations 1...2) --------------------------------------------------
     Output
                    z
@@ -213,8 +213,8 @@
     Message
       --------------------------------------------------------------------------------
       i View greta draw chain i with:
-      `greta_draws_object[[i]]`. 
-      E.g., view chain 1 with: 
+      `greta_draws_object[[i]]`.
+      E.g., view chain 1 with:
       `greta_draws_object[[1]]`.
       i To see a summary of draws, run:
       `summary(greta_draws_object)`
@@ -224,13 +224,13 @@
     Code
       print(draws, n = 1)
     Message
-      
+
       -- MCMC draws from greta -------------------------------------------------------
       * Iterations = 2
       * Warmup = 2
       * Chains = 2
       * Thinning = 1
-      
+
       -- Chain 1 (iterations 1...1) --------------------------------------------------
     Output
                   z
@@ -240,8 +240,8 @@
       Use `print(n = ...)` to see more draws
       --------------------------------------------------------------------------------
       i View greta draw chain i with:
-      `greta_draws_object[[i]]`. 
-      E.g., view chain 1 with: 
+      `greta_draws_object[[i]]`.
+      E.g., view chain 1 with:
       `greta_draws_object[[1]]`.
       i To see a summary of draws, run:
       `summary(greta_draws_object)`
@@ -251,13 +251,13 @@
     Code
       print(draws, n = 3)
     Message
-      
+
       -- MCMC draws from greta -------------------------------------------------------
       * Iterations = 2
       * Warmup = 2
       * Chains = 2
       * Thinning = 1
-      
+
       -- Chain 1 (iterations 1...2) --------------------------------------------------
     Output
                    z
@@ -266,9 +266,8 @@
     Message
       --------------------------------------------------------------------------------
       i View greta draw chain i with:
-      `greta_draws_object[[i]]`. 
-      E.g., view chain 1 with: 
+      `greta_draws_object[[i]]`.
+      E.g., view chain 1 with:
       `greta_draws_object[[1]]`.
       i To see a summary of draws, run:
       `summary(greta_draws_object)`
-

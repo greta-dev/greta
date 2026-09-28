@@ -5,7 +5,7 @@ rule:
   pattern: stopifnot(all($$$CODE))
 fix: stopifnot(~~CODE~~)
 message: |
-  Use stopifnot(x) instead of stopifnot(all(x)). stopifnot(x) runs all() 'under 
+  Use stopifnot(x) instead of stopifnot(all(x)). stopifnot(x) runs all() 'under
   the hood' and provides a better error message in case of failure.
 
 ---
@@ -20,5 +20,5 @@ fix: |
     ~~CODE~~
   })
 message: |
-  Use stopifnot(x) instead of stopifnot(all(x)). stopifnot(x) runs all() 'under 
+  Use stopifnot(x) instead of stopifnot(all(x)). stopifnot(x) runs all() 'under
   the hood' and provides a better error message in case of failure.

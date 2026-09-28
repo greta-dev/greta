@@ -93,7 +93,7 @@ This release provides a few improvements to installation in greta. It should now
 
 * Added option to restart R + run `library(greta)` after installation (#523).
 * Added installation deps object, `greta_deps_spec()` to help simplify specifying package versions (#664).
-* Removed `method` and `conda` arguments from `install_greta_deps()` as they 
+* Removed `method` and `conda` arguments from `install_greta_deps()` as they
   were not used.
 * Removed `manual` argument in `install_greta_deps()`.
 * Added default 5 minute timer to installation processes.
@@ -120,7 +120,7 @@ This release provides a few improvements to installation in greta. It should now
 
 ## Internals
 
-* Internally we are replacing most of the error handling code as separate 
+* Internally we are replacing most of the error handling code as separate
   `check_*` functions.
 * Implemented `cli::cli_abort/warn/inform()` in place of `cli::format_error/warning/message()` + `stop/warning/message(msg, call. = FALSE)` pattern.
 * Uses legacy optimizer internally (Use `tf$keras$optimizers$legacy$METHOD` over `tf$keras$optimizers$METHOD`). No user impact expected.
@@ -186,7 +186,7 @@ This release provides a few improvements to installation in greta. It should now
 
 * head and tail S3 methods for `greta_array` are now consistent with head and tail methods for R versions 3 and 4 ([#384](https://github.com/greta-dev/greta/issues/384)).
 
-* `greta_mcmc_list` objects (returned by `mcmc()`) are now no longer modified by operations (like `coda::gelman.diag()`). 
+* `greta_mcmc_list` objects (returned by `mcmc()`) are now no longer modified by operations (like `coda::gelman.diag()`).
 
 * joint distributions of uniform variables now have the correct constraints when sampling (#377).
 
@@ -194,9 +194,9 @@ This release provides a few improvements to installation in greta. It should now
 
 * `greta` now provides R versions of all of R's primitive functions (I think), to prevent them from silently not executing (#317).
 
-* Uses `Sys.unsetenv("RETICULATE_PYTHON")` in `.onload` on package startup, 
+* Uses `Sys.unsetenv("RETICULATE_PYTHON")` in `.onload` on package startup,
   to prevent an issue introduced with the "ghost orchid" version of RStudio where they do not find the current version of RStudio. See [#444](https://github.com/greta-dev/greta/issues/444) for more details.
-  
+
 * Internal change to code to ensure `future` continues to support parallelisation of chains. See [#447](https://github.com/greta-dev/greta/issues/447) for more details.
 
 * `greta` now depends on `future` version 1.22.1, `tensorflow` (the R package) 2.7.0, and `parallelly` 1.29.0. This should see no changes on the user side.
@@ -223,7 +223,7 @@ This release provides a few improvements to installation in greta. It should now
 
 * `calculate()` now enables simulation of greta array values from their priors, optionally conditioned on fixed values or posterior samples. This enables prior and posterior predictive checking of models, and simulation of data.
 
-* A `simulate()` method for greta models is now also provided, to simulate the values of all greta arrays in a model from their priors. 
+* A `simulate()` method for greta models is now also provided, to simulate the values of all greta arrays in a model from their priors.
 
 * `variable()` now accepts arrays for `upper` and `lower`, enabling users to define variables with different constraints.
 
@@ -381,4 +381,3 @@ API changes:
 
 * removed the deprecated `define_model()`, an alias for `model()`
 * removed the dynamics module, to be replaced by the gretaDynamics package
-

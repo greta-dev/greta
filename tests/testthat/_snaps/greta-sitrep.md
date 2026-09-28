@@ -36,7 +36,7 @@
     Message
       i Initialising python and checking dependencies, this may take a moment.
       x Initialising python and checking dependencies, this may take a moment. ... ...
-      
+
     Condition
       Error in `check_tf_version()`:
       ! x greta could not load TensorFlow Probability.
@@ -93,13 +93,13 @@
     Message
       i checking if python available
       v python (v3.12) available
-      
+
       i checking if TensorFlow available
       v TensorFlow (v2.21.0) available
-      
+
       i checking if TensorFlow Probability available
       v TensorFlow Probability (v0.25.0) available
-      
+
       i greta conda environment: not used (managed (uv) environment active)
       * backend: "managed (uv) environment"
       * selected via: default
@@ -112,13 +112,13 @@
     Message
       i checking if python available
       v python (v3.6) available
-      
+
       i checking if TensorFlow available
       v TensorFlow (v2.21.0) available
-      
+
       i checking if TensorFlow Probability available
       v TensorFlow Probability (v0.25.0) available
-      
+
       i greta conda environment: not used (managed (uv) environment active)
       * backend: "managed (uv) environment"
       * selected via: default
@@ -131,13 +131,13 @@
     Message
       i checking if python available
       v python (v3.6) available
-      
+
       i checking if TensorFlow available
       v TensorFlow (v2.0.0) available
-      
+
       i checking if TensorFlow Probability available
       v TensorFlow Probability (v0.25.0) available
-      
+
       i greta conda environment: not used (managed (uv) environment active)
       * backend: "managed (uv) environment"
       * selected via: default
@@ -150,13 +150,13 @@
     Message
       i checking if python available
       v python (v3.6) available
-      
+
       i checking if TensorFlow available
       v TensorFlow (v2.0.0) available
-      
+
       i checking if TensorFlow Probability available
       v TensorFlow Probability (v0.9.0) available
-      
+
       i greta conda environment: not used (managed (uv) environment active)
       * backend: "managed (uv) environment"
       * selected via: default
@@ -169,13 +169,13 @@
     Message
       i checking if python available
       v python (v3.12) available
-      
+
       i checking if TensorFlow available
       v TensorFlow (v2.21.0) available
-      
+
       i checking if TensorFlow Probability available
       v TensorFlow Probability (v0.25.0) available
-      
+
       i greta conda environment: not used (managed (uv) environment active)
       * backend: "managed (uv) environment"
       * selected via: default
@@ -195,7 +195,7 @@
     Message
       i checking if greta conda environment available
       x greta conda environment not available
-      
+
 
 # greta_sitrep works with quiet, minimal, and detailed options
 
@@ -209,13 +209,13 @@
     Message
       i checking if python available
       v python (v3.12) available
-      
+
       i checking if TensorFlow available
       v TensorFlow (v2.21.0) available
-      
+
       i checking if TensorFlow Probability available
       v TensorFlow Probability (v0.25.0) available
-      
+
       i greta conda environment: not used (managed (uv) environment active)
       * backend: "<backend>"
       * selected via: <source>
@@ -228,4 +228,3 @@
     Condition
       Error in `greta_sitrep()`:
       ! `verbosity` must be one of "minimal", "detailed", or "quiet", not "bananas".
-

@@ -20,11 +20,11 @@ occupancy <- matrix(rbinom(n_sites * n_obs, 1, 0.5), nrow = n_sites)
  #### constant occupancy detection model ####
   psi ~ dunif(0,1)
   p ~ dunif(0,1)
-  
+
   for(i in 1:n.sites){
     z[i] ~ dbern(psi) #occupancy
     p.eff[i] <- z[i] * p #detectability
-    
+
     for(j in 1:n.reps){
       y[i,j] ~ dbern(p.eff[i])
     }

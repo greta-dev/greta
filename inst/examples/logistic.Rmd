@@ -9,9 +9,9 @@ n_env <- 3
 n_sites <- 20
 
 # n_sites x n_env matrix of environmental variables
-env <- matrix(rnorm(n_sites * n_env), nrow = n_sites) 
+env <- matrix(rnorm(n_sites * n_env), nrow = n_sites)
 # n_sites observations of species presence or absence
-occupancy <- rbinom(n_sites, 1, 0.5) 
+occupancy <- rbinom(n_sites, 1, 0.5)
 ```
 
 #### greta code

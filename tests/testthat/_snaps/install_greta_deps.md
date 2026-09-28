@@ -8,7 +8,7 @@
       i See the installation vignette: `vignette(greta::installation)`.
       i Creating 'greta-env-tf2' conda environment using python v3.12, this may tak...
       x Creating 'greta-env-tf2' conda environment using python v3.12, this may tak...
-      
+
     Condition
       Error in `new_install_process()`:
       ! Stopping as installation of greta dependencies took longer than 0.001 minutes You can increase the timeout time by increasing the `timeout` argument. For example, to wait 5 minutes: `install_greta_deps(timeout = 5)` Alternatively, you can perform the entire installation with: `reticulate::install_miniconda()` Then: `reticulate::conda_create(envname = 'greta-env-tf2', python_version = '3.12')` Then: `reticulate::py_install( packages = c( 'numpy', 'tensorflow==2.21.0', 'tensorflow-probability[tf]==0.25.0' ), envname = 'greta-env-tf2', pip = TRUE )` Then select it with `greta_set_python('conda')`, restart R, and load greta with: `library(greta)`
@@ -68,4 +68,3 @@
       If this does not work, read through installation vignette (`vignette(greta::installation)`), or install a conda environment with `install_greta_deps()`.
       Also feel free to lodge an issue on github at:
       <https://github.com/greta-dev/greta/issues/new>
-

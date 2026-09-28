@@ -49,7 +49,7 @@
     Code
       draws <- mock_mcmc(1010)
     Message
-      
+
         sampling          1010/1010 | eta:  0s | <1% bad
 
 ---
@@ -57,17 +57,17 @@
     Code
       draws <- mock_mcmc(500)
     Message
-      
-        sampling            500/500 | eta:  0s | 2% bad 
+
+        sampling            500/500 | eta:  0s | 2% bad
 
 ---
 
     Code
       draws <- mock_mcmc(10)
     Message
-      
+
         sampling =========== 10/10 | eta:  0s | 100% bad
-      
+
 
 # samples has object names
 
@@ -115,11 +115,11 @@
       initials(a = 3)
     Output
       a greta initials object with values:
-      
+
       $a
            [,1]
       [1,]    3
-      
+
 
 # prep_initials errors informatively
 
@@ -217,4 +217,3 @@
     Output
       hmc sampler object with parameters:
         Lmin = 1, Lmax = 10, epsilon = 0.1, diag_sd = 1
-

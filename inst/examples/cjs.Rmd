@@ -59,7 +59,7 @@ model {
   for (i in 1:n_obs) {
     z[i, first_obs[i]] <- 1   # state at first capture must be 1!
     for (t in (first_obs[i] + 1):n_time) {
-      mu1[i, t] <- phi[t - 1] * z[i, t - 1] 
+      mu1[i, t] <- phi[t - 1] * z[i, t - 1]
       z[i, t] ~ dbern(mu1[i, t])   # true state
       mu2[i, t] <- p[t - 1] * z[i, t]
       y[i, t] ~ dbern(mu2[i, t])      # observed state

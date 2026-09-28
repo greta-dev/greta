@@ -33,7 +33,7 @@ In these software packages, users typically write out models in a domain-specifi
 Though see the Python packages PyMC and Edward [@pymc; @edward] in which models are specified in Python code.
 
 With increasing quantities of data, complexity, and realism of statistical models that users wish to build with these software, there is a push for software that scales better with data size and model complexity.
-More recently, custom statistical modelling software has focussed on methods such as Hamiltonian Monte Carlo (rather than Gibbs samplers) in order to improve to computational efficiency.
+More recently, custom statistical modelling software has focused on methods such as Hamiltonian Monte Carlo (rather than Gibbs samplers) in order to improve to computational efficiency.
 This can be seen for example in the development of Stan [@stan].
 
 greta is an package for statistical modelling in R [@Rcore] that has three core differences to commonly used statistical modelling software packages:
@@ -41,7 +41,7 @@ greta is an package for statistical modelling in R [@Rcore] that has three core 
   1. greta models are written interactively in R code rather than in a compiled domain specific language.
   2. greta can be extended by other R packages; providing a fully-featured package management system for extensions.
   3. greta performs statistical inference using TensorFlow [@tf], enabling it to scale across modern high-performance computing systems.
-  
+
 greta can be used to construct both Bayesian and non-Bayesian statistical models, and perform inference via MCMC or optimisation (for maximum likelihood or maximum *a posteriori* estimation).
 The default MCMC algorithm is Hamiltonian Monte Carlo, which is generally very efficient for Bayesian models with large numbers of parameters or highly-correlated posteriors.
 
@@ -98,7 +98,7 @@ We multiply our modelled weekly rates by the number of weeks the counts represen
 
 ```r
 # likelihood
-distribution(baseline_y) <- poisson(baseline_rates * 8)  
+distribution(baseline_y) <- poisson(baseline_rates * 8)
 distribution(epil$y) <- poisson(post_treatment_rates * 2)
 ```
 
@@ -126,14 +126,14 @@ coda::gelman.diag(draws)
 
 ```
 ## Potential scale reduction factors:
-## 
+##
 ##                        Point est. Upper C.I.
 ## treatment_effects[1,1]       1.01       1.04
 ## treatment_effects[2,1]       1.01       1.05
 ## subject_sd                   1.00       1.01
-## 
+##
 ## Multivariate psrf
-## 
+##
 ## 1.02
 ```
 
@@ -165,7 +165,7 @@ summary(drug_effect_draws)$statistics
 ```
 
 ```
-##           Mean             SD       Naive SE Time-series SE 
+##           Mean             SD       Naive SE Time-series SE
 ##   0.9004330745   0.0574290367   0.0009080328   0.0016683350
 ```
 

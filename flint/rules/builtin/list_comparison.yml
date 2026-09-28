@@ -13,6 +13,6 @@ constraints:
   FUN:
     regex: ^(lapply|map|Map|\.mapply)$
 message: |
-  The output of ~~FUN~~(), a list, is being coerced for comparison. 
-  Instead, use a mapper that generates a vector with the correct type directly, 
+  The output of ~~FUN~~(), a list, is being coerced for comparison.
+  Instead, use a mapper that generates a vector with the correct type directly,
   for example vapply(x, FUN, character(1L)) if the output is a string.

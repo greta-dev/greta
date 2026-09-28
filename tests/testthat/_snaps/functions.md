@@ -4,12 +4,12 @@
       log(x)
     Message
       greta array <operation>
-      
+
     Output
            [,1]
-      [1,]  ?  
+      [1,]  ?
     Message
-      
+
 
 ---
 
@@ -22,14 +22,14 @@
       y
     Message
       greta array <data>
-      
+
     Output
            [,1] [,2] [,3]
       [1,]    1    4    7
       [2,]    2    5    8
       [3,]    3    6    9
     Message
-      
+
 
 ---
 
@@ -418,4 +418,3 @@
       Error in `rdist()`:
       ! `x1` and `x2` must have the same number of columns
       However `ncol(x1)` = 1 and `ncol(x2)` = 4
-

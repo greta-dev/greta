@@ -111,9 +111,9 @@ greta array <operation>
 
 ```
      [,1] [,2] [,3]
-[1,]  ?    ?    ?  
-[2,]  ?    ?    ?  
-[3,]  ?    ?    ?  
+[1,]  ?    ?    ?
+[2,]  ?    ?    ?
+[3,]  ?    ?    ?
 ```
 
 ```
@@ -138,9 +138,9 @@ greta array <variable>
 
 ```
      [,1] [,2] [,3]
-[1,]  ?    ?    ?  
-[2,]  ?    ?    ?  
-[3,]  ?    ?    ?  
+[1,]  ?    ?    ?
+[2,]  ?    ?    ?
+[3,]  ?    ?    ?
 ```
 
 ```
@@ -157,9 +157,9 @@ greta array <operation>
 
 ```
      [,1] [,2] [,3]
-[1,]  ?    ?    ?  
-[2,]  ?    ?    ?  
-[3,]  ?    ?    ?  
+[1,]  ?    ?    ?
+[2,]  ?    ?    ?
+[3,]  ?    ?    ?
 ```
 
 ```
@@ -223,7 +223,7 @@ x <- as_data(iris$Petal.Length)
 y <- as_data(iris$Sepal.Length)
 ```
 
-The greta function `as_data()` converts other R objects into greta arrays. In this case it's converting numeric vectors (the two columns of the iris dataframe) into greta arrays. `as_data()` can also convert matrices and R arrays with numeric, integer or logical (`TRUE` or `FALSE`) values into greta arrays. It can also convert dataframes to greta arrays, so long as all elements are either numeric, integer or logical. 
+The greta function `as_data()` converts other R objects into greta arrays. In this case it's converting numeric vectors (the two columns of the iris dataframe) into greta arrays. `as_data()` can also convert matrices and R arrays with numeric, integer or logical (`TRUE` or `FALSE`) values into greta arrays. It can also convert dataframes to greta arrays, so long as all elements are either numeric, integer or logical.
 
 E.g. we can convert the first 5 rows and 4 columns of the iris dataframe, and print the result:
 
@@ -427,7 +427,7 @@ greta array <variable>
 
 ```
      [,1]
-[1,]  ?  
+[1,]  ?
 ```
 
 ```
@@ -453,7 +453,7 @@ greta array <variable>
 
 ```
      [,1]
-[1,]  ?  
+[1,]  ?
 ```
 
 ```
@@ -476,8 +476,8 @@ greta array <variable>
 
 ```
      [,1] [,2] [,3]
-[1,]  ?    ?    ?  
-[2,]  ?    ?    ?  
+[1,]  ?    ?    ?
+[2,]  ?    ?    ?
 ```
 
 ```
@@ -509,13 +509,13 @@ greta array <variable following a normal distribution>
 
 ```
      [,1]
-[1,]  ?  
+[1,]  ?
 ```
 
 ```
 
 ```
-greta will account for this truncation when calculating the density of this distribution; rescaling it to be a valid probability distribution. We can only truncate to within the support of the distribution; e.g. greta will throw an error if we try to truncate a lognormal distribution (which must be positive) to have a lower bound of -1. 
+greta will account for this truncation when calculating the density of this distribution; rescaling it to be a valid probability distribution. We can only truncate to within the support of the distribution; e.g. greta will throw an error if we try to truncate a lognormal distribution (which must be positive) to have a lower bound of -1.
 
 <hr>
 
@@ -553,12 +553,12 @@ greta array <operation>
 
 ```
      [,1]
-[1,]  ?  
-[2,]  ?  
-[3,]  ?  
-[4,]  ?  
-[5,]  ?  
-[6,]  ?  
+[1,]  ?
+[2,]  ?
+[3,]  ?
+[4,]  ?
+[5,]  ?
+[6,]  ?
 ```
 
 ```
@@ -586,9 +586,9 @@ greta array <operation>
 
 ```
      [,1]
-[1,]  ?  
-[2,]  ?  
-[3,]  ?  
+[1,]  ?
+[2,]  ?
+[3,]  ?
 ```
 
 ```
@@ -614,10 +614,10 @@ greta array <operation>
 
 ```
      [,1] [,2] [,3]
-[1,]  ?   0    0   
-[2,]  ?   0    0   
-[3,]  ?   0    0   
-[4,]  ?   0    0   
+[1,]  ?   0    0
+[2,]  ?   0    0
+[3,]  ?   0    0
+[4,]  ?   0    0
 ```
 
 ```
@@ -649,7 +649,7 @@ dim(z[, 1, drop = FALSE])
 [1] 2 1
 ```
 
-greta arrays must always have two dimensions, so greta always acts as though `drop = FALSE`: 
+greta arrays must always have two dimensions, so greta always acts as though `drop = FALSE`:
 
 
 ``` r
@@ -683,8 +683,8 @@ greta array <operation>
 
 ```
      [,1] [,2]
-[1,]  ?    ?  
-[2,]  ?    ?  
+[1,]  ?    ?
+[2,]  ?    ?
 ```
 
 ```
@@ -777,9 +777,9 @@ summary(draws)
 ```
 
 Iterations = 1:1000
-Thinning interval = 1 
-Number of chains = 2 
-Sample size per chain = 1000 
+Thinning interval = 1
+Number of chains = 2
+Sample size per chain = 1000
 
 1. Empirical mean and standard deviation for each variable,
    plus standard error of the mean:
@@ -821,4 +821,3 @@ greta's default sampler is (static) Hamiltonian Monte Carlo. The sampler will au
 A downside of HMC is that it can't be used to sample discrete variables (e.g. integers), so we can't specify a model with a discrete distribution (e.g. Poisson or Binomial), unless it's in the likelihood. If we try to build such a model, greta will give us an error when we run `model()`. Future versions of greta will implement a wider range of MCMC samplers, including some for discrete variables.
 
 <hr>
-
