@@ -117,6 +117,12 @@ choice, see the "I need specific dependency versions" section of
 default (recommended) versions, and is the supported way to query them -
 for example <code>greta_deps_spec()$tf_version</code> for the default TensorFlow
 version.</p>
+<p>To build an unsupported installation on purpose, for example to test how
+greta reports one, set the environment variable
+<code>GRETA_ALLOW_UNSUPPORTED_DEPS</code> to <code>"true"</code>: <code>greta_deps_spec()</code> then warns
+instead of erroring. This is for testing greta, not for using it; see the
+"Building an unsupported installation on purpose" section of
+<code><a href="../articles/installation.html">vignette("installation", package = "greta")</a></code>.</p>
     </div>
 
     <div class="section level2">

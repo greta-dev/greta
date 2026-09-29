@@ -150,6 +150,15 @@
   narrower still, and left to the resolver
   ([\#633](https://github.com/greta-dev/greta/issues/633),
   [\#638](https://github.com/greta-dev/greta/issues/638)).
+- [`greta_deps_spec()`](https://greta-dev.github.io/greta/dev/reference/greta_deps_spec.md)
+  warns instead of erroring on unsupported versions when the environment
+  variable `GRETA_ALLOW_UNSUPPORTED_DEPS` is `"true"`, so an unsupported
+  installation can be built on purpose to test how greta reports it. It
+  is for testing greta, not for using it; greta still checks the
+  versions it finds when it loads. See “Building an unsupported
+  installation on purpose” in
+  [`vignette("installation")`](https://greta-dev.github.io/greta/dev/articles/installation.md)
+  ([\#685](https://github.com/greta-dev/greta/issues/685)).
 - greta now checks the TensorFlow and TensorFlow Probability versions it
   finds against the versions it actually needs, rather than against much
   older floors of 2.9.0 and 0.15.0 that had not moved since before the

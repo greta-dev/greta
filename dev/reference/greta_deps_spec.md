@@ -54,6 +54,13 @@ default (recommended) versions, and is the supported way to query them -
 for example `greta_deps_spec()$tf_version` for the default TensorFlow
 version.
 
+To build an unsupported installation on purpose, for example to test how
+greta reports one, set the environment variable
+`GRETA_ALLOW_UNSUPPORTED_DEPS` to `"true"`: `greta_deps_spec()` then
+warns instead of erroring. This is for testing greta, not for using it;
+see the "Building an unsupported installation on purpose" section of
+[`vignette("installation", package = "greta")`](https://greta-dev.github.io/greta/dev/articles/installation.md).
+
 ## Examples
 
 ``` r

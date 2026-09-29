@@ -334,9 +334,11 @@ with 2.15 – so the argument exists for completeness rather than for use.
 
 ##### TensorFlow 2.16 and 2.17 cannot be used
 
-They are rejected, and there is no way to opt in. Anything below
-TensorFlow 2.18 is refused when you build the spec, before anything is
-downloaded – which is what the error above shows.
+They are rejected. Anything below TensorFlow 2.18 is refused when you
+build the spec, before anything is downloaded – which is what the error
+above shows. The only way past this is a switch meant for testing greta
+itself, described
+[below](#building-an-unsupported-installation-on-purpose).
 
 **The reason is TensorFlow Probability.** Its most recent release is
 0.25.0, from November 2024, and that release is tested against
@@ -391,6 +393,27 @@ take effect on the next restart – see [I want the conda
 workflow](#i-want-the-conda-workflow) if you’re building a conda
 environment, or just restart R if you’re using the managed (uv)
 environment.
+
+#### Building an unsupported installation on purpose
+
+To see how greta behaves with an installation it does not support – for
+example, to check the messages it gives someone who has TensorFlow 2.17
+– set the environment variable `GRETA_ALLOW_UNSUPPORTED_DEPS` to
+`"true"`.
+[`greta_deps_spec()`](https://greta-dev.github.io/greta/dev/reference/greta_deps_spec.md)
+then warns about an unsupported version instead of refusing it, so the
+installation can be built:
+
+``` r
+
+Sys.setenv(GRETA_ALLOW_UNSUPPORTED_DEPS = "true")
+install_greta_deps(greta_deps_spec(tf_version = "2.17.0"))
+```
+
+This is for testing greta, not for using it. Only the spec check is
+relaxed: greta still checks the versions it finds when it loads, and
+reports an installation it cannot use exactly as it would for anyone
+else.
 
 ### I want the conda workflow
 

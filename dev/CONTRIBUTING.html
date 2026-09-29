@@ -76,6 +76,14 @@
 <li>For user-facing changes, add a bullet to the top of <code>NEWS.md</code> below the current development version header describing the changes made followed by your GitHub username, and links to relevant issue(s)/PR(s).</li>
 </ul></div>
 <div class="section level3">
+<h3 id="testing-an-unsupported-installation">Testing an unsupported installation<a class="anchor" aria-label="anchor" href="#testing-an-unsupported-installation"></a></h3>
+<p><code><a href="reference/greta_deps_spec.html">greta_deps_spec()</a></code> refuses TensorFlow and TensorFlow Probability versions greta does not support, so an unsupported installation cannot be built by accident. To build one on purpose, for example to check the messages greta gives when it meets one, set <code>GRETA_ALLOW_UNSUPPORTED_DEPS</code>:</p>
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Sys.setenv.html" class="external-link">Sys.setenv</a></span><span class="op">(</span>GRETA_ALLOW_UNSUPPORTED_DEPS <span class="op">=</span> <span class="st">"true"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="reference/install_greta_deps.html">install_greta_deps</a></span><span class="op">(</span><span class="fu"><a href="reference/greta_deps_spec.html">greta_deps_spec</a></span><span class="op">(</span>tf_version <span class="op">=</span> <span class="st">"2.17.0"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<p><code><a href="reference/greta_deps_spec.html">greta_deps_spec()</a></code> then warns instead of erroring. greta still checks the versions it finds when it loads, so the installation is reported the way a user would see it.</p>
+</div>
+<div class="section level3">
 <h3 id="code-of-conduct">Code of Conduct<a class="anchor" aria-label="anchor" href="#code-of-conduct"></a></h3>
 <p>Please note that the greta project is released with a <a href="CODE_OF_CONDUCT.html">Contributor Code of Conduct</a>. By contributing to this project you agree to abide by its terms.</p>
 </div>

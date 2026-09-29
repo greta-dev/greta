@@ -43,6 +43,25 @@ with a minimal [reprex](https://www.tidyverse.org/help/#reprex).
   followed by your GitHub username, and links to relevant
   issue(s)/PR(s).
 
+### Testing an unsupported installation
+
+[`greta_deps_spec()`](https://greta-dev.github.io/greta/dev/reference/greta_deps_spec.md)
+refuses TensorFlow and TensorFlow Probability versions greta does not
+support, so an unsupported installation cannot be built by accident. To
+build one on purpose, for example to check the messages greta gives when
+it meets one, set `GRETA_ALLOW_UNSUPPORTED_DEPS`:
+
+``` r
+
+Sys.setenv(GRETA_ALLOW_UNSUPPORTED_DEPS = "true")
+install_greta_deps(greta_deps_spec(tf_version = "2.17.0"))
+```
+
+[`greta_deps_spec()`](https://greta-dev.github.io/greta/dev/reference/greta_deps_spec.md)
+then warns instead of erroring. greta still checks the versions it finds
+when it loads, so the installation is reported the way a user would see
+it.
+
 ### Code of Conduct
 
 Please note that the greta project is released with a [Contributor Code
