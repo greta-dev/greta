@@ -307,6 +307,13 @@ greta_deps_default <- list(
 #' for example `greta_deps_spec()$tf_version` for the default TensorFlow
 #' version.
 #'
+#' To build an unsupported installation on purpose, for example to test how
+#' greta reports one, set the environment variable
+#' `GRETA_ALLOW_UNSUPPORTED_DEPS` to `"true"`: `greta_deps_spec()` then warns
+#' instead of erroring. This is for testing greta, not for using it; see the
+#' "Building an unsupported installation on purpose" section of
+#' `vignette("installation", package = "greta")`.
+#'
 #' @param tf_version character. TensorFlow version, in the format
 #'   major.minor.patch. Default is `r greta_deps_default$tf`.
 #' @param tfp_version Character. Tensorflow probability (TFP) version
@@ -346,9 +353,31 @@ greta_deps_spec <- function(
 
   # TensorFlow and TensorFlow Probability are both constrained; Python is left
   # to uv (or conda) to resolve
-  check_greta_versions_supported(deps_obj)
+  if (allow_unsupported_deps()) {
+    tryCatch(
+      check_greta_versions_supported(deps_obj),
+      error = function(e) {
+        cli::cli_warn(
+          c(
+            cli_escape(conditionMessage(e)),
+            "!" = "Continuing, as {.envvar GRETA_ALLOW_UNSUPPORTED_DEPS} \\
+            is set."
+          )
+        )
+      }
+    )
+  } else {
+    check_greta_versions_supported(deps_obj)
+  }
 
   deps_obj
+}
+
+# Lets greta's developers build an unsupported installation on purpose, to see
+# how greta reports one. Documented in ?greta_deps_spec, the installation
+# vignette and .github/CONTRIBUTING.md (greta-dev/greta#685)
+allow_unsupported_deps <- function() {
+  isTRUE(as.logical(Sys.getenv("GRETA_ALLOW_UNSUPPORTED_DEPS", "false")))
 }
 
 new_greta_deps_spec <- function(tf_version, tfp_version, python_version) {

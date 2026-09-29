@@ -38,6 +38,19 @@ test_that("greta_deps_spec rejects TensorFlow older than greta supports", {
   expect_error(greta_deps_spec(tf_version = "2.15.0"), "supports TensorFlow")
 })
 
+test_that("GRETA_ALLOW_UNSUPPORTED_DEPS turns the version error into a warning", {
+  withr::local_envvar(GRETA_ALLOW_UNSUPPORTED_DEPS = "true")
+  expect_warning(
+    deps <- greta_deps_spec(tf_version = "2.17.0", tfp_version = "0.24.0"),
+    "GRETA_ALLOW_UNSUPPORTED_DEPS"
+  )
+  expect_identical(deps$tf_version, "2.17.0")
+  expect_identical(deps$tfp_version, "0.24.0")
+
+  withr::local_envvar(GRETA_ALLOW_UNSUPPORTED_DEPS = "false")
+  expect_error(greta_deps_spec(tf_version = "2.17.0"))
+})
+
 test_that("greta_deps_spec rejects TensorFlow newer than greta supports", {
   expect_error(greta_deps_spec(tf_version = "2.99.0"), "supports TensorFlow")
 })
