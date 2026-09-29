@@ -9,9 +9,9 @@ likelihood/posterior optimisation.
 mcmc(
   model,
   sampler = hmc(),
-  n_samples = 2000,
+  n_samples = 1000,
   thin = 1,
-  warmup = 2000,
+  warmup = 1000,
   chains = 2,
   n_cores = NULL,
   verbose = TRUE,
@@ -26,7 +26,7 @@ stashed_samples()
 
 extra_samples(
   draws,
-  n_samples = 2000,
+  n_samples = 1000,
   thin = 1,
   n_cores = NULL,
   verbose = TRUE,
@@ -70,15 +70,7 @@ opt(
 - thin:
 
   MCMC thinning rate; every `thin` samples is retained, the rest are
-  discarded. For example:
-
-  - `n_samples = 1000, thin = 10`: 10 divides 1000 exactly, so all 1000
-    iterations are run and iterations 10, 20, ..., 1000 are kept: 100
-    draws.
-
-  - `n_samples = 1000, thin = 3`: 3 does not divide 1000 exactly, so
-    iterations 3, 6, ..., 999 are kept: 333 draws. Iteration 1000 is
-    still run, but keeps no draw.
+  discarded
 
 - warmup:
 
@@ -103,20 +95,10 @@ opt(
 
 - pb_update:
 
-  roughly how often to update the progress bar, in iterations. Sampling
-  runs in bursts, and the bar can only update between them. With `thin`
-  above 1 (and `one_by_one = FALSE`), each burst has to end on a kept
-  draw, so the bar updates every `pb_update` iterations rounded to the
-  nearest multiple of `thin`, and at least every `thin`. The count it
-  shows is always the number of iterations run, and it always ends on
-  `n_samples`. For example:
-
-  - `n_samples = 1000, thin = 10, pb_update = 50`: 10 divides 50, so the
-    bar updates every 50 iterations, at 50, 100, ..., 1000.
-
-  - `n_samples = 1000, thin = 3, pb_update = 50`: 3 does not divide 50,
-    and the nearest multiple of 3 is 51, so the bar updates every 51
-    iterations, at 51, 102, ..., 969, and then at 1000.
+  how regularly to update the progress bar (in iterations). If
+  `pb_update` is less than or equal to `thin`, it will be set to
+  `thin + 1` to ensure at least one saved iteration per `pb_update`
+  iterations.
 
 - one_by_one:
 

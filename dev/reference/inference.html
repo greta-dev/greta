@@ -66,9 +66,9 @@ MCMC or likelihood/posterior optimisation.</p>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">mcmc</span><span class="op">(</span></span>
 <span>  <span class="va">model</span>,</span>
 <span>  sampler <span class="op">=</span> <span class="fu"><a href="samplers.html">hmc</a></span><span class="op">(</span><span class="op">)</span>,</span>
-<span>  n_samples <span class="op">=</span> <span class="fl">2000</span>,</span>
+<span>  n_samples <span class="op">=</span> <span class="fl">1000</span>,</span>
 <span>  thin <span class="op">=</span> <span class="fl">1</span>,</span>
-<span>  warmup <span class="op">=</span> <span class="fl">2000</span>,</span>
+<span>  warmup <span class="op">=</span> <span class="fl">1000</span>,</span>
 <span>  chains <span class="op">=</span> <span class="fl">2</span>,</span>
 <span>  n_cores <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  verbose <span class="op">=</span> <span class="cn">TRUE</span>,</span>
@@ -83,7 +83,7 @@ MCMC or likelihood/posterior optimisation.</p>
 <span></span>
 <span><span class="fu">extra_samples</span><span class="op">(</span></span>
 <span>  <span class="va">draws</span>,</span>
-<span>  n_samples <span class="op">=</span> <span class="fl">2000</span>,</span>
+<span>  n_samples <span class="op">=</span> <span class="fl">1000</span>,</span>
 <span>  thin <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  n_cores <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  verbose <span class="op">=</span> <span class="cn">TRUE</span>,</span>
@@ -127,12 +127,7 @@ but before thinning)</p></dd>
 
 <dt id="arg-thin">thin<a class="anchor" aria-label="anchor" href="#arg-thin"></a></dt>
 <dd><p>MCMC thinning rate; every <code>thin</code> samples is retained, the
-rest are discarded. For example:</p><ul><li><p><code>n_samples = 1000, thin = 10</code>: 10 divides 1000 exactly, so all 1000
-iterations are run and iterations 10, 20, ..., 1000 are kept: 100 draws.</p></li>
-<li><p><code>n_samples = 1000, thin = 3</code>: 3 does not divide 1000 exactly, so
-iterations 3, 6, ..., 999 are kept: 333 draws. Iteration 1000 is still
-run, but keeps no draw.</p></li>
-</ul></dd>
+rest are discarded</p></dd>
 
 
 <dt id="arg-warmup">warmup<a class="anchor" aria-label="anchor" href="#arg-warmup"></a></dt>
@@ -154,18 +149,10 @@ details). If NULL (default), it sets them to 2 cores.</p></dd>
 
 
 <dt id="arg-pb-update">pb_update<a class="anchor" aria-label="anchor" href="#arg-pb-update"></a></dt>
-<dd><p>roughly how often to update the progress bar, in
-iterations. Sampling runs in bursts, and the bar can only update between
-them. With <code>thin</code> above 1 (and <code>one_by_one = FALSE</code>), each burst has to
-end on a kept draw, so the bar updates every <code>pb_update</code> iterations rounded
-to the nearest multiple of <code>thin</code>, and at least every <code>thin</code>. The count it
-shows is always the number of iterations run, and it always ends on
-<code>n_samples</code>. For example:</p><ul><li><p><code>n_samples = 1000, thin = 10, pb_update = 50</code>: 10 divides 50, so the
-bar updates every 50 iterations, at 50, 100, ..., 1000.</p></li>
-<li><p><code>n_samples = 1000, thin = 3, pb_update = 50</code>: 3 does not divide 50, and
-the nearest multiple of 3 is 51, so the bar updates every 51
-iterations, at 51, 102, ..., 969, and then at 1000.</p></li>
-</ul></dd>
+<dd><p>how regularly to update the progress bar (in iterations).
+If <code>pb_update</code> is less than or equal to <code>thin</code>, it will be set
+to <code>thin + 1</code> to ensure at least one saved iteration per
+<code>pb_update</code> iterations.</p></dd>
 
 
 <dt id="arg-one-by-one">one_by_one<a class="anchor" aria-label="anchor" href="#arg-one-by-one"></a></dt>

@@ -856,7 +856,7 @@ will automatically tune itself during the warmup phase, to make it as
 efficient as possible. If the chain looks like it’s moving too slowly,
 or if you are getting a lot of messages about proposals being rejected,
 the first thing to try is increasing the length of the warmup period
-from its default of 2000 iterations (via the `warmup` argument). If
+from its default of 1000 iterations (via the `warmup` argument). If
 you’re still getting a lot of rejected samples, it’s often a good idea
 to manually set the initial values for the sampler (via the
 `initial_values` argument). This is often the case when you have lots of
