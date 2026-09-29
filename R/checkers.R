@@ -941,8 +941,8 @@ check_positive_integer <- function(x, name = "", call = rlang::caller_env()) {
 # n_samples = 0 is allowed, to run warmup alone
 check_thin <- function(thin, n_samples, call = rlang::caller_env()) {
   thin <- check_positive_integer(thin, "thin", call = call)
-  ## claude: add explaining variable
-  if (n_samples > 0 && thin > n_samples) {
+  keeps_no_draws <- n_samples > 0 && thin > n_samples
+  if (keeps_no_draws) {
     cli::cli_abort(
       message = c(
         "{.arg thin} must not be larger than {.arg n_samples}",
