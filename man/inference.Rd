@@ -12,9 +12,9 @@
 mcmc(
   model,
   sampler = hmc(),
-  n_samples = 1000,
+  n_samples = 2000,
   thin = 1,
-  warmup = 1000,
+  warmup = 2000,
   chains = 2,
   n_cores = NULL,
   verbose = TRUE,
@@ -29,7 +29,7 @@ stashed_samples()
 
 extra_samples(
   draws,
-  n_samples = 1000,
+  n_samples = 2000,
   thin = 1,
   n_cores = NULL,
   verbose = TRUE,
@@ -62,7 +62,14 @@ opt(
 but before thinning)}
 
 \item{thin}{MCMC thinning rate; every \code{thin} samples is retained, the
-rest are discarded}
+rest are discarded. For example:
+\itemize{
+\item \verb{n_samples = 1000, thin = 10}: 10 divides 1000 exactly, so all 1000
+iterations are run and iterations 10, 20, ..., 1000 are kept: 100 draws.
+\item \verb{n_samples = 1000, thin = 3}: 3 does not divide 1000 exactly, so
+iterations 3, 6, ..., 999 are kept: 333 draws. Iteration 1000 is still
+run, but keeps no draw.
+}}
 
 \item{warmup}{number of samples to spend warming up the mcmc sampler (moving
 chains toward the highest density area and tuning sampler hyperparameters).}
@@ -74,10 +81,20 @@ details). If NULL (default), it sets them to 2 cores.}
 
 \item{verbose}{whether to print progress information to the console}
 
-\item{pb_update}{how regularly to update the progress bar (in iterations).
-During sampling, updates are rounded to a whole number of thinned draws,
-so if \code{pb_update} is less than \code{thin}, the bar updates every \code{thin}
-iterations.}
+\item{pb_update}{roughly how often to update the progress bar, in
+iterations. Sampling runs in bursts, and the bar can only update between
+them. With \code{thin} above 1 (and \code{one_by_one = FALSE}), each burst has to
+end on a kept draw, so the bar updates every \code{pb_update} iterations rounded
+to the nearest multiple of \code{thin}, and at least every \code{thin}. The count it
+shows is always the number of iterations run, and it always ends on
+\code{n_samples}. For example:
+\itemize{
+\item \verb{n_samples = 1000, thin = 10, pb_update = 50}: 10 divides 50, so the
+bar updates every 50 iterations, at 50, 100, ..., 1000.
+\item \verb{n_samples = 1000, thin = 3, pb_update = 50}: 3 does not divide 50, and
+the nearest multiple of 3 is 51, so the bar updates every 51
+iterations, at 51, 102, ..., 969, and then at 1000.
+}}
 
 \item{one_by_one}{whether to run TensorFlow MCMC code one iteration at a
 time, so that greta can handle numerical errors as 'bad' proposals (see
