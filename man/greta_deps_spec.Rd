@@ -50,6 +50,13 @@ Calling \code{greta_deps_spec()} with no arguments returns greta's current
 default (recommended) versions, and is the supported way to query them -
 for example \code{greta_deps_spec()$tf_version} for the default TensorFlow
 version.
+
+To build an unsupported installation on purpose, for example to test how
+greta reports one, set the environment variable
+\code{GRETA_ALLOW_UNSUPPORTED_DEPS} to \code{"true"}: \code{greta_deps_spec()} then warns
+instead of erroring. This is for testing greta, not for using it; see the
+"Building an unsupported installation on purpose" section of
+\code{vignette("installation", package = "greta")}.
 }
 
 \examples{
