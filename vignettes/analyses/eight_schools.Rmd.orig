@@ -155,7 +155,7 @@ m
 plot(m)
 ```
 
-The actual sampling from the model happens with the `mcmc()` function. By default 1000 MCMC samples are drawn after warm-up.
+The actual sampling from the model happens with the `mcmc()` function. By default 2000 MCMC samples are drawn after warm-up.
 What we obtain is a probability measure that describes the likelihood of a set of randomly sampled values for the model variables.
 
 ```{r results='hide', message=FALSE}
