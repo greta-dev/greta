@@ -17,17 +17,32 @@ NULL
 #' @param n_samples number of MCMC samples to draw per chain (after any warm-up,
 #'   but before thinning)
 #' @param thin MCMC thinning rate; every `thin` samples is retained, the
-#'   rest are discarded
+#'   rest are discarded. For example:
+#'
+#'   - `n_samples = 1000, thin = 10`: 10 divides 1000 exactly, so all 1000
+#'   iterations are run and iterations 10, 20, ..., 1000 are kept: 100 draws.
+#'   - `n_samples = 1000, thin = 3`: 3 does not divide 1000 exactly, so
+#'   iterations 3, 6, ..., 999 are kept: 333 draws. Iteration 1000 is still
+#'   run, but keeps no draw.
 #' @param warmup number of samples to spend warming up the mcmc sampler (moving
 #'   chains toward the highest density area and tuning sampler hyperparameters).
 #' @param chains number of MCMC chains to run. Default is 2. We recommend using more chains as this helps improve convergence. However the number of chains specified can increase the CPU load, so we have to set a lower default value.
 #' @param n_cores the maximum number of CPU cores used by each sampler (see
 #'   details). If NULL (default), it sets them to 2 cores.
 #' @param verbose whether to print progress information to the console
-#' @param pb_update how regularly to update the progress bar (in iterations).
-#'   During sampling, updates are rounded to a whole number of thinned draws,
-#'   so if `pb_update` is less than `thin`, the bar updates every `thin`
-#'   iterations.
+#' @param pb_update roughly how often to update the progress bar, in
+#'   iterations. Sampling runs in bursts, and the bar can only update between
+#'   them. With `thin` above 1 (and `one_by_one = FALSE`), each burst has to
+#'   end on a kept draw, so the bar updates every `pb_update` iterations rounded
+#'   to the nearest multiple of `thin`, and at least every `thin`. The count it
+#'   shows is always the number of iterations run, and it always ends on
+#'   `n_samples`. For example:
+#'
+#'   - `n_samples = 1000, thin = 10, pb_update = 50`: 10 divides 50, so the
+#'     bar updates every 50 iterations, at 50, 100, ..., 1000.
+#'   - `n_samples = 1000, thin = 3, pb_update = 50`: 3 does not divide 50, and
+#'     the nearest multiple of 3 is 51, so the bar updates every 51
+#'     iterations, at 51, 102, ..., 969, and then at 1000.
 #' @param one_by_one whether to run TensorFlow MCMC code one iteration at a
 #'   time, so that greta can handle numerical errors as 'bad' proposals (see
 #'   below).
@@ -213,9 +228,9 @@ NULL
 mcmc <- function(
   model,
   sampler = hmc(),
-  n_samples = 1000,
+  n_samples = 2000,
   thin = 1,
-  warmup = 1000,
+  warmup = 2000,
   chains = 2,
   n_cores = NULL,
   verbose = TRUE,
@@ -254,14 +269,6 @@ mcmc <- function(
       model = model,
       compute_options = compute_options
     )
-
-    # if verbose = FALSE, make pb_update as big as possible to speed up sampling
-    if (!verbose) {
-      pb_update <- Inf
-    }
-
-    # now make it finite
-    pb_update <- min(pb_update, max(warmup, n_samples))
 
     run_samplers(
       samplers = samplers,
@@ -302,6 +309,14 @@ run_samplers <- function(
   n_samples <- as.integer(n_samples)
   warmup <- as.integer(warmup)
   thin <- as.integer(thin)
+
+  # without a progress bar to update, make each phase one burst, broken only
+  # where warmup tuning, one_by_one or the iterations after the last draw need
+  # it, since every burst is a round trip from R to TensorFlow
+  if (!verbose) {
+    pb_update <- Inf
+  }
+  pb_update <- min(pb_update, max(warmup, n_samples))
 
   dag <- samplers[[1]]$model$dag
   chains <- samplers[[1]]$n_chains
@@ -488,7 +503,7 @@ stashed_samples <- function() {
 #'
 extra_samples <- function(
   draws,
-  n_samples = 1000,
+  n_samples = 2000,
   thin = 1,
   n_cores = NULL,
   verbose = TRUE,

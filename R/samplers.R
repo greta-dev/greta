@@ -26,8 +26,10 @@ NULL
 #'   random from between `Lmin` and `Lmax`. It is not redrawn at every
 #'   iteration: greta draws a new value each time it returns from TensorFlow.
 #'   During warmup that is roughly every 3 iterations, since tuning breaks the
-#'   run up that often; during sampling it is every `pb_update` iterations, or
-#'   once for the whole phase when `verbose = FALSE`. Setting
+#'   run up that often; during sampling it is every `pb_update` iterations,
+#'   rounded to a whole number of thinned draws, or once for the whole phase
+#'   when `verbose = FALSE`, and once more for any iterations after the last
+#'   draw. Setting
 #'   `one_by_one = TRUE` draws a new value every iteration. `pb_update`,
 #'   `verbose` and `one_by_one` are all arguments of [mcmc()].
 #'   `diag_sd` is used to rescale the parameter space to make it more
