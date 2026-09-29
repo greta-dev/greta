@@ -42,6 +42,7 @@ create_progress_bar <- function(phase, iter, pb_update, width, ...) {
   check_finite_positive_scalar_integer(pb_update)
 
   assign("pb_update", pb_update, envir = pb$.__enclos_env__)
+  assign("last_ticked_it", 0, envir = pb$.__enclos_env__)
 
   pb
 }
@@ -55,8 +56,11 @@ create_progress_bar <- function(phase, iter, pb_update, width, ...) {
 #   instability
 iterate_progress_bar <- function(pb, it, rejects, chains, file = NULL) {
   increment <- pb$.__enclos_env__$pb_update
+  total <- pb$.__enclos_env__$private$total
 
-  if (it %% increment == 0) {
+  at_update_interval <- it %% increment == 0
+  at_last_iteration <- it == total
+  if (at_update_interval || at_last_iteration) {
     if (rejects > 0) {
       reject_perc <- 100 * rejects / (it * chains)
       if (reject_perc < 1) {
@@ -73,16 +77,16 @@ iterate_progress_bar <- function(pb, it, rejects, chains, file = NULL) {
       reject_text <- "         "
     }
 
-    total <- pb$.__enclos_env__$private$total
     iter_pretty <- prettyNum(it, width = nchar(total))
 
-    amount <- ifelse(it > 0, increment, 0)
+    iterations_since_last_tick <- it - pb$.__enclos_env__$last_ticked_it
+    assign("last_ticked_it", it, envir = pb$.__enclos_env__)
 
     # tick the progess bar and record the output message
     # (or print it if file = NULL)
     record(
       pb$tick(
-        amount,
+        iterations_since_last_tick,
         tokens = list(
           iter = iter_pretty,
           rejection = reject_text

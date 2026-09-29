@@ -47,7 +47,6 @@ sampler <- R6Class(
       seed,
       compute_options
     ) {
-      # initialize the inference method
       super$initialize(
         initial_values = initial_values,
         model = model,
@@ -57,14 +56,13 @@ sampler <- R6Class(
 
       self$n_chains <- nrow(self$free_state)
 
-      # duplicate diag_sd if needed
-      ## TODO improve explaining variable here - why does this need to happen?
-      n_diag <- length(self$parameters$diag_sd)
-      n_parameters <- self$n_free
-      multiple_parameters <- n_parameters > 1
-      if (n_diag != n_parameters && multiple_parameters) {
-        diag_sd <- rep(self$parameters$diag_sd[1], n_parameters)
-        self$parameters$diag_sd <- diag_sd
+      # the kernels read one diag_sd per free parameter out of a flat vector,
+      # and count the free parameters from its length, so a single diag_sd is
+      # repeated for each of them
+      has_diag_sd_per_parameter <- length(self$parameters$diag_sd) ==
+        self$n_free
+      if (!has_diag_sd_per_parameter) {
+        self$parameters$diag_sd <- rep(self$parameters$diag_sd[1], self$n_free)
       }
 
       # wrapped in tf_function here so every burst reuses a single trace
@@ -115,7 +113,6 @@ sampler <- R6Class(
       self$thin <- thin
       dag <- self$model$dag
 
-      # set the number of cores
       dag$n_cores <- n_cores
 
       if (!plan_is$parallel & verbose) {
@@ -135,7 +132,7 @@ sampler <- R6Class(
         self$define_tf_evaluate_sample_batch()
       }
 
-      # create these objects if needed
+      # extra_samples() appends to the trace the sampler already has
       if (from_scratch) {
         self$traced_free_state <- self$empty_matrices(
           n = self$n_chains,
@@ -148,22 +145,19 @@ sampler <- R6Class(
         )
       }
 
-      # how big would we like the bursts to be
-      ideal_burst_size <- ifelse(one_by_one, 1L, pb_update)
-
       self$run_warmup(
         n_samples = n_samples,
         pb_update = pb_update,
-        ideal_burst_size = ideal_burst_size,
+        ideal_burst_size = ifelse(one_by_one, 1L, pb_update),
         verbose = verbose
       )
 
       self$run_sampling(
         n_samples = n_samples,
         pb_update = pb_update,
-        ideal_burst_size = ideal_burst_size,
         trace_batch_size = trace_batch_size,
         thin = thin,
+        one_by_one = one_by_one,
         verbose = verbose
       )
 
@@ -218,7 +212,6 @@ sampler <- R6Class(
           self$tune(completed_iterations[burst], self$warmup)
 
           if (verbose) {
-            # update the progress bar/percentage log
             iterate_progress_bar(
               pb = pb_warmup,
               it = completed_iterations[burst],
@@ -235,7 +228,8 @@ sampler <- R6Class(
           }
         }
 
-        # scrub the free state trace and numerical rejections
+        # warmup's draws are not returned, and its numerical rejections are
+        # not reported with sampling's
         self$traced_free_state <- self$empty_matrices(
           n = self$n_chains,
           ncol = self$n_free
@@ -248,24 +242,30 @@ sampler <- R6Class(
     run_sampling = function(
       n_samples,
       pb_update,
-      ideal_burst_size,
       trace_batch_size,
       thin,
+      one_by_one,
       verbose
     ) {
       perform_sampling <- n_samples > 0
       if (perform_sampling) {
-        # on exiting during the main sampling period (even if killed by the
-        # user) trace the free state values
-
+        # turn the free state trace into values on exit, even if the user
+        # interrupts sampling, so the draws so far are kept
         on.exit(self$trace_values(trace_batch_size), add = TRUE)
 
-        # main sampling
+        # the bar updates between bursts, which end on whole draws
+        # (except with one_by_one), so round its updates to whole draws too
+        if (one_by_one) {
+          iterations_per_update <- pb_update
+        } else {
+          iterations_per_update <- thin * max(1, round(pb_update / thin))
+        }
+
         if (verbose) {
           pb_sampling <- create_progress_bar(
             phase = "sampling",
             iter = c(self$warmup, n_samples),
-            pb_update = pb_update,
+            pb_update = iterations_per_update,
             width = self$pb_width
           )
           iterate_progress_bar(
@@ -279,17 +279,46 @@ sampler <- R6Class(
           pb_sampling <- NULL
         }
 
-        # split up warmup iterations into bursts of sampling
-        burst_lengths <- self$burst_lengths(n_samples, ideal_burst_size)
+        if (one_by_one) {
+          # one iteration per burst, so a numerical error rejects only its own
+          # proposal
+          burst_lengths <- rep(1L, n_samples)
+        } else {
+          # a burst shorter than thin has no draw to return, which errors in
+          # TensorFlow (greta-dev/greta#318)
+          n_draws <- n_samples %/% thin
+          draws_per_update <- iterations_per_update / thin
+          draws_per_burst <- self$burst_lengths(n_draws, draws_per_update)
+          whole_draw_bursts <- draws_per_burst * thin
+
+          # the iterations after the last draw keep nothing, but still run, so
+          # the chain runs all n_samples iterations
+          iterations_after_last_draw <- n_samples %% thin
+          final_burst <- if (iterations_after_last_draw > 0) {
+            iterations_after_last_draw
+          } else {
+            NULL
+          }
+
+          burst_lengths <- c(whole_draw_bursts, final_burst)
+        }
         completed_iterations <- cumsum(burst_lengths)
 
+        # TensorFlow thins bursts of whole draws; the rest run unthinned
+        is_whole_draws <- burst_lengths %% thin == 0
+        burst_thin <- ifelse(is_whole_draws, thin, 1L)
+        ends_on_draw <- completed_iterations %% thin == 0
+
         for (burst in seq_along(burst_lengths)) {
-          self$run_burst(n_samples = burst_lengths[burst], thin = thin)
-          # trace is it receiving the python
-          self$trace()
+          self$run_burst(
+            n_samples = burst_lengths[burst],
+            thin = burst_thin[burst]
+          )
+          if (ends_on_draw[burst]) {
+            self$trace()
+          }
 
           if (verbose) {
-            # update the progress bar/percentage log
             iterate_progress_bar(
               pb = pb_sampling,
               it = completed_iterations[burst],
@@ -350,7 +379,6 @@ sampler <- R6Class(
       )
     },
 
-    # print the sampler number (if relevant)
     print_sampler_number = function() {
       msg <- ""
 
@@ -377,9 +405,8 @@ sampler <- R6Class(
       }
     },
 
-    # split the number of samples up into bursts of running the sampler,
-    # considering the progress bar update frequency and the parameter tuning
-    # schedule during warmup
+    # split n_samples into bursts that end at every multiple of pb_update and,
+    # during warmup, of the tuning interval
     burst_lengths = function(n_samples, pb_update, warmup = FALSE) {
       # when to stop for progress bar updates
       changepoints <- c(seq(0, n_samples, by = pb_update), n_samples)
@@ -409,7 +436,6 @@ sampler <- R6Class(
       # tuning periods for the tunable parameters (first 10%, last 60%)
       tuning_periods <- list(c(0, 0.1), c(0.4, 1))
 
-      # whether we're tuning now
       tuning_now <- self$in_periods(
         tuning_periods,
         iter,
@@ -417,7 +443,7 @@ sampler <- R6Class(
       )
 
       if (tuning_now) {
-        # epsilon & tuning parameters
+        # dual averaging step-size adaptation, after Hoffman and Gelman (2014)
         kappa <- 0.75
         gamma <- 0.1
         t0 <- 10
@@ -445,8 +471,7 @@ sampler <- R6Class(
       }
     },
     tune_diag_sd = function(iterations_completed, total_iterations) {
-      # when, during warmup, to tune this parameter (after epsilon, but stopping
-      # before halfway through)
+      # from 10% to 40% of warmup, between epsilon's two tuning periods
       tuning_periods <- list(c(0.1, 0.4))
 
       tuning_now <- self$in_periods(
@@ -458,9 +483,11 @@ sampler <- R6Class(
       if (tuning_now) {
         n_accepted <- sum(!self$accept_history)
 
-        # provided there have been at least 5 acceptances in the warmup so far
+        # meant to wait for more than 5 accepted proposals, but this counts
+        # the rejected ones: greta-dev/greta#841
         if (n_accepted > 5) {
-          # get the sample posterior variance and shrink it
+          # shrink the sample variance towards 1e-3, as Stan does when it
+          # adapts its metric
           sample_var <- self$sample_variance()
           shrinkage <- 1 / (n_accepted + 5)
           var_shrunk <- n_accepted * shrinkage * sample_var + 5e-3 * shrinkage
@@ -492,6 +519,12 @@ sampler <- R6Class(
       # Need to understand if/how tf_function will re-run those values - might
       # need to pass these arguments directly
 
+      # TFP takes its first result num_burnin_steps + 1 iterations in, and each
+      # later one num_steps_between_results + 1 after the last, so thin - 1 for
+      # both keeps every thin-th iteration, and a burst of d draws runs
+      # d * thin iterations
+      iterations_skipped <- tf$subtract(sampler_thin, 1L)
+
       sampler_batch <- tfp$mcmc$sample_chain(
         num_results = tf$math$floordiv(sampler_burst_length, sampler_thin),
         current_state = free_state,
@@ -499,8 +532,8 @@ sampler <- R6Class(
         trace_fn = function(current_state, kernel_results) {
           kernel_results
         },
-        num_burnin_steps = tf$constant(0L, dtype = tf$int32),
-        num_steps_between_results = sampler_thin,
+        num_burnin_steps = iterations_skipped,
+        num_steps_between_results = iterations_skipped,
         parallel_iterations = 1L,
         seed = sampler_seed
       )
@@ -512,9 +545,6 @@ sampler <- R6Class(
     # bursts break so that tuning and progress reporting can run in R between
     # them; moving the loop itself into TF is greta-dev/greta#547
     run_burst = function(n_samples, thin = 1L) {
-      dag <- self$model$dag
-      tfe <- dag$tf_environment
-
       param_vec <- unlist(self$sampler_parameter_values())
 
       # a stateless seed, fixed by the sampler's seed and how many bursts it has
@@ -533,17 +563,11 @@ sampler <- R6Class(
         sampler_seed = burst_seed
       )
 
-      # get trace of free state and drop the null dimension
-      if (
-        is.null(batch_results$all_states) && Sys.getenv("GRETA_DEBUG") == "true"
-      ) {
-        ## TODO probably need to remove this?
-        # browser()
-      }
       free_state_draws <- as.array(batch_results$all_states)
 
-      # if there is one sample at a time, and it's rejected, conversion from
-      # python back to R can drop a dimension, so handle that here. Ugh.
+      # a rejected one-iteration burst comes back from
+      # check_for_free_state_error() as the current free state, which has no
+      # draw dimension, so add one
       if (n_dim(free_state_draws) != 3) {
         dim(free_state_draws) <- c(1, dim(free_state_draws))
       }
@@ -565,7 +589,7 @@ sampler <- R6Class(
         accept_stats_batch <- pmin(1, exp(log_accept_stats))
         self$mean_accept_stat <- mean(accept_stats_batch, na.rm = TRUE)
 
-        # numerical rejections parameter sets
+        # a non-finite acceptance ratio is a numerically rejected proposal
         bad <- sum(!is.finite(log_accept_stats))
         self$numerical_rejections <- self$numerical_rejections + bad
       }
@@ -580,11 +604,7 @@ sampler <- R6Class(
       sampler_param_vec,
       sampler_seed
     ) {
-      # tryCatch handling for numerical errors
-      dag <- self$model$dag
-      tfe <- dag$tf_environment
-      # legacy: previously we used `n_samples` not `sampler_burst_length`
-      n_samples <- sampler_burst_length
+      single_iteration <- sampler_burst_length == 1L
 
       result <- cleanly(
         self$tf_evaluate_sample_batch(
@@ -603,22 +623,19 @@ sampler <- R6Class(
         )
       ) # closing cleanly
 
-      # if it's fine, batch_results is the output
-      # if it's a non-numerical error, it will error
-      # if it's a numerical error, batch_results will be an error object
-      self$check_for_free_state_error(result, n_samples)
+      self$check_for_free_state_error(result, single_iteration)
 
       result
     },
 
-    check_for_free_state_error = function(result, n_samples) {
-      # if it's fine, batch_results is the output
-      # if it's a non-numerical error, it will error
-      # if it's a numerical error, batch_results will be an error object
+    check_for_free_state_error = function(result, single_iteration) {
+      # cleanly() has already thrown any error that is not numerical, so an
+      # error here is a numerical one
       if (inherits(result, "error")) {
-        # simple case that this is a single bad sample. Mock up a result and
-        # pass it back
-        if (n_samples == 1L) {
+        # in a burst of one iteration - every burst, with one_by_one - the
+        # error came from its only proposal, so reject that proposal: mock up
+        # a result that stays at the current state and pass it back
+        if (single_iteration) {
           result <- list(
             all_states = self$free_state,
             trace = list(

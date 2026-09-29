@@ -222,6 +222,16 @@ test_that("progress bar gives a range of messages", {
   expect_snapshot(draws <- mock_mcmc(10))
 })
 
+test_that("progress bar reaches its total when pb_update does not divide it", {
+  pb <- create_progress_bar("sampling", c(0, 13), pb_update = 6, width = 50)
+  out <- get_output(
+    for (it in c(0, 6, 12, 13)) {
+      iterate_progress_bar(pb, it, rejects = 0, chains = 1)
+    }
+  )
+  expect_match(out, "13/13")
+})
+
 test_that("extra_samples works", {
   skip_if_not(check_tf_version())
 
@@ -465,20 +475,114 @@ test_that("samplers print informatively", {
   # expect_match(out, "Lmin = 1")
 })
 
-test_that("pb_update > thin to avoid bursts with no saved iterations", {
+test_that("thinning keeps n_samples %/% thin draws, whatever the bursts", {
   skip_if_not(check_tf_version())
   set.seed(5)
   x <- uniform(0, 1)
   m <- model(x)
-  expect_ok(
-    draws <- mcmc(
-      m,
-      n_samples = 100,
-      warmup = 100,
+
+  # verbose = TRUE, since bursts follow pb_update only when the progress bar
+  # is shown. Each case would leave a burst shorter than thin if sampling were
+  # cut every pb_update iterations, or every iteration with one_by_one: the
+  # last burst (#609, #318), every burst with pb_update below thin, and every
+  # burst with one_by_one (#567)
+  cases <- list(
+    list(n_samples = 1000, thin = 100, pb_update = 101, one_by_one = FALSE),
+    list(n_samples = 100, thin = 3, pb_update = 2, one_by_one = FALSE),
+    list(n_samples = 30, thin = 2, pb_update = 50, one_by_one = TRUE)
+  )
+  for (case in cases) {
+    quietly(
+      draws <- mcmc(
+        m,
+        n_samples = case$n_samples,
+        warmup = 10,
+        thin = case$thin,
+        pb_update = case$pb_update,
+        one_by_one = case$one_by_one,
+        chains = 1,
+        verbose = TRUE
+      )
+    )
+    expect_equal(coda::niter(draws), case$n_samples %/% case$thin)
+    expect_equal(thin(draws), case$thin)
+  }
+
+  # extra_samples() takes its own thin and pb_update (#567)
+  quietly(draws <- mcmc(m, n_samples = 30, warmup = 10, chains = 1))
+  quietly(
+    more <- extra_samples(
+      draws,
+      n_samples = 202,
       thin = 3,
-      pb_update = 2,
-      verbose = FALSE
+      pb_update = 50,
+      verbose = TRUE
     )
   )
-  expect_identical(thin(draws), 3)
+  expect_equal(coda::niter(more), 30 + 202 %/% 3)
+})
+
+test_that("one_by_one runs one iteration per burst, whatever thin is", {
+  skip_if_not(check_tf_version())
+  x <- uniform(0, 1)
+  m <- model(x)
+  draws <- mcmc(
+    m,
+    warmup = 10,
+    n_samples = 30,
+    thin = 3,
+    one_by_one = TRUE,
+    chains = 1,
+    verbose = FALSE
+  )
+  sampler <- get_model_info(draws)$samplers[[1]]
+  expect_identical(sampler$n_bursts, 10L + 30L)
+  expect_equal(coda::niter(draws), 10)
+})
+
+test_that("thin larger than n_samples is an informative error", {
+  skip_if_not(check_tf_version())
+  x <- uniform(0, 1)
+  m <- model(x)
+  expect_snapshot(
+    error = TRUE,
+    mcmc(m, n_samples = 10, warmup = 20, thin = 20, verbose = FALSE)
+  )
+})
+
+test_that("each draw is thin iterations after the last, across bursts", {
+  skip_if_not(check_tf_version())
+  # rwmh accepts every proposal on a target this wide, and each of the n
+  # parameters takes an independent step with sd epsilon / n, so the variance
+  # across parameters of the move between two states, over one step's
+  # variance, counts the iterations between them
+  n <- 2000
+  x <- normal(0, 1e6, dim = n)
+  m <- model(x)
+  step_var <- (0.1 / n)^2
+  thin <- 3
+
+  # without one_by_one, pb_update = 2 * thin cuts sampling into bursts of two
+  # draws, and the one iteration left after the last draw runs on its own; with
+  # it, every iteration is a burst of its own
+  for (one_by_one in c(FALSE, TRUE)) {
+    quietly(
+      draws <- mcmc(
+        m,
+        sampler = rwmh(epsilon = 0.1, diag_sd = 1),
+        warmup = 0,
+        n_samples = 4 * thin + 1,
+        thin = thin,
+        pb_update = 2 * thin,
+        one_by_one = one_by_one,
+        chains = 1,
+        initial_values = initials(x = rep(0, n)),
+        verbose = TRUE
+      )
+    )
+    final_state <- get_model_info(draws)$samplers[[1]]$free_state
+    states <- rbind(0, as.matrix(draws), final_state)
+    iterations <- apply(diff(states), 1, stats::var) / step_var
+    expect_identical(round(iterations), c(thin, thin, thin, thin, 1))
+  }
 })
