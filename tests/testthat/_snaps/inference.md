@@ -50,7 +50,8 @@
       draws <- mock_mcmc(1010)
     Message
       
-        sampling          1010/1010 | eta:  0s | <1% bad
+        sampling ======== 1010/1010 | eta:  0s | <1% bad
+      
 
 ---
 
@@ -58,7 +59,8 @@
       draws <- mock_mcmc(500)
     Message
       
-        sampling            500/500 | eta:  0s | 2% bad 
+        sampling ========== 500/500 | eta:  0s | 2% bad 
+      
 
 ---
 
@@ -224,6 +226,6 @@
       mcmc(m, n_samples = 10, warmup = 20, thin = 20, verbose = FALSE)
     Condition
       Error in `mcmc()`:
-      ! `thin` must be no larger than `n_samples`
+      ! `thin` must not be larger than `n_samples`
       x `thin` is 20 and `n_samples` is 10, so no draws would be kept
 
