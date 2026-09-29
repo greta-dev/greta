@@ -257,7 +257,7 @@ plot(m)
 
 The actual sampling from the model happens with the
 [`mcmc()`](https://greta-dev.github.io/greta/dev/reference/inference.md)
-function. By default 1000 MCMC samples are drawn after warm-up. What we
+function. By default 2000 MCMC samples are drawn after warm-up. What we
 obtain is a probability measure that describes the likelihood of a set
 of randomly sampled values for the model variables.
 
