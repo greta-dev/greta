@@ -38,12 +38,9 @@ test_that("data can be swapped without retracing the log prob function", {
 
   fixture <- mutable_model()
   dag <- fixture$model$dag
-  traces <- function() {
-    dag$tf_log_prob_function$experimental_get_tracing_count()
-  }
 
   before <- log_prob_at(dag)
-  traces_before <- traces()
+  traces_before <- trace_count(dag$tf_log_prob_function)
 
   dag$set_data_value(fixture$x, as.matrix(rep(3, 5)))
 
@@ -53,7 +50,7 @@ test_that("data can be swapped without retracing the log prob function", {
   after <- log_prob_at(dag)
   expect_false(identical(after, before))
   expect_true(is.finite(after))
-  expect_identical(traces(), traces_before)
+  expect_identical(trace_count(dag$tf_log_prob_function), traces_before)
 })
 
 test_that("set_data_value() errors informatively on bad input", {
@@ -73,6 +70,7 @@ test_that("set_data_value() errors informatively on bad input", {
 
 test_that("swapped data reaches the sampler, not just the log prob", {
   skip_if_not(check_tf_version())
+  local_greta_seed()
 
   # the posterior for z sits wherever the data is, but not so tightly that the
   # chain cannot walk there: sd 1 over 10 observations puts the posterior sd

@@ -1143,3 +1143,9 @@ find_thinning <- function(draws, max_thin = 100, autocorr_threshold = 0.01) {
   }
   smallest_thin
 }
+
+# how many times a traced function has been traced; more than once is
+# retracing
+trace_count <- function(traced) {
+  as.integer(traced$experimental_get_tracing_count())
+}
