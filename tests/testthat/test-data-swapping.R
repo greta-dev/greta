@@ -70,6 +70,7 @@ test_that("set_data_value() errors informatively on bad input", {
 
 test_that("swapped data reaches the sampler, not just the log prob", {
   skip_if_not(check_tf_version())
+  local_greta_seed()
 
   # the posterior for z sits wherever the data is, but not so tightly that the
   # chain cannot walk there: sd 1 over 10 observations puts the posterior sd
