@@ -97,6 +97,14 @@ dag_class <- R6Class(
       invisible(self)
     },
 
+    # these variables leave the free state, which narrows it, so the trace
+    # function is rebuilt against its new width. calculate(), the only caller,
+    # does not evaluate the log density, so that function is left as it is
+    set_variables_without_free_state = function(variables) {
+      self$variables_without_free_state <- variables
+      self$define_tf_trace_values_batch()
+    },
+
     define_tf_trace_values_batch = function() {
       self$tf_trace_values_batch <- tensorflow::tf_function(
         f = self$define_trace_values_batch,
@@ -110,20 +118,28 @@ dag_class <- R6Class(
       # a no-op after set_data_value(), which writes through to the node
       self$define_data_variables()
 
-      log_prob_function <- self$generate_log_prob_function()
       self$tf_log_prob_function <- tensorflow::tf_function(
-        f = log_prob_function,
+        f = self$generate_log_prob_function(),
         input_signature = self$free_state_signature()
       )
 
-      # opt() always passes one row, and a graph traced for a known number of
-      # rows runs faster per step than one traced for any number: 100 adam
-      # steps on the linear example took 0.077s this way and 0.104s through
-      # the open signature. greta-dev/greta#843
-      self$tf_log_prob_function_one_row <- tensorflow::tf_function(
-        f = log_prob_function,
-        input_signature = self$free_state_signature(n_rows = 1L)
-      )
+      # rebuilt from the new log-density function the next time it is used
+      self$tf_log_prob_function_one_row <- NULL
+    },
+
+    # opt() always passes one row, and a graph traced for a known number of
+    # rows runs faster per step than one traced for any number: 100 adam steps
+    # on the linear example took 0.075s this way and 0.101s through the open
+    # signature (greta.benchmarks run 2026-09-30-trace-census-i546). Only opt()
+    # uses it, so it is built on first use rather than with every model
+    one_row_log_prob = function(free_state) {
+      if (is.null(self$tf_log_prob_function_one_row)) {
+        self$tf_log_prob_function_one_row <- tensorflow::tf_function(
+          f = self$generate_log_prob_function(),
+          input_signature = self$free_state_signature(n_rows = 1L)
+        )
+      }
+      self$tf_log_prob_function_one_row(free_state)
     },
 
     # The free state's shape, with the batch dimension left open unless n_rows
@@ -492,19 +508,19 @@ dag_class <- R6Class(
     ) {
       which_objective <- match.arg(which_objective)
 
-      # one graph build for all the targets, rather than one each.
-      # define_tf() and define_joint_density() cost O(model size), so calling
-      # them per node made opt(hessian = TRUE) quadratic in the number of
-      # targets, and traced a fresh pfor every time. greta-dev/greta#546
+      # one graph build for all the targets: define_tf() and
+      # define_joint_density() cost O(model size), so building per target
+      # would make opt(hessian = TRUE) quadratic in the number of targets.
+      # greta-dev/greta#546
       tfe_old <- self$tf_environment
       on.exit(self$tf_environment <- tfe_old)
       tfe <- self$tf_environment <- new.env()
       tfe$free_state <- free_state
 
-      # tape_1 is persistent because TensorFlow refuses a jacobian with
-      # experimental_use_pfor set to FALSE on a tape that is not - a
-      # requirement of the call below, rather than a convenience. tape_2 is
-      # read once, so it needs no such thing
+      # tape_1 is persistent because jacobian() reads it once per target, and
+      # because TensorFlow refuses a jacobian with experimental_use_pfor set to
+      # FALSE on a tape that is not. tape_2 is read once, so it needs no such
+      # thing
       with(tf$GradientTape(persistent = TRUE) %as% tape_1, {
         # only these two create tensors, so only these two need recording;
         # fetching them afterwards is just a lookup
@@ -520,17 +536,15 @@ dag_class <- R6Class(
           unadjusted = tfe$joint_density
         )
 
-        # one backward pass over the tape for all the targets, not one each:
-        # gradient() takes a structure of sources and returns one to match.
-        # Unnamed, because reticulate turns a named list into a Python dict,
-        # and model(z, z) really does give two targets called "z"
+        # one backward pass over the tape for all the targets: gradient()
+        # takes a structure of sources and returns one to match. Unnamed,
+        # because reticulate turns a named list into a Python dict, and
+        # model(z, z) really does give two targets called "z"
         g_list <- tape_2$gradient(y, unname(xs_list))
-        names(g_list) <- names(nodes)
       })
 
-      # Map() takes its names from g_list
       Map(
-        function(g, xs, node) {
+        function(xs, g, node) {
           h <- tape_1$jacobian(
             g,
             xs,
@@ -538,8 +552,8 @@ dag_class <- R6Class(
           )
           array(as.array(h), dim = hessian_dims(node$dim))
         },
-        g_list,
         xs_list,
+        g_list,
         nodes
       )
     },

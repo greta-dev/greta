@@ -297,11 +297,7 @@ calculate_greta_mcmc_list <- function(
   mcmc_dag_variables <- mcmc_dag$node_list[mcmc_dag$node_types == "variable"]
   dag_variables <- dag$node_list[dag$node_types == "variable"]
   stateless_names <- setdiff(names(dag_variables), names(mcmc_dag_variables))
-  dag$variables_without_free_state <- dag_variables[stateless_names]
-
-  # those variables leave the free state, which narrows it, so rebuild the
-  # trace function against the free state the draws actually have
-  dag$define_tf_trace_values_batch()
+  dag$set_variables_without_free_state(dag_variables[stateless_names])
 
   # check there's some commonality between the two dags
   check_commanality_btn_dags(dag, mcmc_dag)
