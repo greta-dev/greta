@@ -2,6 +2,11 @@ optimiser <- R6Class(
   "optimiser",
   inherit = inference,
   public = list(
+    # an optimiser only ever evaluates one set of parameters
+    tf_log_prob = function(free_state) {
+      self$model$dag$tf_log_prob_function_one_row(free_state)
+    },
+
     # optimiser information
     name = "",
     method = "method",
@@ -91,9 +96,9 @@ optimiser <- R6Class(
       par <- lapply(par, drop_column_dim)
 
       if (self$adjust) {
-        value <- dag$tf_log_prob_function(self$free_state)$adjusted
+        value <- dag$tf_log_prob_function_one_row(self$free_state)$adjusted
       } else {
-        value <- dag$tf_log_prob_function(self$free_state)$unadjusted
+        value <- dag$tf_log_prob_function_one_row(self$free_state)$unadjusted
       }
 
       value <- as.array(value) * -1
@@ -128,11 +133,11 @@ tf_optimiser <- R6Class(
         free_state <- tf$Variable(inits)
 
         objective_adjusted <- function() {
-          -dag$tf_log_prob_function(free_state)$adjusted
+          -dag$tf_log_prob_function_one_row(free_state)$adjusted
         }
 
         objective_unadjusted <- function() {
-          -dag$tf_log_prob_function(free_state)$unadjusted
+          -dag$tf_log_prob_function_one_row(free_state)$unadjusted
         }
 
         # Keras 3 removed Optimizer$minimize(), so take the gradient step by
@@ -218,11 +223,11 @@ tfp_optimiser <- R6Class(
 
       if (self$adjust) {
         objective <- function(x) {
-          -dag$tf_log_prob_function(x)$adjusted
+          -dag$tf_log_prob_function_one_row(x)$adjusted
         }
       } else {
         objective <- function(x) {
-          -dag$tf_log_prob_function(x)$adjusted
+          -dag$tf_log_prob_function_one_row(x)$adjusted
         }
       }
 
@@ -309,11 +314,11 @@ tf_compat_optimiser <- R6Class(
         free_state <- tf$Variable(inits)
 
         objective_adjusted <- function() {
-          -dag$tf_log_prob_function(free_state)$adjusted
+          -dag$tf_log_prob_function_one_row(free_state)$adjusted
         }
 
         objective_unadjusted <- function() {
-          -dag$tf_log_prob_function(free_state)$unadjusted
+          -dag$tf_log_prob_function_one_row(free_state)$unadjusted
         }
 
         # need to get this to work for tf compat

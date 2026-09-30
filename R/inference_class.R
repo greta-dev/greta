@@ -158,10 +158,16 @@ inference <- R6Class(
         dim = c(1, length(parameters))
       ))
       ld <- lapply(
-        dag$tf_log_prob_function(tf_parameters),
+        self$tf_log_prob(tf_parameters),
         as.numeric
       )
       is.finite(ld$adjusted) && is.finite(ld$unadjusted)
+    },
+
+    # the log-density function this kind of inference evaluates, so checking
+    # the initial values traces the function the inference goes on to use
+    tf_log_prob = function(free_state) {
+      self$model$dag$tf_log_prob_function(free_state)
     },
 
     # run a burst of sampling, and put the resulting free state values in

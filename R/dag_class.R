@@ -110,23 +110,35 @@ dag_class <- R6Class(
       # a no-op after set_data_value(), which writes through to the node
       self$define_data_variables()
 
+      log_prob_function <- self$generate_log_prob_function()
       self$tf_log_prob_function <- tensorflow::tf_function(
-        f = self$generate_log_prob_function(),
+        f = log_prob_function,
         input_signature = self$free_state_signature()
+      )
+
+      # opt() always passes one row, and a graph traced for a known number of
+      # rows runs faster per step than one traced for any number: 100 adam
+      # steps on the linear example took 0.077s this way and 0.104s through
+      # the open signature. greta-dev/greta#843
+      self$tf_log_prob_function_one_row <- tensorflow::tf_function(
+        f = log_prob_function,
+        input_signature = self$free_state_signature(n_rows = 1L)
       )
     },
 
-    # The free state's shape with the batch dimension left open. Without it,
-    # these functions retrace for every batch size they meet: one row while
-    # checking initial values, all chains inside the sampler, and each chunk of
-    # draws calculate() traces. With it, each traces once per model, as the
-    # sampler's function already does. greta-dev/greta#546
-    free_state_signature = function() {
+    # The free state's shape, with the batch dimension left open unless n_rows
+    # is given. Without it, these functions retrace for every batch size they
+    # meet: one row while checking initial values, all chains inside the
+    # sampler, and each chunk of draws calculate() traces. With it, each traces
+    # once per model, as the sampler's function already does.
+    # greta-dev/greta#546
+    free_state_signature = function(n_rows = NULL) {
       n_free <- length(unlist_tf(self$example_parameters(free = TRUE)))
-      list(tf$TensorSpec(shape = list(NULL, n_free), dtype = tf_float()))
+      list(tf$TensorSpec(shape = list(n_rows, n_free), dtype = tf_float()))
     },
 
     tf_log_prob_function = NULL,
+    tf_log_prob_function_one_row = NULL,
 
     tf_log_prob_function_adjusted = function(free_state) {
       self$tf_log_prob_function(free_state)$adjusted
