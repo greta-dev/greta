@@ -239,6 +239,19 @@
   differ from previous versions
   ([\#285](https://github.com/greta-dev/greta/issues/285),
   [\#427](https://github.com/greta-dev/greta/issues/427)).
+- [`mcmc()`](https://greta-dev.github.io/greta/dev/reference/inference.md)
+  and
+  [`calculate()`](https://greta-dev.github.io/greta/dev/reference/calculate.md)
+  no longer retrace the model’s log-density and trace functions each
+  time they meet a new batch size: one row while checking initial
+  values, all chains inside the sampler, and each chunk of draws. Each
+  is now traced once per model. TensorFlow can still print its
+  “triggered tf.function retracing” warning when a session builds
+  several models, though no function is traced more than once: it counts
+  traces per Python code object, and every function greta traces is
+  wrapped by reticulate in the same one, so the first traces of several
+  models’ functions look to it like one function retracing
+  ([\#546](https://github.com/greta-dev/greta/issues/546)).
 - [`nadam()`](https://greta-dev.github.io/greta/dev/reference/optimisers.md)
   now defaults to a `learning_rate` of 0.1, up from 0.001, which was too
   small to reach the optimum of even a five-parameter model within 2000
@@ -259,6 +272,29 @@
   than read as HTML
   ([\#663](https://github.com/greta-dev/greta/issues/663),
   [\#713](https://github.com/greta-dev/greta/issues/713)).
+- [`opt()`](https://greta-dev.github.io/greta/dev/reference/inference.md)
+  traces the model’s log-density function once, where it used to trace
+  it twice with a Keras optimiser such as
+  [`adam()`](https://greta-dev.github.io/greta/dev/reference/optimisers.md):
+  once to check the initial values, and again inside the optimiser’s
+  step. Its first call is 20% to 28% faster on greta’s example models,
+  and later calls are as fast as before
+  ([\#546](https://github.com/greta-dev/greta/issues/546)).
+- [`opt()`](https://greta-dev.github.io/greta/dev/reference/inference.md)
+  with `hessian = TRUE` is faster, and no longer prints TensorFlow’s
+  “triggered tf.function retracing” warning for models whose targets are
+  small. It used to rebuild the model’s TensorFlow graph once per target
+  greta array, and to take every hessian with TensorFlow’s vectorised
+  `pfor`, which traces a fresh function on each call. greta now builds
+  the graph once for all of them, and uses `pfor` only for targets of at
+  least 100 elements, where vectorising pays for itself. On a model with
+  twenty scalar targets, a call takes a median of 0.62 seconds, down
+  from 11.3, and the first call on a new model 1.7 seconds, down from
+  12.4
+  ([benchmarks](https://greta-dev.github.io/greta.benchmarks/posts/2026-10-05-retracing-i546/#speed)).
+  Models with large targets are as fast as before and can still emit the
+  warning, since they still use `pfor`
+  ([\#546](https://github.com/greta-dev/greta/issues/546)).
 - [`opt()`](https://greta-dev.github.io/greta/dev/reference/inference.md)
   with a Keras optimiser (such as
   [`adam()`](https://greta-dev.github.io/greta/dev/reference/optimisers.md)

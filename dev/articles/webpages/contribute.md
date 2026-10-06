@@ -54,7 +54,9 @@ to see what it picked up.
 - give every user-facing change a one-line bullet in `NEWS.md`
   mentioning the issue number.
 - Tests for `R/thing.R` go in `tests/testthat/test-thing.R`.
-- Re-run `devtools::document()` after changing any roxygen comment.
+- Re-run
+  [`devtools::document()`](https://devtools.r-lib.org/reference/document.html)
+  after changing any roxygen comment.
 
 ### exposing internals with `module()`
 

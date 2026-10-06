@@ -537,7 +537,8 @@ Because `RETICULATE_PYTHON` takes precedence, a stored preference will
 appear to be ignored while it is set. To go back to your stored
 preference, remove `RETICULATE_PYTHON` from wherever it is set (for
 example `~/.Renviron`, which you can open with
-`usethis::edit_r_environ()`), then restart R.
+[`usethis::edit_r_environ()`](https://usethis.r-lib.org/reference/edit.html)),
+then restart R.
 
 See
 [`?greta_set_python`](https://greta-dev.github.io/greta/dev/reference/greta_set_python.md)
