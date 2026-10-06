@@ -586,21 +586,78 @@ test_that("warmup tunes inside one call to TensorFlow without a progress bar", {
   )))
 })
 
-test_that("a sampler's functions are traced for its number of chains", {
+test_that("a sampler's function is traced for its number of chains", {
   skip_if_not(check_tf_version())
   x <- normal(0, 1, dim = 2)
   m <- model(x)
   draws <- mcmc(m, warmup = 10, n_samples = 10, chains = 3, verbose = FALSE)
   sampler <- get_model_info(draws)$samplers[[1]]
 
-  signature_shape <- function(traced) {
-    unlist(traced$input_signature[[1]]$shape$as_list())
-  }
-  expect_identical(as.integer(signature_shape(sampler$tf_warmup)), c(3L, 2L))
-  expect_identical(
-    as.integer(signature_shape(sampler$tf_evaluate_sample_batch)),
-    c(3L, 2L)
+  signature <- sampler$tf_iterations$input_signature[[1]]
+  expect_identical(as.integer(unlist(signature$shape$as_list())), c(3L, 2L))
+})
+
+test_that("slice() runs a single chain", {
+  skip_if_not(check_tf_version())
+  x <- normal(0, 1)
+  m <- model(x)
+  expect_ok(
+    draws <- mcmc(
+      m,
+      sampler = slice(),
+      warmup = 10,
+      n_samples = 10,
+      chains = 1,
+      verbose = FALSE
+    )
   )
+  expect_equal(coda::niter(draws), 10)
+})
+
+test_that("mcmc() traces a model's sampler loop once, across calls", {
+  skip_if_not(check_tf_version())
+  x <- normal(0, 1)
+  m <- model(x)
+  sampler_function <- function() {
+    draws <- mcmc(m, warmup = 10, n_samples = 10, chains = 2, verbose = FALSE)
+    get_model_info(draws)$samplers[[1]]$tf_iterations
+  }
+  first <- sampler_function()
+  second <- sampler_function()
+  expect_identical(reticulate::py_id(second), reticulate::py_id(first))
+  expect_identical(second$experimental_get_tracing_count(), 1L)
+})
+
+test_that("samplers sharing a model get the draws they would get alone", {
+  skip_if_not(check_tf_version())
+  x <- normal(0, 1)
+  m <- model(x)
+  runs <- list(
+    list(sampler = rwmh("normal"), chains = 2),
+    list(sampler = rwmh("uniform"), chains = 2),
+    list(sampler = rwmh("normal"), chains = 3),
+    list(sampler = hmc(), chains = 2),
+    list(sampler = slice(), chains = 2),
+    list(sampler = rwmh("normal"), chains = 2)
+  )
+  draws_from <- function(run) {
+    local_greta_seed()
+    draws <- mcmc(
+      m,
+      sampler = run$sampler,
+      warmup = 20,
+      n_samples = 10,
+      chains = run$chains,
+      verbose = FALSE
+    )
+    as.matrix(draws)
+  }
+  shared <- lapply(runs, draws_from)
+  alone <- lapply(runs, function(run) {
+    m$dag$define_tf_log_prob_function()
+    draws_from(run)
+  })
+  expect_identical(shared, alone)
 })
 
 test_that("seeded draws do not depend on how the chain is split into calls", {

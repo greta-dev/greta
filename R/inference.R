@@ -310,9 +310,9 @@ run_samplers <- function(
   warmup <- as.integer(warmup)
   thin <- as.integer(thin)
 
-  # without a progress bar to update, make each phase one burst, broken only
-  # where warmup tuning, one_by_one or the iterations after the last draw need
-  # it, since every burst is a round trip from R to TensorFlow
+  # without a progress bar to update, make each phase one burst, or one per
+  # iteration with one_by_one, since every burst is a round trip from R to
+  # TensorFlow
   if (!verbose) {
     pb_update <- Inf
   }

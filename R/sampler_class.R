@@ -9,15 +9,17 @@ sampler <- R6Class(
     n_chains = 1,
     numerical_rejections = 0,
     n_bursts = 0L,
-    # every iteration's random numbers come from the sampler's seed and the
-    # iteration's number in the chain, so seeded draws do not depend on how
-    # pb_update, verbose or one_by_one split the chain into calls
+    # every iteration's random numbers, whether it tunes, and whether its
+    # state is a draw all come from its number in the chain, so seeded draws
+    # do not depend on how pb_update, verbose or one_by_one split the chain
+    # into calls
     iterations_run = 0L,
+    sampling_start = 0L,
     thin = 1,
     warmup = 1,
 
-    # tuning information. tuning_state is what define_tf_warmup_iterations()
-    # carries from one call to the next, kept here between calls
+    # tuning information. tuning_state is what define_iterations() carries
+    # from one call to the next, kept here between calls
     tuning_interval = 3,
     uses_metropolis = TRUE,
     accept_target = 0.5,
@@ -61,20 +63,60 @@ sampler <- R6Class(
         self$parameters$diag_sd <- rep(self$parameters$diag_sd[1], self$n_free)
       }
 
-      # wrapped in tf_function here so every burst reuses a single trace
-      self$define_tf_evaluate_sample_batch()
-      self$define_tf_warmup()
+      # every call to TensorFlow passes the tuning state, including those of a
+      # chain with no warmup
+      self$reset_tuning_state()
     },
 
-    define_tf_warmup = function() {
+    # The settings read in R while the loop is traced. Samplers of one model
+    # that share them share a trace, and everything else, such as epsilon, the
+    # seed and the chain's position, goes in with each call. A parameter that
+    # is not a number, such as rwmh()'s proposal, picks the code that is
+    # traced rather than a value.
+    trace_key = function() {
+      code_parameters <- Filter(is.character, self$parameters)
+      paste(
+        class(self)[1],
+        self$n_chains,
+        self$tuning_interval,
+        self$accept_target,
+        self$uses_metropolis,
+        paste(unlist(code_parameters), collapse = ","),
+        paste(self$compute_options, collapse = ","),
+        sep = "|"
+      )
+    },
+
+    # Each call to mcmc() makes new samplers, so they look their traced
+    # function up on the model rather than trace the loop again. The function
+    # keeps the sampler it was built from alive, so it is built from a copy
+    # with no draws, or the model would hold on to the first sampler's draws.
+    sampler_function = function() {
+      dag <- self$model$dag
+      key <- self$trace_key()
+      if (is.null(dag$sampler_functions[[key]])) {
+        template <- self$clone()
+        template$traced_free_state <- list()
+        template$traced_values <- list()
+        template$last_burst_free_states <- list()
+        dag$sampler_functions[[key]] <- template$new_tf_iterations()
+      }
+      dag$sampler_functions[[key]]
+    },
+
+    # warmup and sampling call the same traced function, so the loop is traced
+    # once
+    new_tf_iterations = function() {
       float <- tf_float()
       scalar_integer <- tf$TensorSpec(shape = list(), dtype = tf$int32)
-      self$tf_warmup <- tensorflow::tf_function(
-        f = self$define_tf_warmup_iterations,
+      tensorflow::tf_function(
+        f = self$define_iterations,
         input_signature = list(
-          # free state
+          # free_state
           self$free_state_signature(),
-          # n_iterations, iterations_done and total_warmup
+          # n_iterations, first_iteration, warmup, sampling_start and thin
+          scalar_integer,
+          scalar_integer,
           scalar_integer,
           scalar_integer,
           scalar_integer,
@@ -87,50 +129,21 @@ sampler <- R6Class(
           tf$TensorSpec(shape = list(6L), dtype = float),
           tf$TensorSpec(shape = list(self$n_free), dtype = float),
           tf$TensorSpec(shape = list(self$n_free), dtype = float),
-          # call_seed
+          # seed
           tf$TensorSpec(shape = list(2L), dtype = tf$int32)
         )
       )
     },
-    tf_warmup = NULL,
+    tf_iterations = NULL,
 
     # A sampler runs the same number of chains for as long as it exists, so
-    # its functions are traced for exactly that many rows: TensorFlow runs a
+    # its function is traced for exactly that many rows: TensorFlow runs a
     # graph whose shapes it knows faster than one traced for any number of
     # rows, as the log-density function is
     free_state_signature = function() {
       self$model$dag$free_state_signature(n_rows = as.integer(self$n_chains))[[
         1
       ]]
-    },
-
-    define_tf_evaluate_sample_batch = function() {
-      self$tf_evaluate_sample_batch <- tensorflow::tf_function(
-        f = self$define_tf_draws,
-        input_signature = list(
-          # free state
-          self$free_state_signature(),
-          # sampler_burst_length
-          tf$TensorSpec(shape = list(), dtype = tf$int32),
-          # sampler_thin
-          tf$TensorSpec(shape = list(), dtype = tf$int32),
-          # sampler_param_vec
-          tf$TensorSpec(
-            shape = list(
-              length(
-                unlist(
-                  self$sampler_parameter_values()
-                )
-              )
-            ),
-            dtype = tf_float()
-          ),
-          # sampler_seed
-          tf$TensorSpec(shape = list(2L), dtype = tf$int32),
-          # sampler_first_iteration
-          tf$TensorSpec(shape = list(), dtype = tf$int32)
-        )
-      )
     },
 
     run_chain = function(
@@ -148,6 +161,9 @@ sampler <- R6Class(
     ) {
       self$warmup <- warmup
       self$thin <- thin
+      # extra_samples() runs no warmup, and carries on the chain's count of
+      # iterations from where the last run left it
+      self$sampling_start <- self$iterations_run + as.integer(warmup)
       dag <- self$model$dag
 
       dag$n_cores <- n_cores
@@ -165,10 +181,8 @@ sampler <- R6Class(
         dag$define_tf_trace_values_batch()
 
         dag$define_tf_log_prob_function()
-
-        self$define_tf_evaluate_sample_batch()
-        self$define_tf_warmup()
       }
+      self$tf_iterations <- self$sampler_function()
 
       # extra_samples() appends to the trace the sampler already has
       if (from_scratch) {
@@ -183,90 +197,92 @@ sampler <- R6Class(
         )
       }
 
-      self$run_warmup(
-        n_samples = n_samples,
-        pb_update = pb_update,
-        ideal_burst_size = ifelse(one_by_one, 1L, pb_update),
-        verbose = verbose
-      )
+      if (warmup > 0) {
+        self$reset_tuning_state()
+        self$run_phase(
+          phase = "warmup",
+          n_iterations = warmup,
+          n_samples = n_samples,
+          pb_update = pb_update,
+          one_by_one = one_by_one,
+          verbose = verbose
+        )
+        # warmup's numerical rejections are not reported with sampling's
+        self$numerical_rejections <- 0
+      }
 
-      self$run_sampling(
-        n_samples = n_samples,
-        pb_update = pb_update,
-        trace_batch_size = trace_batch_size,
-        thin = thin,
-        one_by_one = one_by_one,
-        verbose = verbose
-      )
+      if (n_samples > 0) {
+        # turn the free state trace into values on exit, even if the user
+        # interrupts sampling, so the draws so far are kept
+        on.exit(self$trace_values(trace_batch_size), add = TRUE)
+        self$run_phase(
+          phase = "sampling",
+          n_iterations = n_samples,
+          n_samples = n_samples,
+          pb_update = pb_update,
+          one_by_one = one_by_one,
+          verbose = verbose
+        )
+      }
 
       # return self, to send results back when running in parallel
       self
     },
 
-    run_warmup = function(
+    # Runs one phase of the chain, warmup or sampling, in bursts of one call
+    # to TensorFlow each. Tuning and thinning happen inside TensorFlow, so a
+    # burst returns to R only to update the progress bar, or after every
+    # iteration with one_by_one, so that a numerical error rejects only its
+    # own proposal. Without a progress bar, run_samplers() makes pb_update
+    # the whole phase.
+    run_phase = function(
+      phase,
+      n_iterations,
       n_samples,
       pb_update,
-      ideal_burst_size,
+      one_by_one,
       verbose
     ) {
-      perform_warmup <- self$warmup > 0
-      if (perform_warmup) {
-        if (verbose) {
-          pb_warmup <- create_progress_bar(
-            phase = "warmup",
-            iter = c(self$warmup, n_samples),
-            pb_update = pb_update,
-            width = self$pb_width
-          )
+      if (verbose) {
+        pb <- create_progress_bar(
+          phase = phase,
+          iter = c(self$warmup, n_samples),
+          pb_update = pb_update,
+          width = self$pb_width
+        )
+        iterate_progress_bar(
+          pb = pb,
+          it = 0,
+          rejects = 0,
+          chains = self$n_chains,
+          file = self$pb_file
+        )
+      }
 
+      iterations_per_burst <- if (one_by_one) 1L else pb_update
+      burst_lengths <- self$burst_lengths(n_iterations, iterations_per_burst)
+      completed_iterations <- cumsum(burst_lengths)
+
+      for (burst in seq_along(burst_lengths)) {
+        self$run_iterations(burst_lengths[burst])
+        self$trace()
+
+        if (verbose) {
           iterate_progress_bar(
-            pb = pb_warmup,
-            it = 0,
-            rejects = 0,
+            pb = pb,
+            it = completed_iterations[burst],
+            rejects = self$numerical_rejections,
             chains = self$n_chains,
             file = self$pb_file
           )
-        } else {
-          pb_warmup <- NULL
-        }
 
-        # tuning happens inside TensorFlow, so warmup returns to R only to
-        # update the progress bar, or after every iteration with one_by_one
-        returns_to_r <- verbose || ideal_burst_size == 1
-        burst_lengths <- if (returns_to_r) {
-          self$burst_lengths(self$warmup, ideal_burst_size)
-        } else {
-          self$warmup
-        }
-        completed_iterations <- cumsum(burst_lengths)
-
-        self$reset_tuning_state()
-        for (burst in seq_along(burst_lengths)) {
-          self$run_warmup_burst(
-            n_iterations = burst_lengths[burst],
-            iterations_done = completed_iterations[burst] - burst_lengths[burst]
+          self$write_percentage_log(
+            total = n_iterations,
+            completed = completed_iterations[burst],
+            stage = phase
           )
-
-          if (verbose) {
-            iterate_progress_bar(
-              pb = pb_warmup,
-              it = completed_iterations[burst],
-              rejects = self$numerical_rejections,
-              chains = self$n_chains,
-              file = self$pb_file
-            )
-
-            self$write_percentage_log(
-              total = self$warmup,
-              completed = completed_iterations[burst],
-              stage = "warmup"
-            )
-          }
         }
-
-        # warmup's numerical rejections are not reported with sampling's
-        self$numerical_rejections <- 0
-      } # end warmup
+      }
     },
 
     reset_tuning_state = function() {
@@ -284,27 +300,31 @@ sampler <- R6Class(
       )
     },
 
-    # runs n_iterations of warmup, tuning as it goes, and keeps the state,
-    # parameters and tuning state it ends with
-    run_warmup_burst = function(n_iterations, iterations_done) {
-      param_vec <- unlist(self$sampler_parameter_values())
-
-      # warmup starts the chain, so its iterations count from zero, and the
-      # seed for each comes from that count inside TensorFlow
+    # Runs the chain's next n_iterations in one call to TensorFlow, and keeps
+    # the state, tuning and draws they end with
+    run_iterations = function(n_iterations) {
+      n_iterations <- as.integer(n_iterations)
+      first_iteration <- self$iterations_run
+      self$iterations_run <- first_iteration + n_iterations
       self$n_bursts <- self$n_bursts + 1L
-      call_seed <- c(self$seed, 0L)
-      on.exit(
-        self$iterations_run <- self$iterations_run + as.integer(n_iterations),
-        add = TRUE
-      )
+
+      # a stateless seed, which TensorFlow combines with each iteration's
+      # number in the chain. Seeding TensorFlow's global state would tie the
+      # random numbers to the trace, so a future worker that rebuilds the
+      # tf_function for extra_samples() would replay the first run's random
+      # numbers
+      seed <- c(self$seed, 0L)
 
       float <- tf_float()
+      param_vec <- unlist(self$sampler_parameter_values())
       result <- cleanly(
-        self$tf_warmup(
+        self$tf_iterations(
           free_state = tensorflow::as_tensor(self$free_state, dtype = float),
-          n_iterations = tensorflow::as_tensor(as.integer(n_iterations)),
-          iterations_done = tensorflow::as_tensor(as.integer(iterations_done)),
-          total_warmup = tensorflow::as_tensor(as.integer(self$warmup)),
+          n_iterations = tensorflow::as_tensor(n_iterations),
+          first_iteration = tensorflow::as_tensor(first_iteration),
+          warmup = tensorflow::as_tensor(as.integer(self$warmup)),
+          sampling_start = tensorflow::as_tensor(self$sampling_start),
+          thin = tensorflow::as_tensor(as.integer(self$thin)),
           sampler_param_vec = tensorflow::as_tensor(
             param_vec,
             dtype = float,
@@ -324,23 +344,23 @@ sampler <- R6Class(
             dtype = float,
             shape = self$n_free
           ),
-          call_seed = tensorflow::as_tensor(call_seed, dtype = tf$int32)
+          seed = tensorflow::as_tensor(seed, dtype = tf$int32)
         )
       )
 
+      # cleanly() has already thrown any error that is not numerical
       if (inherits(result, "error")) {
-        # a numerical error in a single iteration rejects its proposal, and
-        # leaves the state and tuning where they were
-        if (n_iterations == 1) {
-          self$numerical_rejections <- self$numerical_rejections + self$n_chains
-          return(invisible(self))
+        if (n_iterations > 1) {
+          self$abort_numerical_error(result)
         }
-        self$check_for_free_state_error(result, single_iteration = FALSE)
+        self$reject_iteration(first_iteration)
+        return(invisible(self))
       }
 
       free_state <- as.array(result$free_state)
       dim(free_state) <- c(self$n_chains, self$n_free)
       self$free_state <- free_state
+      self$last_burst_free_states <- split_chains(as.array(result$draws))
 
       tuned <- as.numeric(result$sampler_param_vec)
       indices <- self$tuning_indices()
@@ -369,102 +389,37 @@ sampler <- R6Class(
       NULL
     },
 
-    run_sampling = function(
-      n_samples,
-      pb_update,
-      trace_batch_size,
-      thin,
-      one_by_one,
-      verbose
-    ) {
-      perform_sampling <- n_samples > 0
-      if (perform_sampling) {
-        # turn the free state trace into values on exit, even if the user
-        # interrupts sampling, so the draws so far are kept
-        on.exit(self$trace_values(trace_batch_size), add = TRUE)
+    # A numerical error in a call of one iteration came from its only
+    # proposal, so the sampler rejects that proposal: the state and tuning
+    # stay where they were, and the state is kept as a draw if one was due
+    reject_iteration = function(iteration) {
+      self$numerical_rejections <- self$numerical_rejections + self$n_chains
+      sampling_iterations <- iteration + 1L - self$sampling_start
+      is_draw <- sampling_iterations > 0 &&
+        sampling_iterations %% self$thin == 0
+      n_draws <- as.integer(is_draw)
+      draws <- array(
+        rep(self$free_state, n_draws),
+        dim = c(n_draws, self$n_chains, self$n_free)
+      )
+      self$last_burst_free_states <- split_chains(draws)
+    },
 
-        # the bar updates between bursts, which end on whole draws
-        # (except with one_by_one), so round its updates to whole draws too
-        if (one_by_one) {
-          iterations_per_update <- pb_update
-        } else {
-          iterations_per_update <- thin * max(1, round(pb_update / thin))
-        }
-
-        if (verbose) {
-          pb_sampling <- create_progress_bar(
-            phase = "sampling",
-            iter = c(self$warmup, n_samples),
-            pb_update = iterations_per_update,
-            width = self$pb_width
-          )
-          iterate_progress_bar(
-            pb = pb_sampling,
-            it = 0,
-            rejects = 0,
-            chains = self$n_chains,
-            file = self$pb_file
-          )
-        } else {
-          pb_sampling <- NULL
-        }
-
-        if (one_by_one) {
-          # one iteration per burst, so a numerical error rejects only its own
-          # proposal
-          burst_lengths <- rep(1L, n_samples)
-        } else {
-          # a burst shorter than thin has no draw to return, which errors in
-          # TensorFlow (greta-dev/greta#318)
-          n_draws <- n_samples %/% thin
-          draws_per_update <- iterations_per_update / thin
-          draws_per_burst <- self$burst_lengths(n_draws, draws_per_update)
-          whole_draw_bursts <- draws_per_burst * thin
-
-          # the iterations after the last draw keep nothing, but still run, so
-          # the chain runs all n_samples iterations
-          iterations_after_last_draw <- n_samples %% thin
-          final_burst <- if (iterations_after_last_draw > 0) {
-            iterations_after_last_draw
-          } else {
-            NULL
-          }
-
-          burst_lengths <- c(whole_draw_bursts, final_burst)
-        }
-        completed_iterations <- cumsum(burst_lengths)
-
-        # TensorFlow thins bursts of whole draws; the rest run unthinned
-        is_whole_draws <- burst_lengths %% thin == 0
-        burst_thin <- ifelse(is_whole_draws, thin, 1L)
-        ends_on_draw <- completed_iterations %% thin == 0
-
-        for (burst in seq_along(burst_lengths)) {
-          self$run_burst(
-            n_samples = burst_lengths[burst],
-            thin = burst_thin[burst]
-          )
-          if (ends_on_draw[burst]) {
-            self$trace()
-          }
-
-          if (verbose) {
-            iterate_progress_bar(
-              pb = pb_sampling,
-              it = completed_iterations[burst],
-              rejects = self$numerical_rejections,
-              chains = self$n_chains,
-              file = self$pb_file
-            )
-
-            self$write_percentage_log(
-              total = n_samples,
-              completed = completed_iterations[burst],
-              stage = "sampling"
-            )
-          }
-        }
-      } # end sampling
+    # In a call of more than one iteration, the sampler cannot tell which
+    # proposal failed, and the chain would not be valid if it carried on, so
+    # it stops and says how to run one iteration per call
+    abort_numerical_error = function(error) {
+      greta_stash$tf_num_error <- error
+      cli::cli_abort(
+        message = c(
+          "TensorFlow hit a numerical problem that caused it to error",
+          "{.pkg greta} can handle these as bad proposals if you rerun \\
+          {.fun mcmc} with the argument {.code one_by_one = TRUE}.",
+          "This will slow down the sampler slightly.",
+          "The error encountered can be recovered and viewed with:",
+          "{.code greta_notes_tf_num_error()}"
+        )
+      )
     },
 
     # convert traced free state to the traced values, accounting for
@@ -566,27 +521,49 @@ sampler <- R6Class(
       )
     },
 
-    # Runs n_iterations of warmup in one call to TensorFlow, tuning epsilon
-    # and diag_sd between iterations. The tuning state comes in and goes back
-    # out, so warmup can be split into calls for the progress bar, and a call
-    # carries on from where the last one stopped.
-    define_tf_warmup_iterations = function(
+    # Runs n_iterations of the chain in one call to TensorFlow, from
+    # first_iteration, the chain's count of iterations so far. The warmup
+    # iterations before sampling_start tune epsilon and diag_sd, and the
+    # tuning state comes in and goes back out, so a call carries on from where
+    # the last one stopped. From sampling_start on, every thin-th state is
+    # kept as a draw. The loop is greta's own rather than
+    # tfp$mcmc$sample_chain(), which steps one kernel built before the loop:
+    # building the kernel inside the loop, from each iteration's own seed,
+    # lets hmc() draw its leapfrog count every iteration.
+    define_iterations = function(
       free_state,
       n_iterations,
-      iterations_done,
-      total_warmup,
+      first_iteration,
+      warmup,
+      sampling_start,
+      thin,
       sampler_param_vec,
       tuning,
       welford_mean,
       welford_m2,
-      call_seed
+      seed
     ) {
       kernel_results <- self$tf_bootstrap_results(
         free_state,
         sampler_param_vec,
-        call_seed
+        seed
       )
       tunes <- is.finite(self$tuning_interval)
+      warmup_start <- sampling_start - warmup
+
+      draws_after <- function(iterations) {
+        sampling_iterations <- tf$maximum(iterations - sampling_start, 0L)
+        tf$math$floordiv(sampling_iterations, thin)
+      }
+      draws_before_call <- draws_after(first_iteration)
+      # the shape comes from R rather than the free state, whose number of rows
+      # can be left open, so that a call with no draws, such as one in warmup,
+      # stacks to an empty array rather than erroring
+      draws <- tf$TensorArray(
+        dtype = free_state$dtype,
+        size = draws_after(first_iteration + n_iterations) - draws_before_call,
+        element_shape = list(self$n_chains, self$n_free)
+      )
 
       body <- function(
         iteration,
@@ -596,14 +573,16 @@ sampler <- R6Class(
         tuning,
         welford_mean,
         welford_m2,
+        draws,
         numerical_rejections
       ) {
+        chain_iteration <- first_iteration + iteration
         step <- self$tf_step(
           state,
           kernel_results,
           param_vec,
-          call_seed,
-          iterations_done + iteration
+          seed,
+          chain_iteration
         )
 
         is_numerical_rejection <- tf$logical_not(
@@ -613,20 +592,38 @@ sampler <- R6Class(
           tf$reduce_sum(tf$cast(is_numerical_rejection, tf$int32))
 
         if (tunes) {
-          tuned <- self$tf_tune(
-            completed = iterations_done + iteration + 1L,
-            total = total_warmup,
-            step = step,
-            param_vec = param_vec,
-            tuning = tuning,
-            welford_mean = welford_mean,
-            welford_m2 = welford_m2
-          )
-          param_vec <- tuned$param_vec
-          tuning <- tuned$tuning
-          welford_mean <- tuned$welford_mean
-          welford_m2 <- tuned$welford_m2
+          tune <- function() {
+            tuned <- self$tf_tune(
+              completed = chain_iteration - warmup_start + 1L,
+              total = warmup,
+              step = step,
+              param_vec = param_vec,
+              tuning = tuning,
+              welford_mean = welford_mean,
+              welford_m2 = welford_m2
+            )
+            unname(tuned)
+          }
+          keep <- function() {
+            list(param_vec, tuning, welford_mean, welford_m2)
+          }
+          is_warmup <- tf$less(chain_iteration, sampling_start)
+          tuned <- tf$cond(is_warmup, tune, keep)
+          param_vec <- tuned[[1]]
+          tuning <- tuned[[2]]
+          welford_mean <- tuned[[3]]
+          welford_m2 <- tuned[[4]]
         }
+
+        draws_so_far <- draws_after(chain_iteration + 1L)
+        is_draw <- tf$greater(draws_so_far, draws_after(chain_iteration))
+        draws <- tf$cond(
+          is_draw,
+          function() {
+            draws$write(draws_so_far - draws_before_call - 1L, step$state)
+          },
+          function() draws
+        )
 
         list(
           iteration + 1L,
@@ -636,6 +633,7 @@ sampler <- R6Class(
           tuning,
           welford_mean,
           welford_m2,
+          draws,
           numerical_rejections
         )
       }
@@ -654,6 +652,7 @@ sampler <- R6Class(
           tuning,
           welford_mean,
           welford_m2,
+          draws,
           tf$constant(0L)
         )
       )
@@ -664,7 +663,8 @@ sampler <- R6Class(
         tuning = loop[[5]],
         welford_mean = loop[[6]],
         welford_m2 = loop[[7]],
-        numerical_rejections = loop[[8]]
+        draws = loop[[8]]$stack(),
+        numerical_rejections = loop[[9]]
       )
     },
 
@@ -695,18 +695,16 @@ sampler <- R6Class(
       accept_count <- tuning_values[[6]]
 
       # a running variance over every chain's state, updated with a batch of
-      # one state per chain (Chan, Golub and LeVeque, 1983)
-      state <- step$state
-      batch_size <- tf$cast(tf$shape(state)[0], dtype)
-      batch_mean <- tf$reduce_mean(state, axis = 0L)
-      batch_m2 <- tf$reduce_sum(tf$square(state - batch_mean), axis = 0L)
-      new_count <- count + batch_size
-      delta <- batch_mean - welford_mean
-      welford_mean <- welford_mean + delta * batch_size / new_count
-      welford_m2 <- welford_m2 +
-        batch_m2 +
-        tf$square(delta) * count * batch_size / new_count
-      count <- new_count
+      # one state per chain
+      running_variance <- tfp$experimental$stats$RunningVariance(
+        num_samples = count,
+        mean = welford_mean,
+        sum_squared_residuals = welford_m2,
+        event_ndims = 0L
+      )$update(step$state, axis = 0L)
+      count <- running_variance$num_samples
+      welford_mean <- running_variance$mean
+      welford_m2 <- running_variance$sum_squared_residuals
 
       # counts rejected proposals, as tune_diag_sd() did, though it is meant
       # to count accepted ones: greta-dev/greta#841
@@ -788,7 +786,7 @@ sampler <- R6Class(
           within(0.1, 0.4),
           tf$greater(n_for_shrinkage, 5)
         )
-        sample_variance <- welford_m2 / (count - 1)
+        sample_variance <- running_variance$variance(ddof = 1L)
         shrinkage <- 1 / (n_for_shrinkage + 5)
         shrunk_variance <- n_for_shrinkage *
           shrinkage *
@@ -846,224 +844,6 @@ sampler <- R6Class(
         welford_mean = welford_mean,
         welford_m2 = welford_m2
       )
-    },
-
-    # Runs sampler_burst_length iterations in one call to TensorFlow, keeping
-    # every thin-th state, so a burst of d draws runs d * thin iterations. The
-    # loop is greta's own rather than tfp$mcmc$sample_chain(), which steps one
-    # kernel built before the loop: building the kernel inside the loop, from
-    # each iteration's own seed, lets hmc() draw its leapfrog count every
-    # iteration.
-    define_tf_draws = function(
-      free_state,
-      sampler_burst_length,
-      sampler_thin,
-      sampler_param_vec,
-      sampler_seed,
-      sampler_first_iteration
-    ) {
-      n_draws <- tf$math$floordiv(sampler_burst_length, sampler_thin)
-
-      kernel_results <- self$tf_bootstrap_results(
-        free_state,
-        sampler_param_vec,
-        sampler_seed
-      )
-
-      draws <- tf$TensorArray(
-        dtype = free_state$dtype,
-        size = n_draws,
-        element_shape = free_state$shape
-      )
-      log_accept_ratios <- tf$TensorArray(
-        dtype = free_state$dtype,
-        size = sampler_burst_length
-      )
-      accepted <- tf$TensorArray(dtype = tf$bool, size = sampler_burst_length)
-
-      body <- function(
-        iteration,
-        state,
-        kernel_results,
-        draws,
-        log_accept_ratios,
-        accepted
-      ) {
-        step <- self$tf_step(
-          state,
-          kernel_results,
-          sampler_param_vec,
-          sampler_seed,
-          sampler_first_iteration + iteration
-        )
-
-        completed <- iteration + 1L
-        is_draw <- tf$equal(tf$math$floormod(completed, sampler_thin), 0L)
-        draws <- tf$cond(
-          is_draw,
-          function() {
-            draws$write(
-              tf$math$floordiv(completed, sampler_thin) - 1L,
-              step$state
-            )
-          },
-          function() draws
-        )
-
-        list(
-          completed,
-          step$state,
-          step$kernel_results,
-          draws,
-          log_accept_ratios$write(iteration, step$log_accept_ratio),
-          accepted$write(iteration, step$is_accepted)
-        )
-      }
-      not_done <- function(iteration, ...) {
-        tf$less(iteration, sampler_burst_length)
-      }
-
-      loop <- tf$while_loop(
-        cond = not_done,
-        body = body,
-        loop_vars = list(
-          tf$constant(0L),
-          free_state,
-          kernel_results,
-          draws,
-          log_accept_ratios,
-          accepted
-        )
-      )
-
-      list(
-        all_states = loop[[4]]$stack(),
-        trace = list(
-          log_accept_ratio = loop[[5]]$stack(),
-          is_accepted = loop[[6]]$stack()
-        )
-      )
-    },
-
-    # sampling breaks into bursts only so the progress bar can update between
-    # them
-    run_burst = function(n_samples, thin = 1L) {
-      param_vec <- unlist(self$sampler_parameter_values())
-
-      # a stateless seed: the sampler's seed and each iteration's number in the
-      # chain. Seeding TensorFlow's global state would tie the random numbers
-      # to the trace, so a future worker that rebuilds the tf_function for
-      # extra_samples() would replay the first run's random numbers
-      self$n_bursts <- self$n_bursts + 1L
-      first_iteration <- self$iterations_run
-      self$iterations_run <- self$iterations_run + as.integer(n_samples)
-
-      # run the sampler, handling numerical errors
-      batch_results <- self$sample_carefully(
-        free_state = self$free_state,
-        sampler_burst_length = as.integer(n_samples),
-        sampler_thin = as.integer(thin),
-        sampler_param_vec = param_vec,
-        sampler_seed = c(self$seed, 0L),
-        sampler_first_iteration = first_iteration
-      )
-
-      free_state_draws <- as.array(batch_results$all_states)
-
-      # a rejected one-iteration burst comes back from
-      # check_for_free_state_error() as the current free state, which has no
-      # draw dimension, so add one
-      if (n_dim(free_state_draws) != 3) {
-        dim(free_state_draws) <- c(1, dim(free_state_draws))
-      }
-
-      self$last_burst_free_states <- split_chains(free_state_draws)
-
-      n_draws <- nrow(free_state_draws)
-      if (n_draws > 0) {
-        free_state <- free_state_draws[n_draws, , , drop = FALSE]
-        dim(free_state) <- dim(free_state)[-1]
-        self$free_state <- free_state
-      }
-
-      if (self$uses_metropolis) {
-        # a non-finite acceptance ratio is a numerically rejected proposal
-        log_accept_stats <- as.array(batch_results$trace$log_accept_ratio)
-        bad <- sum(!is.finite(log_accept_stats))
-        self$numerical_rejections <- self$numerical_rejections + bad
-      }
-    },
-
-    tf_evaluate_sample_batch = NULL,
-
-    sample_carefully = function(
-      free_state,
-      sampler_burst_length,
-      sampler_thin,
-      sampler_param_vec,
-      sampler_seed,
-      sampler_first_iteration
-    ) {
-      single_iteration <- sampler_burst_length == 1L
-
-      result <- cleanly(
-        self$tf_evaluate_sample_batch(
-          free_state = tensorflow::as_tensor(
-            free_state,
-            dtype = tf_float()
-          ),
-          sampler_burst_length = tensorflow::as_tensor(sampler_burst_length),
-          sampler_thin = tensorflow::as_tensor(sampler_thin),
-          sampler_param_vec = tensorflow::as_tensor(
-            sampler_param_vec,
-            dtype = tf_float(),
-            shape = length(sampler_param_vec)
-          ),
-          sampler_seed = tensorflow::as_tensor(sampler_seed, dtype = tf$int32),
-          sampler_first_iteration = tensorflow::as_tensor(
-            as.integer(sampler_first_iteration)
-          )
-        )
-      ) # closing cleanly
-
-      self$check_for_free_state_error(result, single_iteration)
-
-      result
-    },
-
-    check_for_free_state_error = function(result, single_iteration) {
-      # cleanly() has already thrown any error that is not numerical, so an
-      # error here is a numerical one
-      if (inherits(result, "error")) {
-        # in a burst of one iteration - every burst, with one_by_one - the
-        # error came from its only proposal, so reject that proposal: mock up
-        # a result that stays at the current state and pass it back
-        if (single_iteration) {
-          result <- list(
-            all_states = self$free_state,
-            trace = list(
-              log_accept_ratio = rep(-Inf, self$n_chains),
-              is_accepted = rep(FALSE, self$n_chains)
-            )
-          )
-        } else {
-          greta_stash$tf_num_error <- result
-
-          # otherwise, *one* of these multiple samples was bad. The sampler
-          # won't be valid if we just restart, so we need to error here,
-          # informing the user how to run one sample at a time
-          cli::cli_abort(
-            message = c(
-              "TensorFlow hit a numerical problem that caused it to error",
-              "{.pkg greta} can handle these as bad proposals if you rerun \\
-              {.fun mcmc} with the argument {.code one_by_one = TRUE}.",
-              "This will slow down the sampler slightly.",
-              "The error encountered can be recovered and viewed with:",
-              "{.code greta_notes_tf_num_error()}"
-            )
-          )
-        }
-      }
     },
 
     sampler_parameter_values = function() {
