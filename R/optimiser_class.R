@@ -152,11 +152,7 @@ tf_optimiser <- R6Class(
         # optimiser's slot variables have to exist before tracing.
         tfe$tf_optimiser$build(list(free_state))
 
-        # Compiled because tape/gradient/apply as separate eager calls cost
-        # four R->Python round trips per iteration: that version benchmarked
-        # 1.65x slower than Keras 2's minimize(), where this one is roughly
-        # twice as fast on a small linear regression.
-        step <- tensorflow::tf_function(function() {
+        step <- function() {
           with(tf$GradientTape() %as% tape, {
             objective_value <- objective()
           })
@@ -165,27 +161,52 @@ tf_optimiser <- R6Class(
             list(reticulate::tuple(gradients[[1]], free_state))
           )
           objective()
+        }
+
+        # The whole optimisation is one call to TensorFlow, with the
+        # convergence and overflow checks as tensors: stepping from an R loop
+        # cost about 0.9 ms per iteration on the linear example, mostly that
+        # loop's own body rather than the model (greta.benchmarks run
+        # 2026-08-22-optimiser-r-loop). A non-finite objective stops the loop,
+        # so the overflow check below sees it.
+        max_iterations <- self$max_iterations
+        tolerance <- self$tolerance
+        minimise <- tensorflow::tf_function(function() {
+          infinity <- tf$constant(Inf, dtype = tf_float())
+          keep_going <- function(iteration, old_objective, difference) {
+            tf$logical_and(
+              tf$less(iteration, max_iterations),
+              tf$logical_and(
+                tf$greater(difference, tolerance),
+                tf$math$is_finite(old_objective) | tf$equal(iteration, 0L)
+              )
+            )
+          }
+          one_step <- function(iteration, old_objective, difference) {
+            # the objective has one element, one per row of the free state
+            objective_value <- tf$reshape(step(), shape = list())
+            list(
+              iteration + 1L,
+              objective_value,
+              tf$abs(old_objective - objective_value)
+            )
+          }
+          tf$while_loop(
+            cond = keep_going,
+            body = one_step,
+            loop_vars = list(tf$constant(0L), infinity, infinity)
+          )
         })
 
-        while (
-          self$it < self$max_iterations &
-            all(self$diff > self$tolerance)
-        ) {
-          # `iterations` counts completed steps, so +1 makes this the 1-based
-          # number of the iteration about to run.
-          # It is a keras.Variable, which reticulate leaves as a Python object,
-          # so read it through $numpy().
-          self$it <- as.numeric(tfe$tf_optimiser$iterations$numpy()) + 1
+        result <- minimise()
+        self$it <- as.numeric(result[[1]])
+        self$old_obj <- as.numeric(result[[2]])
+        self$diff <- as.numeric(result[[3]])
 
-          obj_numeric <- step()$numpy()
+        # The objective value can reach numerical overflow, so we error and
+        # suggest changing initial values or changing sampler, e.g., `adam`
+        self$check_numerical_overflow(self$old_obj)
 
-          # The objective value can reach numerical overflow, so we error and
-          # suggest changing initial values or changing sampler, e.g., `adam`
-          self$check_numerical_overflow(obj_numeric)
-
-          self$diff <- abs(self$old_obj - obj_numeric)
-          self$old_obj <- obj_numeric
-        }
         tfe$free_state <- free_state
       }
     },
