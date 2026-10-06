@@ -854,10 +854,13 @@ need_more_samples <- function(draws, target_samples = 5000) {
   !(converged & enough_samples)
 }
 
+# a whole number of draws, and at least 100: with almost enough effective
+# samples, or enough but not yet converged, the estimate is below one draw or
+# negative, which extra_samples() rejects
 new_samples <- function(draws, target_samples = 5000) {
   neff <- min(coda::effectiveSize(draws))
   efficiency <- neff / coda::niter(draws)
-  1.2 * (target_samples - neff) / efficiency
+  max(100, ceiling(1.2 * (target_samples - neff) / efficiency))
 }
 
 still_have_time <- function(start_time, time_limit = 300) {
