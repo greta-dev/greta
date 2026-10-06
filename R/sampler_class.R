@@ -22,6 +22,12 @@ sampler <- R6Class(
     uses_metropolis = TRUE,
     accept_target = 0.5,
     tuning_state = NULL,
+    # the warmup scheme tf_tune() uses, and the windowed scheme's buffer and
+    # window ends as fractions of warmup. Not user-facing: set on the class to
+    # compare the schemes
+    adaptation = "greta",
+    adaptation_buffer = 0.15,
+    adaptation_windows = c(0.25, 0.45, 0.9),
 
     # sampler kernel information
     parameters = list(
@@ -84,7 +90,7 @@ sampler <- R6Class(
             dtype = float
           ),
           # tuning, welford_mean and welford_m2
-          tf$TensorSpec(shape = list(6L), dtype = float),
+          tf$TensorSpec(shape = list(8L), dtype = float),
           tf$TensorSpec(shape = list(self$n_free), dtype = float),
           tf$TensorSpec(shape = list(self$n_free), dtype = float),
           # call_seed
@@ -267,7 +273,9 @@ sampler <- R6Class(
           count = 0,
           n_for_shrinkage = 0,
           accept_sum = 0,
-          accept_count = 0
+          accept_count = 0,
+          da_updates = 0,
+          da_mu = log(10 * (self$parameters$epsilon %||% 0.1))
         ),
         welford_mean = rep(0, self$n_free),
         welford_m2 = rep(0, self$n_free)
@@ -658,14 +666,22 @@ sampler <- R6Class(
       )
     },
 
-    # greta's warmup tuning, one iteration at a time inside TensorFlow. Every
-    # tuning_interval iterations, and at the end of warmup, it updates epsilon
-    # by dual averaging towards accept_target over the first 10% and last 60%
-    # of warmup (Hoffman and Gelman, 2014), and diag_sd from the variance of
-    # every warmup draw so far over the 30% between. `tuning` holds hbar, the
-    # averaged log epsilon, the variance's draw count, the count used to
-    # shrink the variance, and the summed and counted acceptance since the last
-    # update.
+    # Warmup tuning, one iteration at a time inside TensorFlow. `tuning` holds
+    # hbar and the averaged log epsilon of dual averaging, the running
+    # variance's draw count, the count its shrinkage weighs it by, the summed
+    # and counted acceptance since the last update, and the update count and
+    # mu that dual averaging restarts from in the windowed scheme. The scheme
+    # is self$adaptation:
+    # - "greta": greta's own. Every tuning_interval iterations it updates
+    #   epsilon by dual averaging over the first 10% and last 60% of warmup
+    #   (Hoffman and Gelman, 2014), and diag_sd from the variance of every
+    #   warmup draw so far over the 30% between, shrunk by a count of the
+    #   rejected proposals (greta-dev/greta#841)
+    # - "greta_841": the same, shrunk by a count of the accepted proposals
+    # - "windowed": Stan's, as in greta-dev/greta#853. After a buffer that
+    #   adapts epsilon only, diag_sd is estimated afresh in windows, from their
+    #   own draws, and dual averaging restarts after each; a last buffer adapts
+    #   epsilon only
     tf_tune = function(
       completed,
       total,
@@ -677,46 +693,21 @@ sampler <- R6Class(
     ) {
       dtype <- param_vec$dtype
       tuning_values <- tf$unstack(tuning)
-      hbar <- tuning_values[[1]]
-      log_epsilon_bar <- tuning_values[[2]]
-      count <- tuning_values[[3]]
-      n_for_shrinkage <- tuning_values[[4]]
-      accept_sum <- tuning_values[[5]]
-      accept_count <- tuning_values[[6]]
-
-      # a running variance over every chain's state, updated with a batch of
-      # one state per chain (Chan, Golub and LeVeque, 1983)
-      state <- step$state
-      batch_size <- tf$cast(tf$shape(state)[0], dtype)
-      batch_mean <- tf$reduce_mean(state, axis = 0L)
-      batch_m2 <- tf$reduce_sum(tf$square(state - batch_mean), axis = 0L)
-      new_count <- count + batch_size
-      delta <- batch_mean - welford_mean
-      welford_mean <- welford_mean + delta * batch_size / new_count
-      welford_m2 <- welford_m2 +
-        batch_m2 +
-        tf$square(delta) * count * batch_size / new_count
-      count <- new_count
-
-      # counts rejected proposals, as tune_diag_sd() did, though it is meant
-      # to count accepted ones: greta-dev/greta#841
-      n_rejected <- tf$reduce_sum(
-        tf$cast(tf$logical_not(step$is_accepted), dtype)
-      )
-      n_for_shrinkage <- n_for_shrinkage + n_rejected
+      names(tuning_values) <- names(self$tuning_state$tuning)
 
       accept_stat <- tf$minimum(
         tf$constant(1, dtype),
         tf$exp(step$log_accept_ratio)
       )
       is_number <- tf$logical_not(tf$math$is_nan(accept_stat))
-      accept_sum <- accept_sum +
+      tuning_values$accept_sum <- tuning_values$accept_sum +
         tf$reduce_sum(tf$where(
           is_number,
           accept_stat,
           tf$zeros_like(accept_stat)
         ))
-      accept_count <- accept_count + tf$reduce_sum(tf$cast(is_number, dtype))
+      tuning_values$accept_count <- tuning_values$accept_count +
+        tf$reduce_sum(tf$cast(is_number, dtype))
 
       at_tuning_point <- tf$logical_or(
         tf$equal(
@@ -726,10 +717,131 @@ sampler <- R6Class(
         tf$equal(completed, total)
       )
 
-      epsilon_index <- self$tuning_indices()$epsilon
-      diag_sd_index <- self$tuning_indices()$diag_sd
+      tune_scheme <- switch(
+        self$adaptation,
+        greta = self$tf_tune_greta,
+        greta_841 = self$tf_tune_greta,
+        windowed = self$tf_tune_windowed
+      )
+      tune_scheme(
+        completed = completed,
+        total = total,
+        at_tuning_point = at_tuning_point,
+        state = step$state,
+        is_accepted = step$is_accepted,
+        param_vec = param_vec,
+        tuning_values = tuning_values,
+        welford_mean = welford_mean,
+        welford_m2 = welford_m2
+      )
+    },
+
+    # a running variance over every chain's state, updated with a batch of one
+    # state per chain (Chan, Golub and LeVeque, 1983)
+    tf_update_variance = function(count, welford_mean, welford_m2, state) {
+      dtype <- state$dtype
+      batch_size <- tf$cast(tf$shape(state)[0], dtype)
+      batch_mean <- tf$reduce_mean(state, axis = 0L)
+      batch_m2 <- tf$reduce_sum(tf$square(state - batch_mean), axis = 0L)
+      new_count <- count + batch_size
+      delta <- batch_mean - welford_mean
+      list(
+        count = new_count,
+        welford_mean = welford_mean + delta * batch_size / new_count,
+        welford_m2 = welford_m2 +
+          batch_m2 +
+          tf$square(delta) * count * batch_size / new_count
+      )
+    },
+
+    # one step of dual averaging (Hoffman and Gelman, 2014) after t updates,
+    # with epsilon the averaged value at the end of warmup
+    tf_dual_averaging = function(
+      t,
+      mu,
+      gamma,
+      hbar,
+      log_epsilon_bar,
+      mean_accept,
+      final
+    ) {
+      kappa <- 0.75
+      t0 <- 10
+      w1 <- 1 / (t + t0)
+      hbar <- (1 - w1) * hbar + w1 * (self$accept_target - mean_accept)
+      log_epsilon <- mu - hbar * tf$sqrt(t) / gamma
+      w2 <- tf$pow(t, -kappa)
+      log_epsilon_bar <- w2 * log_epsilon + (1 - w2) * log_epsilon_bar
+      list(
+        epsilon = tf$where(
+          final,
+          tf$exp(log_epsilon_bar),
+          tf$exp(log_epsilon)
+        ),
+        hbar = hbar,
+        log_epsilon_bar = log_epsilon_bar
+      )
+    },
+
+    tf_mean_accept = function(tuning_values) {
+      dtype <- tuning_values$accept_sum$dtype
+      tf$where(
+        tf$greater(tuning_values$accept_count, 0),
+        tuning_values$accept_sum /
+          tf$maximum(tuning_values$accept_count, tf$constant(1, dtype)),
+        tf$constant(0, dtype)
+      )
+    },
+
+    tf_set_tuned = function(param_vec, epsilon, diag_sd) {
+      indices <- self$tuning_indices()
+      tf$tensor_scatter_nd_update(
+        param_vec,
+        indices = tf$expand_dims(
+          tf$constant(c(indices$epsilon, indices$diag_sd), dtype = tf$int32),
+          axis = 1L
+        ),
+        updates = tf$concat(
+          list(tf$expand_dims(epsilon, 0L), diag_sd),
+          axis = 0L
+        )
+      )
+    },
+
+    tf_tune_greta = function(
+      completed,
+      total,
+      at_tuning_point,
+      state,
+      is_accepted,
+      param_vec,
+      tuning_values,
+      welford_mean,
+      welford_m2
+    ) {
+      dtype <- param_vec$dtype
+      variance <- self$tf_update_variance(
+        tuning_values$count,
+        welford_mean,
+        welford_m2,
+        state
+      )
+      tuning_values$count <- variance$count
+      welford_mean <- variance$welford_mean
+      welford_m2 <- variance$welford_m2
+
+      counted <- if (self$adaptation == "greta_841") {
+        is_accepted
+      } else {
+        tf$logical_not(is_accepted)
+      }
+      tuning_values$n_for_shrinkage <- tuning_values$n_for_shrinkage +
+        tf$reduce_sum(tf$cast(counted, dtype))
+
+      indices <- self$tuning_indices()
 
       update <- function() {
+        values <- tuning_values
         completed_value <- tf$cast(completed, dtype)
         fraction <- completed_value / tf$cast(total, dtype)
         within <- function(lower, upper) {
@@ -739,94 +851,180 @@ sampler <- R6Class(
           )
         }
 
-        mean_accept <- tf$where(
-          tf$greater(accept_count, 0),
-          accept_sum / tf$maximum(accept_count, tf$constant(1, dtype)),
-          tf$constant(0, dtype)
+        averaged <- self$tf_dual_averaging(
+          t = completed_value,
+          mu = log(10 * 0.05),
+          gamma = 0.1,
+          hbar = values$hbar,
+          log_epsilon_bar = values$log_epsilon_bar,
+          mean_accept = self$tf_mean_accept(values),
+          final = tf$equal(completed, total)
         )
-
-        # dual averaging
-        kappa <- 0.75
-        gamma <- 0.1
-        t0 <- 10
-        mu <- log(t0 * 0.05)
-        w1 <- 1 / (completed_value + t0)
-        new_hbar <- (1 - w1) * hbar + w1 * (self$accept_target - mean_accept)
-        log_epsilon <- mu - new_hbar * tf$sqrt(completed_value) / gamma
-        w2 <- tf$pow(completed_value, -kappa)
-        new_log_epsilon_bar <- w2 * log_epsilon + (1 - w2) * log_epsilon_bar
-        # at the end of warmup, epsilon is the averaged value
-        new_epsilon <- tf$where(
-          tf$equal(completed, total),
-          tf$exp(new_log_epsilon_bar),
-          tf$exp(log_epsilon)
-        )
-
         tuning_epsilon <- tf$logical_or(within(0, 0.1), within(0.4, 1))
-        old_epsilon <- tf$gather(param_vec, epsilon_index)
-        epsilon <- tf$where(tuning_epsilon, new_epsilon, old_epsilon)
-        hbar <- tf$where(tuning_epsilon, new_hbar, hbar)
-        log_epsilon_bar <- tf$where(
+        epsilon <- tf$where(
           tuning_epsilon,
-          new_log_epsilon_bar,
-          log_epsilon_bar
+          averaged$epsilon,
+          tf$gather(param_vec, indices$epsilon)
+        )
+        values$hbar <- tf$where(tuning_epsilon, averaged$hbar, values$hbar)
+        values$log_epsilon_bar <- tf$where(
+          tuning_epsilon,
+          averaged$log_epsilon_bar,
+          values$log_epsilon_bar
         )
 
         # diag_sd, from the sample variance shrunk towards 1e-3, as Stan does
         # when it adapts its metric
-        tuning_diag_sd <- tf$logical_and(
-          within(0.1, 0.4),
-          tf$greater(n_for_shrinkage, 5)
-        )
-        sample_variance <- welford_m2 / (count - 1)
-        shrinkage <- 1 / (n_for_shrinkage + 5)
-        shrunk_variance <- n_for_shrinkage *
-          shrinkage *
-          sample_variance +
-          5e-3 * shrinkage
-        old_diag_sd <- tf$gather(param_vec, diag_sd_index)
+        n <- values$n_for_shrinkage
+        tuning_diag_sd <- tf$logical_and(within(0.1, 0.4), tf$greater(n, 5))
+        sample_variance <- welford_m2 / (values$count - 1)
+        shrinkage <- 1 / (n + 5)
+        shrunk_variance <- n * shrinkage * sample_variance + 5e-3 * shrinkage
         diag_sd <- tf$where(
           tuning_diag_sd,
           tf$sqrt(shrunk_variance),
-          old_diag_sd
+          tf$gather(param_vec, indices$diag_sd)
         )
 
-        new_param_vec <- tf$tensor_scatter_nd_update(
-          param_vec,
-          indices = tf$expand_dims(
-            tf$constant(c(epsilon_index, diag_sd_index), dtype = tf$int32),
-            axis = 1L
-          ),
-          updates = tf$concat(
-            list(tf$expand_dims(epsilon, 0L), diag_sd),
-            axis = 0L
-          )
-        )
-        zero <- tf$constant(0, dtype)
+        values$accept_sum <- tf$constant(0, dtype)
+        values$accept_count <- tf$constant(0, dtype)
         list(
-          new_param_vec,
-          tf$stack(list(
-            hbar,
-            log_epsilon_bar,
-            count,
-            n_for_shrinkage,
-            zero,
-            zero
-          ))
+          self$tf_set_tuned(param_vec, epsilon, diag_sd),
+          tf$stack(unname(values))
         )
       }
       keep <- function() {
+        list(param_vec, tf$stack(unname(tuning_values)))
+      }
+      updated <- tf$cond(at_tuning_point, update, keep)
+
+      list(
+        param_vec = updated[[1]],
+        tuning = updated[[2]],
+        welford_mean = welford_mean,
+        welford_m2 = welford_m2
+      )
+    },
+
+    tf_tune_windowed = function(
+      completed,
+      total,
+      at_tuning_point,
+      state,
+      is_accepted,
+      param_vec,
+      tuning_values,
+      welford_mean,
+      welford_m2
+    ) {
+      dtype <- param_vec$dtype
+      indices <- self$tuning_indices()
+      total_value <- tf$cast(total, dtype)
+      completed_value <- tf$cast(completed, dtype)
+      buffer_end <- tf$round(self$adaptation_buffer * total_value)
+      window_ends <- tf$round(
+        tf$constant(self$adaptation_windows, dtype) * total_value
+      )
+
+      # the draws of the current window
+      in_window <- tf$logical_and(
+        tf$greater(completed_value, buffer_end),
+        tf$less_equal(completed_value, tf$reduce_max(window_ends))
+      )
+      variance <- self$tf_update_variance(
+        tuning_values$count,
+        welford_mean,
+        welford_m2,
+        state
+      )
+      tuning_values$count <- tf$where(
+        in_window,
+        variance$count,
+        tuning_values$count
+      )
+      welford_mean <- tf$where(in_window, variance$welford_mean, welford_mean)
+      welford_m2 <- tf$where(in_window, variance$welford_m2, welford_m2)
+
+      # at the end of a window, set diag_sd from its draws, keep each
+      # parameter's step size, epsilon * diag_sd / sum(diag_sd), as it was,
+      # and restart dual averaging from there
+      window_ends_now <- tf$reduce_any(tf$equal(completed_value, window_ends))
+      end_window <- function() {
+        values <- tuning_values
+        n <- values$count
+        has_draws <- tf$greater(n, 10)
+        sample_variance <- welford_m2 / tf$maximum(n - 1, tf$constant(1, dtype))
+        shrunk_variance <- (n / (n + 5)) *
+          sample_variance +
+          1e-3 * (5 / (n + 5))
+        old_epsilon <- tf$gather(param_vec, indices$epsilon)
+        old_diag_sd <- tf$gather(param_vec, indices$diag_sd)
+        new_diag_sd <- tf$sqrt(shrunk_variance)
+        epsilon <- tf$where(
+          has_draws,
+          old_epsilon *
+            tf$reduce_sum(new_diag_sd) /
+            tf$reduce_sum(old_diag_sd),
+          old_epsilon
+        )
+        diag_sd <- tf$where(has_draws, new_diag_sd, old_diag_sd)
+
+        zero <- tf$constant(0, dtype)
+        values$count <- zero
+        values$hbar <- zero
+        values$log_epsilon_bar <- zero
+        values$da_updates <- zero
+        values$da_mu <- tf$math$log(10 * epsilon)
+        list(
+          self$tf_set_tuned(param_vec, epsilon, diag_sd),
+          tf$stack(unname(values)),
+          tf$zeros_like(welford_mean),
+          tf$zeros_like(welford_m2)
+        )
+      }
+      no_window_end <- function() {
         list(
           param_vec,
-          tf$stack(list(
-            hbar,
-            log_epsilon_bar,
-            count,
-            n_for_shrinkage,
-            accept_sum,
-            accept_count
-          ))
+          tf$stack(unname(tuning_values)),
+          welford_mean,
+          welford_m2
         )
+      }
+      ended <- tf$cond(window_ends_now, end_window, no_window_end)
+      param_vec <- ended[[1]]
+      tuning_values <- tf$unstack(ended[[2]])
+      names(tuning_values) <- names(self$tuning_state$tuning)
+      welford_mean <- ended[[3]]
+      welford_m2 <- ended[[4]]
+
+      # dual averaging every tuning interval, from its last restart
+      update <- function() {
+        values <- tuning_values
+        values$da_updates <- values$da_updates + 1
+        averaged <- self$tf_dual_averaging(
+          t = values$da_updates,
+          mu = values$da_mu,
+          gamma = 0.05,
+          hbar = values$hbar,
+          log_epsilon_bar = values$log_epsilon_bar,
+          mean_accept = self$tf_mean_accept(values),
+          final = tf$equal(completed, total)
+        )
+        values$hbar <- averaged$hbar
+        values$log_epsilon_bar <- averaged$log_epsilon_bar
+        values$accept_sum <- tf$constant(0, dtype)
+        values$accept_count <- tf$constant(0, dtype)
+        list(
+          self$tf_set_tuned(
+            param_vec,
+            averaged$epsilon,
+            tf$gather(param_vec, indices$diag_sd)
+          ),
+          tf$stack(unname(values))
+        )
+      }
+      keep <- function() {
+        list(param_vec, tf$stack(unname(tuning_values)))
       }
       updated <- tf$cond(at_tuning_point, update, keep)
 

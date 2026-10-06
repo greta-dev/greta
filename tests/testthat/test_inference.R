@@ -586,6 +586,24 @@ test_that("warmup tunes inside one call to TensorFlow without a progress bar", {
   )))
 })
 
+test_that("the windowed warmup scheme estimates diag_sd on very different scales", {
+  skip_if_not(check_tf_version())
+  default_scheme <- sampler$public_fields$adaptation
+  sampler$set("public", "adaptation", "windowed", overwrite = TRUE)
+  withr::defer(
+    sampler$set("public", "adaptation", default_scheme, overwrite = TRUE)
+  )
+
+  # greta-dev/greta#853's test, at five scales rather than twenty
+  true_sd <- 10^seq(-2, 2, length.out = 5)
+  x <- normal(0, true_sd)
+  m <- model(x)
+  set.seed(2026 - 10 - 07)
+  draws <- mcmc(m, warmup = 1000, n_samples = 10, chains = 4, verbose = FALSE)
+  tuned <- get_model_info(draws)$samplers[[1]]$parameters$diag_sd
+  expect_true(all(abs(log(tuned / true_sd)) < log(1.25)))
+})
+
 test_that("seeded draws do not depend on how the chain is split into calls", {
   skip_if_not(check_tf_version())
   x <- normal(0, 1)
