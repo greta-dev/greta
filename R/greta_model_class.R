@@ -24,9 +24,14 @@ NULL
 #'   instability during sampling.
 #'
 #' @param compile whether to apply
-#'   [XLA JIT compilation](https://openxla.org/xla) to
-#'   the TensorFlow graph representing the model. This may slow down model
-#'   definition, and speed up model evaluation.
+#'   [XLA JIT compilation](https://openxla.org/xla) to the TensorFlow functions
+#'   that evaluate the model. XLA compiles each function the first time it
+#'   runs, which slows that first call and can speed up later ones. Not every
+#'   model can be compiled: a model with a covariance or correlation matrix
+#'   variable, such as one from [wishart()], [lkj_correlation()] or
+#'   [cholesky_variable()], runs uncompiled with a warning, and a model whose
+#'   operations XLA does not support, such as a `tf$while_loop()` without
+#'   `maximum_iterations`, errors when it is first run.
 #'
 #' @details `model()` takes greta arrays as arguments, and defines a
 #'   statistical model by finding all of the other greta arrays on which they
@@ -49,7 +54,7 @@ NULL
 #'
 #' plot(m)
 #' }
-model <- function(..., precision = c("double", "single"), compile = TRUE) {
+model <- function(..., precision = c("double", "single"), compile = FALSE) {
   check_tf_version("error")
 
   # get the floating point precision
@@ -82,9 +87,6 @@ model <- function(..., precision = c("double", "single"), compile = TRUE) {
   target_greta_arrays <- check_greta_arrays(target_greta_arrays, "model")
 
   # get the dag containing the target nodes
-  # TF1/2 check
-  # I don't think we need to use the `compile` flag in TF2 anymore
-  # Well, it will be passed onto the tf_function creation step
   dag <- dag_class$new(
     target_greta_arrays,
     tf_float = tf_float,
@@ -95,6 +97,7 @@ model <- function(..., precision = c("double", "single"), compile = TRUE) {
   # to one another. Need to check there are densities in each graph
   check_subgraphs(dag)
   check_unfixed_discrete_distributions(dag)
+  check_xla_can_compile(dag, compile)
 
   # define the TF graph
   # dag$define_tf()

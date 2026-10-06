@@ -1149,3 +1149,9 @@ find_thinning <- function(draws, max_thin = 100, autocorr_threshold = 0.01) {
 trace_count <- function(traced) {
   as.integer(traced$experimental_get_tracing_count())
 }
+
+# whether TensorFlow marked a traced function for XLA compilation
+xla_must_compile <- function(traced) {
+  attributes <- traced$get_concrete_function()$function_def$attr
+  attributes$`__getitem__`("_XlaMustCompile")$b
+}

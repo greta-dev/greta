@@ -1693,6 +1693,21 @@ check_unfixed_discrete_distributions <- function(
   }
 }
 
+check_xla_can_compile <- function(dag, compile) {
+  xla_turned_off <- compile && !dag$compile
+  if (xla_turned_off) {
+    cli::cli_warn(
+      message = c(
+        "XLA compilation is turned off for this model.",
+        "i" = "XLA cannot compile a model with a covariance or correlation \\
+        matrix variable, such as one from {.fn wishart}, \\
+        {.fn lkj_correlation} or {.fn cholesky_variable}.",
+        "i" = "Set {.code compile = FALSE} to silence this warning."
+      )
+    )
+  }
+}
+
 check_greta_array_type <- function(x, optional, call = rlang::caller_env()) {
   if (!is.numeric(x) && !is.logical(x) && !optional) {
     cli::cli_abort(
@@ -1916,10 +1931,16 @@ check_for_errors <- function(res, call = rlang::caller_env()) {
 
     # if it was just a numerical error, quietly return a bad value
     if (!any(numerical_errors)) {
+      xla_failed <- grepl("xla", res$message, ignore.case = TRUE)
+      xla_advice <- c(
+        "i" = "XLA could not compile this model. Build it with \\
+        {.code model(..., compile = FALSE)} to run it uncompiled."
+      )
       cli::cli_abort(
         message = c(
           "{.pkg greta} hit a tensorflow error:",
-          "{res}"
+          "{res}",
+          if (xla_failed) xla_advice
         ),
         call = call
       )

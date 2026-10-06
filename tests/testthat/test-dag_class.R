@@ -29,3 +29,36 @@ test_that("opt() traces only a log-density function for one row", {
   expect_identical(trace_count(one_row), 1L)
   expect_identical(trace_count(m$dag$tf_log_prob_function), 0L)
 })
+
+test_that("compile = TRUE has XLA compile the model's functions", {
+  skip_if_not(check_tf_version())
+  x <- normal(0, 1)
+  m_compiled <- model(x, compile = TRUE)
+  m_default <- model(x)
+  opt(m_compiled)
+  opt(m_default)
+
+  compiled <- function(dag) {
+    vapply(
+      list(
+        dag$tf_log_prob_function,
+        dag$tf_log_prob_function_one_row,
+        dag$tf_trace_values_batch
+      ),
+      xla_must_compile,
+      logical(1)
+    )
+  }
+  expect_identical(compiled(m_compiled$dag), rep(TRUE, 3))
+  expect_identical(compiled(m_default$dag), rep(FALSE, 3))
+})
+
+test_that("a model with a covariance or correlation matrix runs uncompiled", {
+  skip_if_not(check_tf_version())
+  set.seed(2026 - 10 - 06)
+  correlation <- lkj_correlation(2)
+
+  expect_snapshot(m <- model(correlation, compile = TRUE))
+  expect_false(xla_must_compile(m$dag$tf_log_prob_function))
+  expect_ok(mcmc(m, warmup = 10, n_samples = 10, chains = 1, verbose = FALSE))
+})
