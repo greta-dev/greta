@@ -22,16 +22,8 @@ NULL
 #' @param diag_sd estimate of the posterior marginal standard deviations
 #'   (positive, will be tuned).
 #'
-#' @details For `hmc()`, the number of leapfrog steps is selected uniformly at
-#'   random from between `Lmin` and `Lmax`. It is not redrawn at every
-#'   iteration: greta draws a new value each time it returns from TensorFlow.
-#'   During warmup that is roughly every 3 iterations, since tuning breaks the
-#'   run up that often; during sampling it is every `pb_update` iterations,
-#'   rounded to a whole number of thinned draws, or once for the whole phase
-#'   when `verbose = FALSE`, and once more for any iterations after the last
-#'   draw. Setting
-#'   `one_by_one = TRUE` draws a new value every iteration. `pb_update`,
-#'   `verbose` and `one_by_one` are all arguments of [mcmc()].
+#' @details For `hmc()`, the number of leapfrog steps is drawn uniformly at
+#'   random from between `Lmin` and `Lmax`, afresh at every iteration.
 #'   `diag_sd` is used to rescale the parameter space to make it more
 #'   uniform, and make sampling more efficient.
 hmc <- function(Lmin = 5, Lmax = 10, epsilon = 0.1, diag_sd = 1) {
@@ -152,18 +144,31 @@ hmc_sampler <- R6Class(
     ),
     accept_target = 0.651,
 
-    define_tf_kernel = function(sampler_param_vec) {
+    define_tf_kernel = function(sampler_param_vec, seed) {
       dag <- self$model$dag
       tfe <- dag$tf_environment
 
-      free_state_size <- length(sampler_param_vec) - 2
+      free_state_size <- length(sampler_param_vec) - 3
 
       # the sampler's parameters arrive as one flat vector because that is what
       # the traced function's TensorSpec takes; this unpacks it again. Passing
       # them as real arguments is greta-dev/greta#547
-      hmc_l <- sampler_param_vec[0]
-      hmc_epsilon <- sampler_param_vec[1]
-      hmc_diag_sd <- sampler_param_vec[2:(1 + free_state_size)]
+      hmc_l_min <- tf$cast(sampler_param_vec[0], tf$int32)
+      hmc_l_max <- tf$cast(sampler_param_vec[1], tf$int32)
+      hmc_epsilon <- sampler_param_vec[2]
+      hmc_diag_sd <- sampler_param_vec[3:(2 + free_state_size)]
+
+      # the sampler loop builds a kernel every iteration, each from its own
+      # seed, so the leapfrog count is drawn afresh every iteration. Drawn once
+      # per call to TensorFlow, it stays fixed for a whole burst, and a chain
+      # whose step size and leapfrog count trace a closed orbit stops mixing
+      hmc_l <- tf$random$stateless_uniform(
+        shape = shape(),
+        seed = seed,
+        minval = hmc_l_min,
+        maxval = hmc_l_max + 1L,
+        dtype = tf$int32
+      )
 
       hmc_step_sizes <- tf$cast(
         x = tf$reshape(
@@ -189,17 +194,13 @@ hmc_sampler <- R6Class(
       )
     },
     sampler_parameter_values = function() {
-      # random number of integration steps
-      l_min <- self$parameters$Lmin
-      l_max <- self$parameters$Lmax
-      l <- sample(seq(l_min, l_max), 1)
-
       epsilon <- self$parameters$epsilon
       diag_sd <- matrix(self$parameters$diag_sd)
 
       # return named list for replacing tensors
       list(
-        hmc_l = l,
+        hmc_l_min = self$parameters$Lmin,
+        hmc_l_max = self$parameters$Lmax,
         hmc_epsilon = epsilon,
         hmc_diag_sd = diag_sd
       )
@@ -218,7 +219,7 @@ rwmh_sampler <- R6Class(
     ),
     accept_target = 0.44,
 
-    define_tf_kernel = function(sampler_param_vec) {
+    define_tf_kernel = function(sampler_param_vec, seed) {
       # wrap this up into a function to extract these out
       free_state_size <- length(sampler_param_vec) - 1 # get it from dag object
       # e.g., length(dag$free_state)
@@ -277,7 +278,7 @@ slice_sampler <- R6Class(
     tuning_interval = Inf,
     uses_metropolis = FALSE,
 
-    define_tf_kernel = function(sampler_param_vec) {
+    define_tf_kernel = function(sampler_param_vec, seed) {
       slice_max_doublings <- tensorflow::as_tensor(
         x = sampler_param_vec[0],
         dtype = tf$int32
