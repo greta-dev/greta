@@ -79,7 +79,7 @@ sampler <- R6Class(
         f = self$define_tf_warmup_iterations,
         input_signature = list(
           # free state
-          self$model$dag$free_state_signature()[[1]],
+          self$free_state_signature(),
           # n_iterations, iterations_done and total_warmup
           scalar_integer,
           scalar_integer,
@@ -100,12 +100,22 @@ sampler <- R6Class(
     },
     tf_warmup = NULL,
 
+    # A sampler runs the same number of chains for as long as it exists, so
+    # its functions are traced for exactly that many rows: TensorFlow runs a
+    # graph whose shapes it knows faster than one traced for any number of
+    # rows, as the log-density function is
+    free_state_signature = function() {
+      self$model$dag$free_state_signature(n_rows = as.integer(self$n_chains))[[
+        1
+      ]]
+    },
+
     define_tf_evaluate_sample_batch = function() {
       self$tf_evaluate_sample_batch <- tensorflow::tf_function(
         f = self$define_tf_draws,
         input_signature = list(
           # free state
-          self$model$dag$free_state_signature()[[1]],
+          self$free_state_signature(),
           # sampler_burst_length
           tf$TensorSpec(shape = list(), dtype = tf$int32),
           # sampler_thin

@@ -604,6 +604,23 @@ test_that("the windowed warmup scheme estimates diag_sd on very different scales
   expect_true(all(abs(log(tuned / true_sd)) < log(1.25)))
 })
 
+test_that("a sampler's functions are traced for its number of chains", {
+  skip_if_not(check_tf_version())
+  x <- normal(0, 1, dim = 2)
+  m <- model(x)
+  draws <- mcmc(m, warmup = 10, n_samples = 10, chains = 3, verbose = FALSE)
+  sampler <- get_model_info(draws)$samplers[[1]]
+
+  signature_shape <- function(traced) {
+    unlist(traced$input_signature[[1]]$shape$as_list())
+  }
+  expect_identical(as.integer(signature_shape(sampler$tf_warmup)), c(3L, 2L))
+  expect_identical(
+    as.integer(signature_shape(sampler$tf_evaluate_sample_batch)),
+    c(3L, 2L)
+  )
+})
+
 test_that("seeded draws do not depend on how the chain is split into calls", {
   skip_if_not(check_tf_version())
   x <- normal(0, 1)
