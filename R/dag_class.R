@@ -97,9 +97,18 @@ dag_class <- R6Class(
       invisible(self)
     },
 
+    # these variables leave the free state, which narrows it, so the trace
+    # function is rebuilt against its new width. calculate(), the only caller,
+    # does not evaluate the log density, so that function is left as it is
+    set_variables_without_free_state = function(variables) {
+      self$variables_without_free_state <- variables
+      self$define_tf_trace_values_batch()
+    },
+
     define_tf_trace_values_batch = function() {
       self$tf_trace_values_batch <- tensorflow::tf_function(
-        f = self$define_trace_values_batch
+        f = self$define_trace_values_batch,
+        input_signature = self$free_state_signature()
       )
     },
 
@@ -109,16 +118,43 @@ dag_class <- R6Class(
       # a no-op after set_data_value(), which writes through to the node
       self$define_data_variables()
 
-      # no input_signature, so this retraces once per distinct batch shape and
-      # then caches - bounded by how many chain counts a session uses, not by
-      # how often it is called. Measured, so it is not the source of the
-      # retracing warnings in greta-dev/greta#546
       self$tf_log_prob_function <- tensorflow::tf_function(
-        f = self$generate_log_prob_function()
+        f = self$generate_log_prob_function(),
+        input_signature = self$free_state_signature()
       )
+
+      # rebuilt from the new log-density function the next time it is used
+      self$tf_log_prob_function_one_row <- NULL
+    },
+
+    # opt() always passes one row, and a graph traced for a known number of
+    # rows runs faster per step than one traced for any number: 100 adam steps
+    # on the linear example took 0.075s this way and 0.101s through the open
+    # signature (greta.benchmarks run 2026-09-30-trace-census-i546). Only opt()
+    # uses it, so it is built on first use rather than with every model
+    one_row_log_prob = function(free_state) {
+      if (is.null(self$tf_log_prob_function_one_row)) {
+        self$tf_log_prob_function_one_row <- tensorflow::tf_function(
+          f = self$generate_log_prob_function(),
+          input_signature = self$free_state_signature(n_rows = 1L)
+        )
+      }
+      self$tf_log_prob_function_one_row(free_state)
+    },
+
+    # The free state's shape, with the batch dimension left open unless n_rows
+    # is given. Without it, these functions retrace for every batch size they
+    # meet: one row while checking initial values, all chains inside the
+    # sampler, and each chunk of draws calculate() traces. With it, each traces
+    # once per model, as the sampler's function already does.
+    # greta-dev/greta#546
+    free_state_signature = function(n_rows = NULL) {
+      n_free <- length(unlist_tf(self$example_parameters(free = TRUE)))
+      list(tf$TensorSpec(shape = list(n_rows, n_free), dtype = tf_float()))
     },
 
     tf_log_prob_function = NULL,
+    tf_log_prob_function_one_row = NULL,
 
     tf_log_prob_function_adjusted = function(free_state) {
       self$tf_log_prob_function(free_state)$adjusted
@@ -472,72 +508,54 @@ dag_class <- R6Class(
     ) {
       which_objective <- match.arg(which_objective)
 
-      ga_names <- names(nodes)
-
-      ## TF1/2 retracing
-      ## This is a location where retracting happens in `opt`
-      hessian_list <- lapply(
-        X = nodes,
-        self$calculate_one_hessian,
-        free_state = free_state,
-        which_objective = which_objective
-      )
-      # assign names and return
-      names(hessian_list) <- ga_names
-      hessian_list
-    },
-
-    calculate_one_hessian = function(
-      node,
-      free_state,
-      which_objective = c(
-        "adjusted",
-        "unadjusted"
-      )
-    ) {
-      which_objective <- match.arg(which_objective)
-
-      # temporarily define a new environment
+      # one graph build for all the targets: define_tf() and
+      # define_joint_density() cost O(model size), so building per target
+      # would make opt(hessian = TRUE) quadratic in the number of targets.
+      # greta-dev/greta#546
       tfe_old <- self$tf_environment
       on.exit(self$tf_environment <- tfe_old)
       tfe <- self$tf_environment <- new.env()
-
-      # put the free state in the environment, and build out the tf graph
       tfe$free_state <- free_state
 
-      # get names and dimensions of target greta arrays
-      ga_dim <- node$dim
-      tf_name <- self$tf_name(node)
-
-      # we now make all of the operations define themselves now
-      with(tf$GradientTape() %as% tape_1, {
+      # tape_1 is persistent because jacobian() reads it once per target, and
+      # because TensorFlow refuses a jacobian with experimental_use_pfor set to
+      # FALSE on a tape that is not. tape_2 is read once, so it needs no such
+      # thing
+      with(tf$GradientTape(persistent = TRUE) %as% tape_1, {
+        # only these two create tensors, so only these two need recording;
+        # fetching them afterwards is just a lookup
         with(tf$GradientTape() %as% tape_2, {
           self$define_tf()
-          # define the densities
           self$define_joint_density()
-
-          xs <- get(tf_name, tfe)
-
-          objectives <- list(
-            adjusted = tfe$joint_density_adj,
-            unadjusted = tfe$joint_density
-          )
-
-          # return either of the densities, or a list of both
-          y <- switch(
-            which_objective,
-            adjusted = objectives$adjusted,
-            unadjusted = objectives$unadjusted
-          )
         })
-        g <- tape_2$gradient(y, xs)
+
+        xs_list <- lapply(nodes, self$get_tf_object)
+        y <- switch(
+          which_objective,
+          adjusted = tfe$joint_density_adj,
+          unadjusted = tfe$joint_density
+        )
+
+        # one backward pass over the tape for all the targets: gradient()
+        # takes a structure of sources and returns one to match. Unnamed,
+        # because reticulate turns a named list into a Python dict, and
+        # model(z, z) really does give two targets called "z"
+        g_list <- tape_2$gradient(y, unname(xs_list))
       })
-      h <- tape_1$jacobian(g, xs)
 
-      # reshape from tensor to R dimensions
-      hessian <- array(h$numpy(), dim = hessian_dims(ga_dim))
-
-      hessian
+      Map(
+        function(xs, g, node) {
+          h <- tape_1$jacobian(
+            g,
+            xs,
+            experimental_use_pfor = prod(node$dim) >= pfor_min_elements()
+          )
+          array(as.array(h), dim = hessian_dims(node$dim))
+        },
+        xs_list,
+        g_list,
+        nodes
+      )
     },
 
     ###<<<

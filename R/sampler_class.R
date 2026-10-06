@@ -76,7 +76,7 @@ sampler <- R6Class(
         f = self$define_tf_draws,
         input_signature = list(
           # free state
-          tf$TensorSpec(shape = list(NULL, self$n_free), dtype = tf_float()),
+          self$model$dag$free_state_signature()[[1]],
           # sampler_burst_length
           tf$TensorSpec(shape = list(), dtype = tf$int32),
           # sampler_thin

@@ -469,9 +469,6 @@ build_sampler <- function(
   seed = get_seed(),
   compute_options
 ) {
-  ## TF1/2 retracing
-  ## This is where a retracing warning happens
-  ## in mcmc
   sampler$class$new(
     initial_values,
     model,
@@ -1073,4 +1070,17 @@ user_agrees <- function(ask, question) {
     return(TRUE)
   }
   yesno::yesno(question)
+}
+
+# how many elements a target greta array needs before dag$hessians() asks
+# TensorFlow to vectorise its jacobian with pfor. pfor traces a fresh function
+# on every call, so it only pays once there is enough to vectorise over.
+# Measured on TensorFlow 2.21.0, macOS arm64, first opt(hessian = TRUE) call,
+# median of five: twenty scalar targets took 1.97s by while loop against
+# pfor's 8.11s, one target of 400 elements took 0.44s against 0.21s, and one
+# of 100 was a tie. greta.benchmarks run 2026-09-29-hessian-timing-i546. That
+# will move with TensorFlow releases and nothing will say so, so re-measure
+# before trusting it outside the range in DESCRIPTION.
+pfor_min_elements <- function() {
+  100L
 }
