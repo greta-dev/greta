@@ -218,17 +218,6 @@ inference <- R6Class(
       )
 
       values_trace
-    },
-
-    # is the sampler in one of the tuning periods for a given parameter
-    in_periods = function(periods, i, n_samples) {
-      within <- function(period, fraction) {
-        fraction > period[1] & fraction <= period[2]
-      }
-
-      fraction <- i / n_samples
-      in_period <- vapply(periods, within, fraction, FUN.VALUE = FALSE)
-      any(in_period)
     }
   )
 )
