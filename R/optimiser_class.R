@@ -22,6 +22,8 @@ optimiser <- R6Class(
     it = 0,
     old_obj = Inf,
     diff = Inf,
+    # whether the optimiser itself says it converged, where it can say
+    converged = NA,
 
     # set up the model
     initialize = function(
@@ -88,7 +90,12 @@ optimiser <- R6Class(
         self$it <- NA
       }
 
-      converged <- self$it < (self$max_iterations - 1)
+      # an optimiser that does not say whether it converged is taken to have
+      # converged if it stopped short of its iteration limit
+      converged <- self$converged
+      if (is.na(converged)) {
+        converged <- self$it < (self$max_iterations - 1)
+      }
       # because we need to resolve an issue with indexing of TF object
       r_free_state <- as.array(self$free_state)
       par <- dag$trace_values(r_free_state, flatten = FALSE)
@@ -202,6 +209,7 @@ tf_optimiser <- R6Class(
         self$it <- as.numeric(result[[1]])
         self$old_obj <- as.numeric(result[[2]])
         self$diff <- as.numeric(result[[3]])
+        self$converged <- self$diff <= self$tolerance
 
         # The objective value can reach numerical overflow, so we error and
         # suggest changing initial values or changing sampler, e.g., `adam`
@@ -285,6 +293,7 @@ tfp_optimiser <- R6Class(
         )
 
         self$it <- as.numeric(tfe$tf_optimiser$num_iterations)
+        self$converged <- all(as.logical(tfe$tf_optimiser$converged))
         if (self$name == "nelder_mead") {
           tfe$free_state <- tf$expand_dims(tfe$tf_optimiser$position, axis = 0L)
         } else if (self$name == "bfgs") {

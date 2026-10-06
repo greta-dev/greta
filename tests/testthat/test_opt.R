@@ -83,6 +83,18 @@ test_that("opt converges with TFP optimisers", {
   expect_true(all(abs(x - o$par$z) < 1e-2))
 })
 
+test_that("opt reports convergence as the optimiser does", {
+  skip_if_not(check_tf_version())
+  x <- normal(0, 1, dim = 3)
+  m <- model(x)
+
+  # BFGS reaches the optimum of a standard normal in one iteration, one short
+  # of an iteration limit of two. greta-dev/greta#569
+  o <- opt(m, optimiser = bfgs(), max_iterations = 2)
+  expect_equal(o$iterations, 1)
+  expect_identical(o$convergence, 0)
+})
+
 test_that("opt fails with defunct optimisers", {
   skip_if_not(check_tf_version())
 
