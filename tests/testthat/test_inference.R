@@ -352,7 +352,7 @@ test_that("hmc() draws its leapfrog count every iteration", {
   spread <- vapply(
     1:10,
     function(seed) {
-      set.seed(seed)
+      local_greta_seed(seed)
       draws <- mcmc(
         m,
         sampler = hmc(Lmin = 6, Lmax = 9, epsilon = posterior_sd),
@@ -507,6 +507,10 @@ test_that("samplers print informatively", {
   # expect_match(out, "Lmin = 1")
 })
 
+test_that("hmc() errors informatively when Lmin is larger than Lmax", {
+  expect_snapshot(error = TRUE, hmc(Lmin = 10, Lmax = 5))
+})
+
 test_that("thinning keeps n_samples %/% thin draws, whatever the bursts", {
   skip_if_not(check_tf_version())
   set.seed(5)
@@ -514,10 +518,9 @@ test_that("thinning keeps n_samples %/% thin draws, whatever the bursts", {
   m <- model(x)
 
   # verbose = TRUE, since bursts follow pb_update only when the progress bar
-  # is shown. Each case would leave a burst shorter than thin if sampling were
-  # cut every pb_update iterations, or every iteration with one_by_one: the
-  # last burst (#609, #318), every burst with pb_update below thin, and every
-  # burst with one_by_one (#567)
+  # is shown. Each case leaves bursts shorter than thin, which keep no draws:
+  # the last burst (#609, #318), every burst with pb_update below thin, and
+  # every burst with one_by_one (#567)
   cases <- list(
     list(n_samples = 1000, thin = 100, pb_update = 101, one_by_one = FALSE),
     list(n_samples = 100, thin = 3, pb_update = 2, one_by_one = FALSE),
@@ -665,14 +668,58 @@ test_that("seeded draws do not depend on how the chain is split into calls", {
   x <- normal(0, 1)
   m <- model(x)
   draws_with <- function(...) {
-    set.seed(2026 - 10 - 06)
+    local_greta_seed()
     quietly(draws <- mcmc(m, warmup = 40, n_samples = 30, chains = 2, ...))
     as.matrix(draws)
   }
 
   one_call_per_phase <- draws_with(verbose = FALSE)
-  expect_equal(draws_with(verbose = TRUE, pb_update = 7), one_call_per_phase)
-  expect_equal(draws_with(one_by_one = TRUE), one_call_per_phase)
+  expect_identical(
+    draws_with(verbose = TRUE, pb_update = 7),
+    one_call_per_phase
+  )
+  expect_identical(draws_with(one_by_one = TRUE), one_call_per_phase)
+
+  thinned <- draws_with(thin = 3, verbose = FALSE)
+  expect_identical(draws_with(thin = 3, pb_update = 7), thinned)
+  expect_identical(draws_with(thin = 3, one_by_one = TRUE), thinned)
+})
+
+test_that("extra_samples() carries each chain on from its last iteration", {
+  skip_if_not(check_tf_version())
+  x <- normal(0, 1)
+  m <- model(x)
+  draws_with <- function(...) {
+    local_greta_seed()
+    mcmc(m, warmup = 20, chains = 2, verbose = FALSE, ...)
+  }
+
+  # with thin = 3, the first run keeps iterations 3, 6 and 9 and ends after
+  # 10, and extra_samples() starts its own thinning from there
+  every_iteration <- as.matrix(draws_with(n_samples = 19))
+  first <- draws_with(n_samples = 10, thin = 3)
+  more <- extra_samples(first, n_samples = 9, thin = 3, verbose = FALSE)
+  kept <- c(3, 6, 9, 13, 16, 19)
+  expect_identical(
+    as.matrix(more),
+    every_iteration[c(kept, kept + 19), , drop = FALSE]
+  )
+})
+
+test_that("a numerical error at the end of warmup still tunes", {
+  skip_if_not(check_tf_version())
+  x <- normal(0, 1)
+  m <- model(x)
+  draws <- mcmc(m, warmup = 30, n_samples = 10, chains = 2, verbose = FALSE)
+  sampler <- get_model_info(draws)$samplers[[1]]
+
+  # replay warmup's last iteration as one that errored with one_by_one, from
+  # an epsilon that tuning would not leave
+  sampler$parameters$epsilon <- 1
+  sampler$reject_iteration(sampler$sampling_start - 1L)
+
+  log_epsilon_bar <- sampler$tuning_state$tuning[["log_epsilon_bar"]]
+  expect_equal(sampler$parameters$epsilon, exp(log_epsilon_bar))
 })
 
 test_that("thin larger than n_samples is an informative error", {

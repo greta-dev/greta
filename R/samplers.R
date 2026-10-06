@@ -16,8 +16,10 @@ NULL
 #' @rdname samplers
 #' @export
 #'
-#' @param Lmin minimum number of leapfrog steps (positive integer, Lmin > Lmax)
-#' @param Lmax maximum number of leapfrog steps (positive integer, Lmax > Lmin)
+#' @param Lmin minimum number of leapfrog steps (positive integer, no larger
+#'   than Lmax)
+#' @param Lmax maximum number of leapfrog steps (positive integer, no smaller
+#'   than Lmin)
 #' @param epsilon leapfrog stepsize hyperparameter (positive, will be tuned)
 #' @param diag_sd estimate of the posterior marginal standard deviations
 #'   (positive, will be tuned).
@@ -28,6 +30,7 @@ NULL
 #'   uniform, and make sampling more efficient.
 hmc <- function(Lmin = 5, Lmax = 10, epsilon = 0.1, diag_sd = 1) {
   # nolint end
+  check_leapfrog_range(Lmin, Lmax)
   obj <- list(
     parameters = list(
       Lmin = Lmin,
@@ -151,17 +154,16 @@ hmc_sampler <- R6Class(
       free_state_size <- length(sampler_param_vec) - 3
 
       # the sampler's parameters arrive as one flat vector because that is what
-      # the traced function's TensorSpec takes; this unpacks it again. Passing
-      # them as real arguments is greta-dev/greta#547
+      # the traced function's TensorSpec takes; this unpacks it again
       hmc_l_min <- tf$cast(sampler_param_vec[0], tf$int32)
       hmc_l_max <- tf$cast(sampler_param_vec[1], tf$int32)
       hmc_epsilon <- sampler_param_vec[2]
       hmc_diag_sd <- sampler_param_vec[3:(2 + free_state_size)]
 
       # the sampler loop builds a kernel every iteration, each from its own
-      # seed, so the leapfrog count is drawn afresh every iteration. Drawn once
-      # per call to TensorFlow, it stays fixed for a whole burst, and a chain
-      # whose step size and leapfrog count trace a closed orbit stops mixing
+      # seed, so the leapfrog count is drawn afresh every iteration. A count
+      # fixed for many iterations would let a chain whose step size and count
+      # trace a closed orbit stop mixing
       hmc_l <- tf$random$stateless_uniform(
         shape = shape(),
         seed = seed,

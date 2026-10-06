@@ -8,6 +8,7 @@ sampler <- R6Class(
     n_samplers = 1,
     n_chains = 1,
     numerical_rejections = 0,
+    # the number of calls to TensorFlow so far, which only the tests read
     n_bursts = 0L,
     # every iteration's random numbers, whether it tunes, and whether its
     # state is a draw all come from its number in the chain, so seeded draws
@@ -78,6 +79,7 @@ sampler <- R6Class(
       paste(
         class(self)[1],
         self$n_chains,
+        length(unlist(self$sampler_parameter_values())),
         self$tuning_interval,
         self$accept_target,
         self$uses_metropolis,
@@ -99,6 +101,7 @@ sampler <- R6Class(
         template$traced_free_state <- list()
         template$traced_values <- list()
         template$last_burst_free_states <- list()
+        template$tf_iterations <- NULL
         dag$sampler_functions[[key]] <- template$new_tf_iterations()
       }
       dag$sampler_functions[[key]]
@@ -137,9 +140,12 @@ sampler <- R6Class(
     tf_iterations = NULL,
 
     # A sampler runs the same number of chains for as long as it exists, so
-    # its function is traced for exactly that many rows: TensorFlow runs a
-    # graph whose shapes it knows faster than one traced for any number of
-    # rows, as the log-density function is
+    # its function is traced for exactly that many rows, where the
+    # log-density function's is traced for any number. TensorFlow runs a graph
+    # whose shapes it knows faster: a second mcmc() call took 0.55 to 0.62
+    # times as long this way on greta's example models (the tf-warmup and
+    # branch versions in greta.benchmarks run 2026-10-07-tf-warmup-i547, at
+    # greta.benchmarks commit c5d7064)
     free_state_signature = function() {
       self$model$dag$free_state_signature(n_rows = as.integer(self$n_chains))[[
         1
@@ -305,7 +311,6 @@ sampler <- R6Class(
     run_iterations = function(n_iterations) {
       n_iterations <- as.integer(n_iterations)
       first_iteration <- self$iterations_run
-      self$iterations_run <- first_iteration + n_iterations
       self$n_bursts <- self$n_bursts + 1L
 
       # a stateless seed, which TensorFlow combines with each iteration's
@@ -354,15 +359,30 @@ sampler <- R6Class(
           self$abort_numerical_error(result)
         }
         self$reject_iteration(first_iteration)
-        return(invisible(self))
+      } else {
+        free_state <- as.array(result$free_state)
+        dim(free_state) <- c(self$n_chains, self$n_free)
+        self$free_state <- free_state
+        self$last_burst_free_states <- split_chains(as.array(result$draws))
+        self$keep_tuning(
+          result$sampler_param_vec,
+          result$tuning,
+          result$welford_mean,
+          result$welford_m2
+        )
+        self$numerical_rejections <- self$numerical_rejections +
+          as.numeric(result$numerical_rejections)
       }
 
-      free_state <- as.array(result$free_state)
-      dim(free_state) <- c(self$n_chains, self$n_free)
-      self$free_state <- free_state
-      self$last_burst_free_states <- split_chains(as.array(result$draws))
+      # counted once they have run, so that an interrupted call leaves the
+      # chain's count where its state is
+      self$iterations_run <- first_iteration + n_iterations
+      invisible(self)
+    },
 
-      tuned <- as.numeric(result$sampler_param_vec)
+    # keeps the tuned parameters and the tuning state TensorFlow returned
+    keep_tuning = function(param_vec, tuning, welford_mean, welford_m2) {
+      tuned <- as.numeric(param_vec)
       indices <- self$tuning_indices()
       if (!is.null(indices)) {
         self$parameters$epsilon <- tuned[indices$epsilon + 1]
@@ -370,17 +390,10 @@ sampler <- R6Class(
       }
 
       self$tuning_state <- list(
-        tuning = setNames(
-          as.numeric(result$tuning),
-          names(self$tuning_state$tuning)
-        ),
-        welford_mean = as.numeric(result$welford_mean),
-        welford_m2 = as.numeric(result$welford_m2)
+        tuning = setNames(as.numeric(tuning), names(self$tuning_state$tuning)),
+        welford_mean = as.numeric(welford_mean),
+        welford_m2 = as.numeric(welford_m2)
       )
-      self$numerical_rejections <- self$numerical_rejections +
-        as.numeric(result$numerical_rejections)
-
-      invisible(self)
     },
 
     # where epsilon and diag_sd sit in sampler_parameter_values(), counted
@@ -390,10 +403,17 @@ sampler <- R6Class(
     },
 
     # A numerical error in a call of one iteration came from its only
-    # proposal, so the sampler rejects that proposal: the state and tuning
-    # stay where they were, and the state is kept as a draw if one was due
+    # proposal, so the sampler rejects that proposal: the state stays where
+    # it was, and is kept as a draw if one was due
     reject_iteration = function(iteration) {
       self$numerical_rejections <- self$numerical_rejections + self$n_chains
+
+      tunes_iteration <- iteration < self$sampling_start &&
+        is.finite(self$tuning_interval)
+      if (tunes_iteration) {
+        self$tune_rejected_iteration(iteration)
+      }
+
       sampling_iterations <- iteration + 1L - self$sampling_start
       is_draw <- sampling_iterations > 0 &&
         sampling_iterations %% self$thin == 0
@@ -403,6 +423,56 @@ sampler <- R6Class(
         dim = c(n_draws, self$n_chains, self$n_free)
       )
       self$last_burst_free_states <- split_chains(draws)
+    },
+
+    # Warmup tunes on a rejected proposal as on any other: an acceptance of
+    # zero, and the state unchanged. If the iteration that errored ends warmup,
+    # this is also what sets epsilon to its averaged value. It runs tf_tune()
+    # eagerly, since only an iteration that errors with one_by_one comes here.
+    tune_rejected_iteration = function(iteration) {
+      float <- tf_float()
+      warmup_start <- self$sampling_start - self$warmup
+      rejected_step <- list(
+        state = tensorflow::as_tensor(self$free_state, dtype = float),
+        log_accept_ratio = tensorflow::as_tensor(
+          rep(-Inf, self$n_chains),
+          dtype = float
+        ),
+        is_accepted = tensorflow::as_tensor(rep(FALSE, self$n_chains))
+      )
+      param_vec <- unlist(self$sampler_parameter_values())
+      tuned <- self$tf_tune(
+        completed = tensorflow::as_tensor(
+          as.integer(iteration - warmup_start + 1L)
+        ),
+        total = tensorflow::as_tensor(as.integer(self$warmup)),
+        step = rejected_step,
+        param_vec = tensorflow::as_tensor(
+          param_vec,
+          dtype = float,
+          shape = length(param_vec)
+        ),
+        tuning = tensorflow::as_tensor(
+          unname(self$tuning_state$tuning),
+          dtype = float
+        ),
+        welford_mean = tensorflow::as_tensor(
+          self$tuning_state$welford_mean,
+          dtype = float,
+          shape = self$n_free
+        ),
+        welford_m2 = tensorflow::as_tensor(
+          self$tuning_state$welford_m2,
+          dtype = float,
+          shape = self$n_free
+        )
+      )
+      self$keep_tuning(
+        tuned$param_vec,
+        tuned$tuning,
+        tuned$welford_mean,
+        tuned$welford_m2
+      )
     },
 
     # In a call of more than one iteration, the sampler cannot tell which
@@ -458,9 +528,9 @@ sampler <- R6Class(
       }
     },
 
-    # split n_samples into bursts that end at every multiple of pb_update
-    burst_lengths = function(n_samples, pb_update) {
-      changepoints <- c(seq(0, n_samples, by = pb_update), n_samples)
+    # split n_iterations into bursts that end at every multiple of pb_update
+    burst_lengths = function(n_iterations, pb_update) {
+      changepoints <- c(seq(0, n_iterations, by = pb_update), n_iterations)
       changepoints <- sort(unique(changepoints))
       diff(changepoints)
     },
@@ -622,7 +692,7 @@ sampler <- R6Class(
           function() {
             draws$write(draws_so_far - draws_before_call - 1L, step$state)
           },
-          function() draws
+          \() draws
         )
 
         list(
@@ -706,8 +776,8 @@ sampler <- R6Class(
       welford_mean <- running_variance$mean
       welford_m2 <- running_variance$sum_squared_residuals
 
-      # counts rejected proposals, as tune_diag_sd() did, though it is meant
-      # to count accepted ones: greta-dev/greta#841
+      # counts rejected proposals, though it is meant to count accepted ones:
+      # greta-dev/greta#841
       n_rejected <- tf$reduce_sum(
         tf$cast(tf$logical_not(step$is_accepted), dtype)
       )
@@ -847,7 +917,6 @@ sampler <- R6Class(
     },
 
     sampler_parameter_values = function() {
-      # random number of integration steps
       self$parameters
     },
     empty_matrices = function(n, ncol) {
