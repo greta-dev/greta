@@ -40,16 +40,8 @@ During the warmup iterations of \code{mcmc}, some of these
 sampler parameters will be tuned to improve the efficiency of the sampler,
 so the values provided here are used as starting values.
 
-For \code{hmc()}, the number of leapfrog steps is selected uniformly at
-random from between \code{Lmin} and \code{Lmax}. It is not redrawn at every
-iteration: greta draws a new value each time it returns from TensorFlow.
-During warmup that is roughly every 3 iterations, since tuning breaks the
-run up that often; during sampling it is every \code{pb_update} iterations,
-rounded to a whole number of thinned draws, or once for the whole phase
-when \code{verbose = FALSE}, and once more for any iterations after the last
-draw. Setting
-\code{one_by_one = TRUE} draws a new value every iteration. \code{pb_update},
-\code{verbose} and \code{one_by_one} are all arguments of \code{\link[=mcmc]{mcmc()}}.
+For \code{hmc()}, the number of leapfrog steps is drawn uniformly at
+random from between \code{Lmin} and \code{Lmax}, afresh at every iteration.
 \code{diag_sd} is used to rescale the parameter space to make it more
 uniform, and make sampling more efficient.
 

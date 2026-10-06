@@ -495,8 +495,12 @@ sampler <- R6Class(
         }
       }
     },
-    # TF1/2 check todo
-    # need to convert this into a TF function
+    # Runs sampler_burst_length iterations in one call to TensorFlow, keeping
+    # every thin-th state, so a burst of d draws runs d * thin iterations. The
+    # loop is greta's own rather than tfp$mcmc$sample_chain(), which steps one
+    # kernel built before the loop: building the kernel inside the loop, from
+    # each iteration's own seed, lets hmc() draw its leapfrog count every
+    # iteration.
     define_tf_draws = function(
       free_state,
       sampler_burst_length,
@@ -504,41 +508,113 @@ sampler <- R6Class(
       sampler_param_vec,
       sampler_seed
     ) {
-      dag <- self$model$dag
-      tfe <- dag$tf_environment
+      n_draws <- tf$math$floordiv(sampler_burst_length, sampler_thin)
 
-      sampler_kernel <- self$define_tf_kernel(
-        sampler_param_vec
+      # two independent seeds per iteration, one for the kernel's parameters
+      # and one for its step
+      iteration_seed <- function(iteration, stream) {
+        tf$random$experimental$stateless_fold_in(
+          sampler_seed,
+          2L * iteration + stream
+        )
+      }
+
+      first_kernel <- self$define_tf_kernel(
+        sampler_param_vec,
+        seed = iteration_seed(0L, 0L)
+      )
+      kernel_results <- first_kernel$bootstrap_results(free_state)
+
+      draws <- tf$TensorArray(
+        dtype = free_state$dtype,
+        size = n_draws,
+        element_shape = free_state$shape
+      )
+      log_accept_ratios <- tf$TensorArray(
+        dtype = free_state$dtype,
+        size = sampler_burst_length
+      )
+      accepted <- tf$TensorArray(dtype = tf$bool, size = sampler_burst_length)
+      n_chains <- tf$shape(free_state)[0]
+
+      body <- function(
+        iteration,
+        state,
+        kernel_results,
+        draws,
+        log_accept_ratios,
+        accepted
+      ) {
+        kernel <- self$define_tf_kernel(
+          sampler_param_vec,
+          seed = iteration_seed(iteration, 0L)
+        )
+        step <- kernel$one_step(
+          state,
+          kernel_results,
+          seed = iteration_seed(iteration, 1L)
+        )
+        new_state <- step[[1]]
+        new_results <- step[[2]]
+
+        completed <- iteration + 1L
+        is_draw <- tf$equal(tf$math$floormod(completed, sampler_thin), 0L)
+        draws <- tf$cond(
+          is_draw,
+          function() {
+            draws$write(
+              tf$math$floordiv(completed, sampler_thin) - 1L,
+              new_state
+            )
+          },
+          function() draws
+        )
+
+        # the slice sampler has no acceptance step, so every iteration counts
+        # as accepted
+        if (self$uses_metropolis) {
+          log_accept_ratio <- tf$cast(
+            new_results$log_accept_ratio,
+            free_state$dtype
+          )
+          is_accepted <- new_results$is_accepted
+        } else {
+          log_accept_ratio <- tf$zeros(n_chains, dtype = free_state$dtype)
+          is_accepted <- tf$ones(n_chains, dtype = tf$bool)
+        }
+
+        list(
+          completed,
+          new_state,
+          new_results,
+          draws,
+          log_accept_ratios$write(iteration, log_accept_ratio),
+          accepted$write(iteration, is_accepted)
+        )
+      }
+      not_done <- function(iteration, ...) {
+        tf$less(iteration, sampler_burst_length)
+      }
+
+      loop <- tf$while_loop(
+        cond = not_done,
+        body = body,
+        loop_vars = list(
+          tf$constant(0L),
+          free_state,
+          kernel_results,
+          draws,
+          log_accept_ratios,
+          accepted
+        )
       )
 
-      # TF1/2 check
-      # some sampler parameter values need to be re-run at each iteration to
-      # decide, e.g., the leap step in HMC, which is run inside define_tf_kernel
-      # currently we run `sample_parameter_values` which will randomly pick
-      # an "l" step.
-      # Need to understand if/how tf_function will re-run those values - might
-      # need to pass these arguments directly
-
-      # TFP takes its first result num_burnin_steps + 1 iterations in, and each
-      # later one num_steps_between_results + 1 after the last, so thin - 1 for
-      # both keeps every thin-th iteration, and a burst of d draws runs
-      # d * thin iterations
-      iterations_skipped <- tf$subtract(sampler_thin, 1L)
-
-      sampler_batch <- tfp$mcmc$sample_chain(
-        num_results = tf$math$floordiv(sampler_burst_length, sampler_thin),
-        current_state = free_state,
-        kernel = sampler_kernel,
-        trace_fn = function(current_state, kernel_results) {
-          kernel_results
-        },
-        num_burnin_steps = iterations_skipped,
-        num_steps_between_results = iterations_skipped,
-        parallel_iterations = 1L,
-        seed = sampler_seed
-      )
-      return(
-        sampler_batch
+      list(
+        all_states = loop[[4]]$stack(),
+        trace = list(
+          log_accept_ratio = loop[[5]]$stack(),
+          is_accepted = loop[[6]]$stack()
+        )
       )
     },
 

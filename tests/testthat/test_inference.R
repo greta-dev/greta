@@ -336,6 +336,38 @@ test_that("model errors nicely", {
   expect_snapshot(error = TRUE, model(a, b))
 })
 
+test_that("hmc() draws its leapfrog count every iteration", {
+  skip_if_not(check_tf_version())
+  x <- as_data(rep(0, 10))
+  z <- normal(0, 10)
+  distribution(x) <- normal(z, 1)
+  m <- model(z)
+
+  # With a step size equal to the posterior sd, each leapfrog step turns the
+  # chain a sixth of a circle, so 6 steps bring every proposal back to where
+  # it started and 9 steps to its mirror image. A leapfrog count drawn once for
+  # the whole call freezes the chain whenever it is 6 or 9.
+  # greta-dev/greta#547
+  posterior_sd <- 1 / sqrt(10 + 1 / 100)
+  spread <- vapply(
+    1:10,
+    function(seed) {
+      set.seed(seed)
+      draws <- mcmc(
+        m,
+        sampler = hmc(Lmin = 6, Lmax = 9, epsilon = posterior_sd),
+        warmup = 0,
+        n_samples = 200,
+        chains = 1,
+        verbose = FALSE
+      )
+      sd(abs(as.vector(draws[[1]])))
+    },
+    numeric(1)
+  )
+  expect_gt(min(spread), 0.05)
+})
+
 test_that("mcmc supports rwmh sampler with normal proposals", {
   skip_if_not(check_tf_version())
   x <- normal(0, 1)
