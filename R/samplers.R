@@ -284,6 +284,14 @@ slice_sampler <- R6Class(
     tuning_interval = Inf,
     uses_metropolis = FALSE,
 
+    # TFP's slice sampler loses a batch dimension of one inside its own while
+    # loop, and then errors that the shape changed between iterations, so a
+    # single chain is traced for any number of rows
+    free_state_signature = function() {
+      n_rows <- if (self$n_chains > 1) as.integer(self$n_chains) else NULL
+      self$model$dag$free_state_signature(n_rows = n_rows)[[1]]
+    },
+
     define_tf_kernel = function(sampler_param_vec, seed) {
       slice_max_doublings <- tensorflow::as_tensor(
         x = sampler_param_vec[0],
