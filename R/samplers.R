@@ -204,6 +204,9 @@ hmc_sampler <- R6Class(
         hmc_epsilon = epsilon,
         hmc_diag_sd = diag_sd
       )
+    },
+    tuning_indices = function() {
+      list(epsilon = 2L, diag_sd = 2L + seq_len(self$n_free))
     }
   )
 )
@@ -264,6 +267,9 @@ rwmh_sampler <- R6Class(
         rwmh_epsilon = epsilon,
         rwmh_diag_sd = diag_sd
       )
+    },
+    tuning_indices = function() {
+      list(epsilon = 0L, diag_sd = seq_len(self$n_free))
     }
   )
 )
@@ -304,9 +310,6 @@ slice_sampler <- R6Class(
 
       # return named list for replacing tensors
       list(slice_max_doublings = max_doublings)
-    },
-
-    # no additional here tuning
-    tune = function(iterations_completed, total_iterations) {}
+    }
   )
 )

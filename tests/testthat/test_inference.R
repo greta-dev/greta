@@ -572,6 +572,35 @@ test_that("one_by_one runs one iteration per burst, whatever thin is", {
   expect_equal(coda::niter(draws), 10)
 })
 
+test_that("warmup tunes inside one call to TensorFlow without a progress bar", {
+  skip_if_not(check_tf_version())
+  x <- normal(0, 1)
+  m <- model(x)
+  draws <- mcmc(m, warmup = 200, n_samples = 100, chains = 2, verbose = FALSE)
+  sampler <- get_model_info(draws)$samplers[[1]]
+  # one call for warmup and one for sampling
+  expect_identical(sampler$n_bursts, 2L)
+  expect_false(isTRUE(all.equal(
+    sampler$parameters$epsilon,
+    hmc()$parameters$epsilon
+  )))
+})
+
+test_that("seeded draws do not depend on how the chain is split into calls", {
+  skip_if_not(check_tf_version())
+  x <- normal(0, 1)
+  m <- model(x)
+  draws_with <- function(...) {
+    set.seed(2026 - 10 - 06)
+    quietly(draws <- mcmc(m, warmup = 40, n_samples = 30, chains = 2, ...))
+    as.matrix(draws)
+  }
+
+  one_call_per_phase <- draws_with(verbose = FALSE)
+  expect_equal(draws_with(verbose = TRUE, pb_update = 7), one_call_per_phase)
+  expect_equal(draws_with(one_by_one = TRUE), one_call_per_phase)
+})
+
 test_that("thin larger than n_samples is an informative error", {
   skip_if_not(check_tf_version())
   x <- uniform(0, 1)
