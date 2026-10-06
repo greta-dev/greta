@@ -36,7 +36,7 @@ dag_class <- R6Class(
 
       # store the performance control info
       self$tf_float <- tf_float
-      self$compile <- compile
+      self$compile <- compile && self$xla_can_compile()
       self$define_tf_trace_values_batch()
       self$define_tf_log_prob_function()
     },
@@ -108,7 +108,8 @@ dag_class <- R6Class(
     define_tf_trace_values_batch = function() {
       self$tf_trace_values_batch <- tensorflow::tf_function(
         f = self$define_trace_values_batch,
-        input_signature = self$free_state_signature()
+        input_signature = self$free_state_signature(),
+        jit_compile = self$compile
       )
     },
 
@@ -120,7 +121,8 @@ dag_class <- R6Class(
 
       self$tf_log_prob_function <- tensorflow::tf_function(
         f = self$generate_log_prob_function(),
-        input_signature = self$free_state_signature()
+        input_signature = self$free_state_signature(),
+        jit_compile = self$compile
       )
 
       # rebuilt from the new log-density function the next time it is used
@@ -136,7 +138,8 @@ dag_class <- R6Class(
       if (is.null(self$tf_log_prob_function_one_row)) {
         self$tf_log_prob_function_one_row <- tensorflow::tf_function(
           f = self$generate_log_prob_function(),
-          input_signature = self$free_state_signature(n_rows = 1L)
+          input_signature = self$free_state_signature(n_rows = 1L),
+          jit_compile = self$compile
         )
       }
       self$tf_log_prob_function_one_row(free_state)
@@ -151,6 +154,16 @@ dag_class <- R6Class(
     free_state_signature = function(n_rows = NULL) {
       n_free <- length(unlist_tf(self$example_parameters(free = TRUE)))
       list(tf$TensorSpec(shape = list(n_rows, n_free), dtype = tf_float()))
+    },
+
+    # XLA cannot compile the gradient of the covariance and correlation matrix
+    # bijectors through the open batch dimension of free_state_signature():
+    # their set_diag() reads a shape as a constant, and XLA knows only a bound
+    # on that dimension, so sampling fails. greta-dev/greta#833
+    xla_can_compile = function() {
+      variables <- self$node_list[self$node_types == "variable"]
+      constraints <- vapply(variables, \(node) node$constraint, character(1))
+      !any(constraints %in% c("correlation_matrix", "covariance_matrix"))
     },
 
     tf_log_prob_function = NULL,

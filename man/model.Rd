@@ -6,7 +6,7 @@
 \alias{plot.greta_model}
 \title{greta model objects}
 \usage{
-model(..., precision = c("double", "single"), compile = TRUE)
+model(..., precision = c("double", "single"), compile = FALSE)
 
 \method{print}{greta_model}(x, ...)
 
@@ -26,9 +26,14 @@ decrease the computation time but increase the risk of numerical
 instability during sampling.}
 
 \item{compile}{whether to apply
-\href{https://openxla.org/xla}{XLA JIT compilation} to
-the TensorFlow graph representing the model. This may slow down model
-definition, and speed up model evaluation.}
+\href{https://openxla.org/xla}{XLA JIT compilation} to the TensorFlow functions
+that evaluate the model. XLA compiles each function the first time it
+runs, which slows that first call and can speed up later ones. Not every
+model can be compiled: a model with a covariance or correlation matrix
+variable, such as one from \code{\link[=wishart]{wishart()}}, \code{\link[=lkj_correlation]{lkj_correlation()}} or
+\code{\link[=cholesky_variable]{cholesky_variable()}}, runs uncompiled with a warning, and a model whose
+operations XLA does not support, such as a \code{tf$while_loop()} without
+\code{maximum_iterations}, errors when it is first run.}
 
 \item{x}{a \code{greta_model} object}
 
