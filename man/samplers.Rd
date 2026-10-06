@@ -14,9 +14,11 @@ rwmh(proposal = c("normal", "uniform"), epsilon = 0.1, diag_sd = 1)
 slice(max_doublings = 5)
 }
 \arguments{
-\item{Lmin}{minimum number of leapfrog steps (positive integer, Lmin > Lmax)}
+\item{Lmin}{minimum number of leapfrog steps (positive integer, no larger
+than Lmax)}
 
-\item{Lmax}{maximum number of leapfrog steps (positive integer, Lmax > Lmin)}
+\item{Lmax}{maximum number of leapfrog steps (positive integer, no smaller
+than Lmin)}
 
 \item{epsilon}{leapfrog stepsize hyperparameter (positive, will be tuned)}
 

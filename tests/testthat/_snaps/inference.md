@@ -220,6 +220,15 @@
       hmc sampler object with parameters:
         Lmin = 1, Lmax = 10, epsilon = 0.1, diag_sd = 1
 
+# hmc() errors informatively when Lmin is larger than Lmax
+
+    Code
+      hmc(Lmin = 10, Lmax = 5)
+    Condition
+      Error in `hmc()`:
+      ! `Lmin` must not be larger than `Lmax`
+      x `Lmin` is 10 and `Lmax` is 5
+
 # thin larger than n_samples is an informative error
 
     Code

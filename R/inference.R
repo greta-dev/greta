@@ -30,19 +30,10 @@ NULL
 #' @param n_cores the maximum number of CPU cores used by each sampler (see
 #'   details). If NULL (default), it sets them to 2 cores.
 #' @param verbose whether to print progress information to the console
-#' @param pb_update roughly how often to update the progress bar, in
-#'   iterations. Sampling runs in bursts, and the bar can only update between
-#'   them. With `thin` above 1 (and `one_by_one = FALSE`), each burst has to
-#'   end on a kept draw, so the bar updates every `pb_update` iterations rounded
-#'   to the nearest multiple of `thin`, and at least every `thin`. The count it
-#'   shows is always the number of iterations run, and it always ends on
-#'   `n_samples`. For example:
-#'
-#'   - `n_samples = 1000, thin = 10, pb_update = 50`: 10 divides 50, so the
-#'     bar updates every 50 iterations, at 50, 100, ..., 1000.
-#'   - `n_samples = 1000, thin = 3, pb_update = 50`: 3 does not divide 50, and
-#'     the nearest multiple of 3 is 51, so the bar updates every 51
-#'     iterations, at 51, 102, ..., 969, and then at 1000.
+#' @param pb_update how often to update the progress bar, in iterations.
+#'   Warmup and sampling each run in bursts of `pb_update` iterations, and the
+#'   bar updates between them, showing the number of iterations run. It does
+#'   not change the draws.
 #' @param one_by_one whether to run TensorFlow MCMC code one iteration at a
 #'   time, so that greta can handle numerical errors as 'bad' proposals (see
 #'   below).
@@ -117,10 +108,10 @@ NULL
 #' @note `set.seed()` is all you need to make MCMC reproducible: greta draws
 #'   its own seed from R's random number generator and passes it to the
 #'   sampler, so both the initial values and the sampler are seeded. See
-#'   examples below. The draws also depend on how sampling is split between
-#'   progress updates, and on how chains are split between parallel workers,
-#'   so a run is repeated exactly only with the same `verbose`, `pb_update`,
-#'   `one_by_one` and future plan (including its number of workers). The
+#'   examples below. `verbose`, `pb_update` and `one_by_one` do not change the
+#'   draws, but how chains are split between parallel workers does, so a run
+#'   is repeated exactly only with the same future plan (including its number
+#'   of workers). The
 #'   [Reproducible results](https://greta-dev.github.io/greta/articles/webpages/reproducibility.html)
 #'   article shows each of these, and how greta compares with Stan and PyMC.
 #'
@@ -515,15 +506,10 @@ extra_samples <- function(
   thin <- check_thin(thin, n_samples)
 
   model_info <- get_model_info(draws)
-  samplers <- model_info$samplers
 
-  # set the last values as the current free state values
-  for (sampler in samplers) {
-    free_state_draws <- sampler$traced_free_state
-    n_draws <- nrow(free_state_draws[[1]])
-    free_state_draws <- lapply(free_state_draws, `[`, n_draws, )
-    sampler$free_state <- do.call(rbind, free_state_draws)
-  }
+  # each sampler carries on from its free state, the state its chains last
+  # reached, which with thin above 1 can be after the last kept draw
+  samplers <- model_info$samplers
 
   run_samplers(
     samplers = samplers,
@@ -744,8 +730,9 @@ print.initials <- function(x, ...) {
 #'     model at the parameters 'par'
 #'    \item `iterations` the number of iterations taken by the optimiser
 #'    \item `convergence` an integer code, 0 indicates successful
-#'     completion, 1 indicates the iteration limit `max_iterations` had
-#'     been reached
+#'     completion, 1 that the optimiser did not converge: it reached the
+#'     iteration limit `max_iterations`, or `bfgs()` or `nelder_mead()`
+#'     stopped without converging
 #'   \item `hessian` (if `hessian = TRUE`) a named list of hessian
 #'     matrices/arrays for the parameters (w.r.t. `value`)
 #'  }

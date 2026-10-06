@@ -81,20 +81,10 @@ details). If NULL (default), it sets them to 2 cores.}
 
 \item{verbose}{whether to print progress information to the console}
 
-\item{pb_update}{roughly how often to update the progress bar, in
-iterations. Sampling runs in bursts, and the bar can only update between
-them. With \code{thin} above 1 (and \code{one_by_one = FALSE}), each burst has to
-end on a kept draw, so the bar updates every \code{pb_update} iterations rounded
-to the nearest multiple of \code{thin}, and at least every \code{thin}. The count it
-shows is always the number of iterations run, and it always ends on
-\code{n_samples}. For example:
-\itemize{
-\item \verb{n_samples = 1000, thin = 10, pb_update = 50}: 10 divides 50, so the
-bar updates every 50 iterations, at 50, 100, ..., 1000.
-\item \verb{n_samples = 1000, thin = 3, pb_update = 50}: 3 does not divide 50, and
-the nearest multiple of 3 is 51, so the bar updates every 51
-iterations, at 51, 102, ..., 969, and then at 1000.
-}}
+\item{pb_update}{how often to update the progress bar, in iterations.
+Warmup and sampling each run in bursts of \code{pb_update} iterations, and the
+bar updates between them, showing the number of iterations run. It does
+not change the draws.}
 
 \item{one_by_one}{whether to run TensorFlow MCMC code one iteration at a
 time, so that greta can handle numerical errors as 'bad' proposals (see
@@ -150,8 +140,9 @@ specified in \code{model}
 model at the parameters 'par'
 \item \code{iterations} the number of iterations taken by the optimiser
 \item \code{convergence} an integer code, 0 indicates successful
-completion, 1 indicates the iteration limit \code{max_iterations} had
-been reached
+completion, 1 that the optimiser did not converge: it reached the
+iteration limit \code{max_iterations}, or \code{bfgs()} or \code{nelder_mead()}
+stopped without converging
 \item \code{hessian} (if \code{hessian = TRUE}) a named list of hessian
 matrices/arrays for the parameters (w.r.t. \code{value})
 }
@@ -241,10 +232,10 @@ The parameter vector can then be passed to model. See example.
 \code{set.seed()} is all you need to make MCMC reproducible: greta draws
 its own seed from R's random number generator and passes it to the
 sampler, so both the initial values and the sampler are seeded. See
-examples below. The draws also depend on how sampling is split between
-progress updates, and on how chains are split between parallel workers,
-so a run is repeated exactly only with the same \code{verbose}, \code{pb_update},
-\code{one_by_one} and future plan (including its number of workers). The
+examples below. \code{verbose}, \code{pb_update} and \code{one_by_one} do not change the
+draws, but how chains are split between parallel workers does, so a run
+is repeated exactly only with the same future plan (including its number
+of workers). The
 \href{https://greta-dev.github.io/greta/articles/webpages/reproducibility.html}{Reproducible results}
 article shows each of these, and how greta compares with Stan and PyMC.
 

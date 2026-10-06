@@ -190,7 +190,7 @@ tf_optimiser <- R6Class(
             )
           }
           one_step <- function(iteration, old_objective, difference) {
-            # the objective has one element, one per row of the free state
+            # the free state has one row, so the objective has one element
             objective_value <- tf$reshape(step(), shape = list())
             list(
               iteration + 1L,
@@ -212,8 +212,12 @@ tf_optimiser <- R6Class(
         self$converged <- self$diff <= self$tolerance
 
         # The objective value can reach numerical overflow, so we error and
-        # suggest changing initial values or changing sampler, e.g., `adam`
-        self$check_numerical_overflow(self$old_obj)
+        # suggest changing initial values or changing sampler, e.g., `adam`.
+        # With max_iterations = 0 there is no objective yet to check
+        has_objective <- self$it > 0
+        if (has_objective) {
+          self$check_numerical_overflow(self$old_obj)
+        }
 
         tfe$free_state <- free_state
       }
