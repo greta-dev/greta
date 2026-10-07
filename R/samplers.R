@@ -30,6 +30,8 @@ NULL
 #'   uniform, and make sampling more efficient.
 hmc <- function(Lmin = 5, Lmax = 10, epsilon = 0.1, diag_sd = 1) {
   # nolint end
+  Lmin <- check_positive_integer(Lmin, "Lmin")
+  Lmax <- check_positive_integer(Lmax, "Lmax")
   check_leapfrog_range(Lmin, Lmax)
   obj <- list(
     parameters = list(
@@ -125,19 +127,9 @@ print.sampler <- function(x, ...) {
   cat(msg)
 }
 
-tune_tf <- R6Class(
-  "tune_tf",
-  inherit = sampler
-)
-
-tune_r <- R6Class(
-  "tune_r",
-  inherit = sampler
-)
-
 hmc_sampler <- R6Class(
   "hmc_sampler",
-  inherit = tune_r,
+  inherit = sampler,
   public = list(
     parameters = list(
       Lmin = 10,
@@ -149,16 +141,13 @@ hmc_sampler <- R6Class(
 
     define_tf_kernel = function(sampler_param_vec, seed) {
       dag <- self$model$dag
-      tfe <- dag$tf_environment
-
-      free_state_size <- length(sampler_param_vec) - 3
 
       # the sampler's parameters arrive as one flat vector because that is what
       # the traced function's TensorSpec takes; this unpacks it again
       hmc_l_min <- tf$cast(sampler_param_vec[0], tf$int32)
       hmc_l_max <- tf$cast(sampler_param_vec[1], tf$int32)
       hmc_epsilon <- sampler_param_vec[2]
-      hmc_diag_sd <- sampler_param_vec[3:(2 + free_state_size)]
+      hmc_diag_sd <- sampler_param_vec[3:(2 + self$n_free)]
 
       # the sampler loop builds a kernel every iteration, each from its own
       # seed, so the leapfrog count is drawn afresh every iteration. A count
@@ -175,13 +164,12 @@ hmc_sampler <- R6Class(
       hmc_step_sizes <- tf$cast(
         x = tf$reshape(
           hmc_epsilon * (hmc_diag_sd / tf$reduce_sum(hmc_diag_sd)),
-          shape = shape(free_state_size)
+          shape = shape(self$n_free)
         ),
         dtype = tf$float64
       )
-      # the kernel never sees free_state: its size comes from the parameter
-      # vector above, and TFP passes the current state to target_log_prob_fn
-      # when it calls it
+      # the kernel never sees free_state: TFP passes the current state to
+      # target_log_prob_fn when it calls it
 
       # build the kernel
       # nolint start
@@ -215,7 +203,7 @@ hmc_sampler <- R6Class(
 
 rwmh_sampler <- R6Class(
   "rwmh_sampler",
-  inherit = tune_r,
+  inherit = sampler,
   public = list(
     parameters = list(
       proposal = "normal",
@@ -225,30 +213,26 @@ rwmh_sampler <- R6Class(
     accept_target = 0.44,
 
     define_tf_kernel = function(sampler_param_vec, seed) {
-      # wrap this up into a function to extract these out
-      free_state_size <- length(sampler_param_vec) - 1 # get it from dag object
-      # e.g., length(dag$free_state)
       rwmh_epsilon <- sampler_param_vec[0]
-      rwmh_diag_sd <- sampler_param_vec[1:(1 + free_state_size)]
+      rwmh_diag_sd <- sampler_param_vec[1:(1 + self$n_free)]
 
       dag <- self$model$dag
-      tfe <- dag$tf_environment
 
-      tfe$rwmh_proposal <- switch(
+      rwmh_proposal <- switch(
         self$parameters$proposal,
         normal = tfp$mcmc$random_walk_normal_fn,
         uniform = tfp$mcmc$random_walk_uniform_fn
       )
 
       # step_sizes must be a vector, shape(n, ), so reshape it. As in the HMC
-      # kernel, free_state is not needed: the size comes from the parameter
-      # vector, and TFP passes the state to target_log_prob_fn
+      # kernel, free_state is not needed: TFP passes the state to
+      # target_log_prob_fn
       rwmh_step_sizes <- tf$reshape(
         rwmh_epsilon * (rwmh_diag_sd / tf$reduce_sum(rwmh_diag_sd)),
-        shape = shape(free_state_size)
+        shape = shape(self$n_free)
       )
 
-      new_state_fn <- tfe$rwmh_proposal(scale = rwmh_step_sizes)
+      new_state_fn <- rwmh_proposal(scale = rwmh_step_sizes)
 
       # build the kernel
       # nolint start
@@ -278,12 +262,11 @@ rwmh_sampler <- R6Class(
 
 slice_sampler <- R6Class(
   "slice_sampler",
-  inherit = tune_r,
+  inherit = sampler,
   public = list(
     parameters = list(
       max_doublings = NA
     ),
-    tuning_interval = Inf,
     uses_metropolis = FALSE,
 
     # TFP's slice sampler loses a batch dimension of one inside its own while
@@ -301,7 +284,6 @@ slice_sampler <- R6Class(
       )
 
       dag <- self$model$dag
-      tfe <- dag$tf_environment
 
       # build the kernel
       # nolint start

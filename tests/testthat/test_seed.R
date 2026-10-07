@@ -146,6 +146,28 @@ test_that("mcmc draws do not depend on TensorFlow's global seed", {
   expect_identical(as.numeric(one), as.numeric(two))
 })
 
+test_that("seeded draws do not depend on how the chain is split into calls", {
+  skip_if_not(check_tf_version())
+  x <- normal(0, 1)
+  m <- model(x)
+  draws_with <- function(...) {
+    local_greta_seed()
+    quietly(draws <- mcmc(m, warmup = 40, n_samples = 30, chains = 2, ...))
+    as.matrix(draws)
+  }
+
+  one_call_per_phase <- draws_with(verbose = FALSE)
+  expect_identical(
+    draws_with(verbose = TRUE, pb_update = 7),
+    one_call_per_phase
+  )
+  expect_identical(draws_with(one_by_one = TRUE), one_call_per_phase)
+
+  thinned <- draws_with(thin = 3, verbose = FALSE)
+  expect_identical(draws_with(thin = 3, pb_update = 7), thinned)
+  expect_identical(draws_with(thin = 3, one_by_one = TRUE), thinned)
+})
+
 test_that("mcmc() advances R's RNG rather than resetting it", {
   skip_if_not(check_tf_version())
   x <- normal(0, 1)

@@ -159,15 +159,15 @@ tf_optimiser <- R6Class(
         # optimiser's slot variables have to exist before tracing.
         tfe$tf_optimiser$build(list(free_state))
 
-        step <- function() {
+        # the objective and its gradient at the current free state, from one
+        # evaluation of the log density
+        objective_and_gradient <- function() {
           with(tf$GradientTape() %as% tape, {
             objective_value <- objective()
           })
-          gradients <- tape$gradient(objective_value, list(free_state))
-          tfe$tf_optimiser$apply_gradients(
-            list(reticulate::tuple(gradients[[1]], free_state))
-          )
-          objective()
+          gradient <- tape$gradient(objective_value, list(free_state))[[1]]
+          # the free state has one row, so the objective has one element
+          list(tf$reshape(objective_value, shape = list()), gradient)
         }
 
         # The whole optimisation is one call to TensorFlow, with the
@@ -180,7 +180,7 @@ tf_optimiser <- R6Class(
         tolerance <- self$tolerance
         minimise <- tensorflow::tf_function(function() {
           infinity <- tf$constant(Inf, dtype = tf_float())
-          keep_going <- function(iteration, old_objective, difference) {
+          keep_going <- function(iteration, old_objective, difference, ...) {
             tf$logical_and(
               tf$less(iteration, max_iterations),
               tf$logical_and(
@@ -189,23 +189,33 @@ tf_optimiser <- R6Class(
               )
             )
           }
-          one_step <- function(iteration, old_objective, difference) {
-            # the free state has one row, so the objective has one element
-            objective_value <- tf$reshape(step(), shape = list())
+          # each step applies the gradient at the current state, then takes
+          # the objective and gradient at the new one, which the next step
+          # reuses rather than evaluating the log density again
+          one_step <- function(iteration, old_objective, difference, gradient) {
+            tfe$tf_optimiser$apply_gradients(
+              list(reticulate::tuple(gradient, free_state))
+            )
+            evaluated <- objective_and_gradient()
             list(
               iteration + 1L,
-              objective_value,
-              tf$abs(old_objective - objective_value)
+              evaluated[[1]],
+              tf$abs(old_objective - evaluated[[1]]),
+              evaluated[[2]]
             )
           }
+          start <- objective_and_gradient()
           tf$while_loop(
             cond = keep_going,
             body = one_step,
-            loop_vars = list(tf$constant(0L), infinity, infinity)
+            loop_vars = list(tf$constant(0L), infinity, infinity, start[[2]])
           )
         })
 
         result <- minimise()
+        # minimise's closure is this frame, which also holds minimise, so
+        # each would keep the other alive after opt() returns
+        minimise <- NULL
         self$it <- as.numeric(result[[1]])
         self$old_obj <- as.numeric(result[[2]])
         self$diff <- as.numeric(result[[3]])

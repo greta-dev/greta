@@ -628,7 +628,7 @@ test_that("mcmc() traces a model's sampler loop once, across calls", {
   first <- sampler_function()
   second <- sampler_function()
   expect_identical(reticulate::py_id(second), reticulate::py_id(first))
-  expect_identical(second$experimental_get_tracing_count(), 1L)
+  expect_identical(trace_count(second), 1L)
 })
 
 test_that("samplers sharing a model get the draws they would get alone", {
@@ -661,28 +661,6 @@ test_that("samplers sharing a model get the draws they would get alone", {
     draws_from(run)
   })
   expect_identical(shared, alone)
-})
-
-test_that("seeded draws do not depend on how the chain is split into calls", {
-  skip_if_not(check_tf_version())
-  x <- normal(0, 1)
-  m <- model(x)
-  draws_with <- function(...) {
-    local_greta_seed()
-    quietly(draws <- mcmc(m, warmup = 40, n_samples = 30, chains = 2, ...))
-    as.matrix(draws)
-  }
-
-  one_call_per_phase <- draws_with(verbose = FALSE)
-  expect_identical(
-    draws_with(verbose = TRUE, pb_update = 7),
-    one_call_per_phase
-  )
-  expect_identical(draws_with(one_by_one = TRUE), one_call_per_phase)
-
-  thinned <- draws_with(thin = 3, verbose = FALSE)
-  expect_identical(draws_with(thin = 3, pb_update = 7), thinned)
-  expect_identical(draws_with(thin = 3, one_by_one = TRUE), thinned)
 })
 
 test_that("extra_samples() carries each chain on from its last iteration", {
