@@ -700,6 +700,34 @@ test_that("a numerical error at the end of warmup still tunes", {
   expect_equal(sampler$parameters$epsilon, exp(log_epsilon_bar))
 })
 
+test_that("a numerical error with one_by_one repeats the draw before it", {
+  skip_if_not(check_tf_version())
+  local_greta_seed()
+  # solve() errors on the singular matrix whenever round(r) is 1 or -1
+  r <- normal(0, 1)
+  singular_at_one <- diag(2) + (1 - diag(2)) * round(r)
+  y <- as_data(0.5)
+  distribution(y) <- normal(sum(solve(singular_at_one)), 1)
+  m <- model(r)
+
+  draws <- mcmc(
+    m,
+    sampler = rwmh(epsilon = 1),
+    warmup = 0,
+    n_samples = 40,
+    chains = 1,
+    initial_values = initials(r = 0.2),
+    one_by_one = TRUE,
+    verbose = FALSE
+  )
+  sampler <- get_model_info(draws)$samplers[[1]]
+  expect_gt(sampler$numerical_rejections, 0)
+
+  chain <- as.numeric(draws[[1]])
+  repeated <- which(duplicated(chain))
+  expect_identical(chain[repeated], chain[repeated - 1])
+})
+
 test_that("thin larger than n_samples is an informative error", {
   skip_if_not(check_tf_version())
   x <- uniform(0, 1)
