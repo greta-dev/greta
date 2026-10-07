@@ -692,9 +692,12 @@ test_that("a numerical error at the end of warmup still tunes", {
   sampler <- get_model_info(draws)$samplers[[1]]
 
   # replay warmup's last iteration as one that errored with one_by_one, from
-  # an epsilon that tuning would not leave
+  # an epsilon that tuning would not leave, holding the chain's state as
+  # tensors as a phase does
   sampler$parameters$epsilon <- 1
+  sampler$chain_tensors <- sampler$state_tensors()
   sampler$reject_iteration(sampler$sampling_start - 1L)
+  sampler$keep_in_r(sampler$chain_tensors)
 
   log_epsilon_bar <- sampler$tuning_state$tuning[["log_epsilon_bar"]]
   expect_equal(sampler$parameters$epsilon, exp(log_epsilon_bar))
@@ -726,6 +729,35 @@ test_that("a numerical error with one_by_one repeats the draw before it", {
   chain <- as.numeric(draws[[1]])
   repeated <- which(duplicated(chain))
   expect_identical(chain[repeated], chain[repeated - 1])
+})
+
+test_that("numerical errors in warmup with one_by_one still tune", {
+  skip_if_not(check_tf_version())
+  local_greta_seed()
+  # solve() errors on the singular matrix whenever round(r) is 1 or -1
+  r <- normal(0, 1)
+  singular_at_one <- diag(2) + (1 - diag(2)) * round(r)
+  y <- as_data(0.5)
+  distribution(y) <- normal(sum(solve(singular_at_one)), 1)
+  m <- model(r)
+
+  warmup <- 30
+  chains <- 2
+  draws <- mcmc(
+    m,
+    sampler = rwmh(epsilon = 1),
+    warmup = warmup,
+    n_samples = 1,
+    chains = chains,
+    initial_values = list(initials(r = 0.2), initials(r = -0.2)),
+    one_by_one = TRUE,
+    verbose = FALSE
+  )
+  sampler <- get_model_info(draws)$samplers[[1]]
+
+  # every warmup iteration adds each chain's state to the variance estimate,
+  # whether or not its proposal errored
+  expect_equal(sampler$tuning_state$tuning[["count"]], warmup * chains)
 })
 
 test_that("thin larger than n_samples is an informative error", {

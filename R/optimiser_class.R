@@ -35,7 +35,8 @@ optimiser <- R6Class(
       other_args,
       max_iterations,
       tolerance,
-      adjust
+      adjust,
+      compute_options
     ) {
       super$initialize(
         initial_values,
@@ -51,6 +52,7 @@ optimiser <- R6Class(
       self$max_iterations <- as.integer(max_iterations)
       self$tolerance <- tolerance
       self$adjust <- adjust
+      self$compute_options <- compute_options
 
       if ("uses_callbacks" %in% names(other_args)) {
         self$uses_callbacks <- other_args$uses_callbacks
@@ -138,7 +140,7 @@ tf_optimiser <- R6Class(
         self$converged <- self$diff <= self$tolerance
 
         # The objective value can reach numerical overflow, so we error and
-        # suggest changing initial values or changing sampler, e.g., `adam`.
+        # suggest changing initial values or changing optimiser, e.g., `adam`.
         # With max_iterations = 0 there is no objective yet to check
         has_objective <- self$it > 0
         if (has_objective) {
@@ -151,17 +153,40 @@ tf_optimiser <- R6Class(
 
     # Each call to opt() makes a new optimiser, so it looks its traced loop
     # up on the model rather than trace it again, keyed by the Keras optimiser,
-    # its settings and adjust, which the trace reads. The loop comes with the
-    # free state's variable and the Keras optimiser it steps, and restart()
-    # puts both back where they start: the free state at the initial values,
-    # and the optimiser's own variables, such as Adam's moments and its count
-    # of iterations, at their values when it was built.
+    # its settings and adjust, which the trace reads, and by the device its
+    # variables are made on. The loop comes with the free state's variable and
+    # the Keras optimiser it steps, and restart() puts both back where they
+    # start: the free state at the initial values, and the optimiser's own
+    # variables, such as Adam's moments and its count of iterations, at their
+    # values when it was built.
     optimiser_loop = function() {
+      # deparse() writes every Python object, such as a Keras learning rate
+      # schedule, the same way, so a loop with one among its settings is
+      # traced for this call alone
+      has_plain_settings <- all(vapply(
+        self$parameters,
+        \(setting) is.null(setting) || is.atomic(setting),
+        logical(1)
+      ))
+      if (!has_plain_settings) {
+        return(self$new_optimiser_loop())
+      }
+
       dag <- self$model$dag
+      # deparse() rounds numbers to 15 significant digits unless asked for
+      # 17, which tell any two doubles apart
+      every_digit <- c(
+        "keepNA",
+        "keepInteger",
+        "niceNames",
+        "showAttributes",
+        "digits17"
+      )
       key <- paste(
         self$method,
-        paste(deparse(self$parameters), collapse = ""),
+        deparse1(self$parameters, control = every_digit),
         self$adjust,
+        self$compute_options,
         sep = "|"
       )
       if (is.null(dag$optimiser_functions[[key]])) {

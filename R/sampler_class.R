@@ -276,8 +276,8 @@ sampler <- R6Class(
       completed_iterations <- cumsum(burst_lengths)
 
       # The state and tuning stay as tensors from one call to the next, and
-      # come back to R once, when the phase ends or stops, since making them
-      # into tensors costs more than a call of one iteration
+      # come back to R once, when the phase ends or stops, so a phase of many
+      # short calls, as with one_by_one, does not convert them on every call
       self$chain_tensors <- self$state_tensors()
       on.exit(
         {
@@ -338,7 +338,7 @@ sampler <- R6Class(
       # numbers
       seed <- c(self$seed, 0L)
 
-      tensors <- self$current_tensors()
+      tensors <- self$chain_tensors
       result <- cleanly(
         self$tf_iterations(
           free_state = tensors$free_state,
@@ -362,7 +362,7 @@ sampler <- R6Class(
         }
         self$reject_iteration(first_iteration)
       } else {
-        self$keep_tensors(result[names(tensors)])
+        self$chain_tensors <- result[names(tensors)]
         self$last_burst_free_states <- split_chains(as.array(result$draws))
         self$numerical_rejections <- self$numerical_rejections +
           as.numeric(result$numerical_rejections)
@@ -406,20 +406,6 @@ sampler <- R6Class(
           shape = self$n_free
         )
       )
-    },
-
-    current_tensors = function() {
-      self$chain_tensors %||% self$state_tensors()
-    },
-
-    # keeps the state and tuning TensorFlow returned: as tensors while a phase
-    # runs, and in the R fields otherwise
-    keep_tensors = function(tensors) {
-      if (is.null(self$chain_tensors)) {
-        self$keep_in_r(tensors)
-      } else {
-        self$chain_tensors <- tensors
-      }
     },
 
     keep_in_r = function(tensors) {
@@ -474,7 +460,7 @@ sampler <- R6Class(
       is_draw <- sampling_iterations > 0 &&
         sampling_iterations %% self$thin == 0
       n_draws <- as.integer(is_draw)
-      free_state <- as.array(self$current_tensors()$free_state)
+      free_state <- as.array(self$chain_tensors$free_state)
       draws <- array(
         rep(free_state, n_draws),
         dim = c(n_draws, self$n_chains, self$n_free)
@@ -488,7 +474,7 @@ sampler <- R6Class(
     # eagerly, since only an iteration that errors with one_by_one comes here.
     tune_rejected_iteration = function(iteration) {
       warmup_start <- self$sampling_start - self$warmup
-      tensors <- self$current_tensors()
+      tensors <- self$chain_tensors
       rejected_step <- list(
         state = tensors$free_state,
         log_accept_ratio = tensorflow::as_tensor(
@@ -508,7 +494,7 @@ sampler <- R6Class(
         welford_mean = tensors$welford_mean,
         welford_m2 = tensors$welford_m2
       )
-      self$keep_tensors(c(list(free_state = tensors$free_state), tuned))
+      self$chain_tensors <- c(list(free_state = tensors$free_state), tuned)
     },
 
     # In a call of more than one iteration, the sampler cannot tell which
