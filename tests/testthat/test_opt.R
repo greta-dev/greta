@@ -202,6 +202,67 @@ test_that("opt() calls with different settings on one model match new models", {
   expect_length(m$dag$optimiser_functions, 1)
 })
 
+test_that("opt() traces again for a setting past 15 digits or another device", {
+  skip_if_not(check_tf_version())
+  x <- normal(0, 1, dim = 2)
+  m <- model(x)
+  loop_key <- function(...) {
+    opt(m, max_iterations = 5, ...)
+    names(m$dag$optimiser_functions)
+  }
+
+  first <- loop_key(optimiser = adam(learning_rate = 0.1))
+  # deparse() writes this as 0.1 too, to its default 15 digits
+  nearby_rate <- 0.1 * (1 + 4 * .Machine$double.eps)
+  nearby <- loop_key(optimiser = adam(learning_rate = nearby_rate))
+  on_gpu <- suppressMessages(
+    loop_key(
+      optimiser = adam(learning_rate = 0.1),
+      compute_options = gpu_only()
+    )
+  )
+  expect_false(identical(nearby, first))
+  expect_false(identical(on_gpu, first))
+})
+
+test_that("an opt() loop traced for one call does not outlive it", {
+  skip_if_not(check_tf_version())
+  python <- reticulate::py_run_string(
+    "
+def count_traced_functions():
+    import gc
+    import tensorflow as tf
+    gc.collect()
+    traced = tf.types.experimental.GenericFunction
+    return sum(isinstance(o, traced) for o in gc.get_objects())
+",
+    local = TRUE
+  )
+  count_traced_functions <- function() {
+    gc()
+    python$count_traced_functions()
+  }
+  x <- normal(0, 1, dim = 2)
+  m <- model(x)
+  # a learning rate schedule is a Python object, so opt() traces a loop for
+  # each call rather than keep one on the model
+  schedule <- tf$keras$optimizers$schedules$ExponentialDecay(
+    initial_learning_rate = 0.1,
+    decay_steps = 5L,
+    decay_rate = 0.5
+  )
+  optimise <- function() {
+    opt(m, optimiser = adam(learning_rate = schedule), max_iterations = 5)
+  }
+
+  optimise()
+  before <- count_traced_functions()
+  for (i in 1:3) {
+    optimise()
+  }
+  expect_identical(count_traced_functions(), before)
+})
+
 test_that("opt accepts initial values for TFP optimisers", {
   skip_if_not(check_tf_version())
 
