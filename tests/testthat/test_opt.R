@@ -139,6 +139,28 @@ test_that("opt accepts initial values for TF optimisers", {
   expect_true(all(abs(x - o$par$z) < 1e-3))
 })
 
+test_that("a later opt() call reuses its traced loop and starts afresh", {
+  skip_if_not(check_tf_version())
+  x <- normal(0, 1, dim = 2)
+  m <- model(x)
+  optimise <- function() {
+    opt(
+      m,
+      optimiser = adam(),
+      initial_values = initials(x = c(1, -1)),
+      max_iterations = 50
+    )
+  }
+
+  first <- optimise()
+  # adam()'s moments and iteration count are restarted, so the same initial
+  # values give the same result
+  expect_identical(optimise(), first)
+  loops <- m$dag$optimiser_functions
+  expect_length(loops, 1)
+  expect_identical(trace_count(loops[[1]]$minimise), 1L)
+})
+
 test_that("opt accepts initial values for TFP optimisers", {
   skip_if_not(check_tf_version())
 

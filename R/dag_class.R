@@ -126,12 +126,14 @@ dag_class <- R6Class(
       # rebuilt from the new log-density function the next time it is used
       self$tf_log_prob_function_one_row <- NULL
       self$sampler_functions <- list()
+      self$optimiser_functions <- list()
     },
 
-    # the samplers' traced functions, keyed by sampler$trace_key(). Each
-    # traces the log-density function into its own graph, so they are
-    # dropped whenever that function is rebuilt
+    # the samplers' and opt()'s traced loops, keyed by sampler$trace_key() and
+    # by optimiser. Each traces the log-density function into its own graph,
+    # so they are dropped whenever that function is rebuilt
     sampler_functions = list(),
+    optimiser_functions = list(),
 
     # opt() always passes one row, and a graph traced for a known number of
     # rows runs faster per step than one traced for any number: 100 adam steps
