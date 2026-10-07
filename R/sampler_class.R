@@ -275,6 +275,18 @@ sampler <- R6Class(
       burst_lengths <- self$burst_lengths(n_iterations, iterations_per_burst)
       completed_iterations <- cumsum(burst_lengths)
 
+      # The state and tuning stay as tensors from one call to the next, and
+      # come back to R once, when the phase ends or stops, since making them
+      # into tensors costs more than a call of one iteration
+      self$chain_tensors <- self$state_tensors()
+      on.exit(
+        {
+          self$keep_in_r(self$chain_tensors)
+          self$chain_tensors <- NULL
+        },
+        add = TRUE
+      )
+
       for (burst in seq_along(burst_lengths)) {
         self$run_iterations(burst_lengths[burst])
         self$trace()
@@ -326,22 +338,19 @@ sampler <- R6Class(
       # numbers
       seed <- c(self$seed, 0L)
 
-      tuning <- self$tuning_tensors()
+      tensors <- self$current_tensors()
       result <- cleanly(
         self$tf_iterations(
-          free_state = tensorflow::as_tensor(
-            self$free_state,
-            dtype = tf_float()
-          ),
+          free_state = tensors$free_state,
           n_iterations = tensorflow::as_tensor(n_iterations),
           first_iteration = tensorflow::as_tensor(first_iteration),
           warmup = tensorflow::as_tensor(as.integer(self$warmup)),
           sampling_start = tensorflow::as_tensor(self$sampling_start),
           thin = tensorflow::as_tensor(as.integer(self$thin)),
-          param_vec = tuning$param_vec,
-          tuning = tuning$tuning,
-          welford_mean = tuning$welford_mean,
-          welford_m2 = tuning$welford_m2,
+          param_vec = tensors$param_vec,
+          tuning = tensors$tuning,
+          welford_mean = tensors$welford_mean,
+          welford_m2 = tensors$welford_m2,
           seed = tensorflow::as_tensor(seed, dtype = tf$int32)
         )
       )
@@ -353,17 +362,10 @@ sampler <- R6Class(
         }
         self$reject_iteration(first_iteration)
       } else {
-        free_state <- as.array(result$free_state)
-        dim(free_state) <- c(self$n_chains, self$n_free)
-        self$free_state <- free_state
+        self$keep_tensors(result[names(tensors)])
         self$last_burst_free_states <- split_chains(as.array(result$draws))
         self$numerical_rejections <- self$numerical_rejections +
           as.numeric(result$numerical_rejections)
-
-        includes_warmup <- first_iteration < self$sampling_start
-        if (includes_warmup) {
-          self$keep_tuning(result)
-        }
       }
 
       # counted once they have run, so that an interrupted call leaves the
@@ -372,13 +374,18 @@ sampler <- R6Class(
       invisible(self)
     },
 
-    # The sampler's parameters and tuning state, as the tensors the traced
-    # function and tf_tune() take. The shapes are given so that a model with
-    # one free parameter still passes vectors, as the signature expects.
-    tuning_tensors = function() {
+    # the chain's state and tuning as tensors while a phase runs, and NULL
+    # between phases, when the R fields hold them
+    chain_tensors = NULL,
+
+    # The sampler's state, parameters and tuning state, as the tensors the
+    # traced function and tf_tune() take. The shapes are given so that a model
+    # with one free parameter still passes vectors, as the signature expects.
+    state_tensors = function() {
       float <- tf_float()
       param_vec <- unlist(self$sampler_parameter_values())
       list(
+        free_state = tensorflow::as_tensor(self$free_state, dtype = float),
         param_vec = tensorflow::as_tensor(
           param_vec,
           dtype = float,
@@ -399,6 +406,27 @@ sampler <- R6Class(
           shape = self$n_free
         )
       )
+    },
+
+    current_tensors = function() {
+      self$chain_tensors %||% self$state_tensors()
+    },
+
+    # keeps the state and tuning TensorFlow returned: as tensors while a phase
+    # runs, and in the R fields otherwise
+    keep_tensors = function(tensors) {
+      if (is.null(self$chain_tensors)) {
+        self$keep_in_r(tensors)
+      } else {
+        self$chain_tensors <- tensors
+      }
+    },
+
+    keep_in_r = function(tensors) {
+      free_state <- as.array(tensors$free_state)
+      dim(free_state) <- c(self$n_chains, self$n_free)
+      self$free_state <- free_state
+      self$keep_tuning(tensors)
     },
 
     # keeps the tuned parameters and the tuning state TensorFlow returned
@@ -446,8 +474,9 @@ sampler <- R6Class(
       is_draw <- sampling_iterations > 0 &&
         sampling_iterations %% self$thin == 0
       n_draws <- as.integer(is_draw)
+      free_state <- as.array(self$current_tensors()$free_state)
       draws <- array(
-        rep(self$free_state, n_draws),
+        rep(free_state, n_draws),
         dim = c(n_draws, self$n_chains, self$n_free)
       )
       self$last_burst_free_states <- split_chains(draws)
@@ -458,29 +487,28 @@ sampler <- R6Class(
     # this is also what sets epsilon to its averaged value. It runs tf_tune()
     # eagerly, since only an iteration that errors with one_by_one comes here.
     tune_rejected_iteration = function(iteration) {
-      float <- tf_float()
       warmup_start <- self$sampling_start - self$warmup
+      tensors <- self$current_tensors()
       rejected_step <- list(
-        state = tensorflow::as_tensor(self$free_state, dtype = float),
+        state = tensors$free_state,
         log_accept_ratio = tensorflow::as_tensor(
           rep(-Inf, self$n_chains),
-          dtype = float
+          dtype = tf_float()
         ),
         is_accepted = tensorflow::as_tensor(rep(FALSE, self$n_chains))
       )
-      tuning <- self$tuning_tensors()
       tuned <- self$tf_tune(
         completed = tensorflow::as_tensor(
           as.integer(iteration - warmup_start + 1L)
         ),
         total = tensorflow::as_tensor(as.integer(self$warmup)),
         step = rejected_step,
-        param_vec = tuning$param_vec,
-        tuning = tuning$tuning,
-        welford_mean = tuning$welford_mean,
-        welford_m2 = tuning$welford_m2
+        param_vec = tensors$param_vec,
+        tuning = tensors$tuning,
+        welford_mean = tensors$welford_mean,
+        welford_m2 = tensors$welford_m2
       )
-      self$keep_tuning(tuned)
+      self$keep_tensors(c(list(free_state = tensors$free_state), tuned))
     },
 
     # In a call of more than one iteration, the sampler cannot tell which
