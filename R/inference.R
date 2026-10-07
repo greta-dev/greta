@@ -756,7 +756,8 @@ opt <- function(
       other_args = optimiser$other_args,
       max_iterations = max_iterations,
       tolerance = tolerance,
-      adjust = adjust
+      adjust = adjust,
+      compute_options = compute_options
     )
 
     # run it and get the outputs

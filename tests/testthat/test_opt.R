@@ -161,6 +161,45 @@ test_that("a later opt() call reuses its traced loop and starts afresh", {
   expect_identical(trace_count(loops[[1]]$minimise), 1L)
 })
 
+test_that("opt() calls with different settings on one model match new models", {
+  skip_if_not(check_tf_version())
+  schedule <- function(rate) {
+    tf$keras$optimizers$schedules$ExponentialDecay(
+      initial_learning_rate = rate,
+      decay_steps = 5L,
+      decay_rate = 0.5
+    )
+  }
+  # the two schedules are Python objects, which deparse() writes alike
+  settings <- list(
+    list(optimiser = adam(learning_rate = 0.1), adjust = TRUE),
+    list(optimiser = adam(learning_rate = 0.2), adjust = TRUE),
+    list(optimiser = adam(learning_rate = 0.1), adjust = FALSE),
+    list(optimiser = adam(learning_rate = schedule(0.001)), adjust = TRUE),
+    list(optimiser = adam(learning_rate = schedule(0.5)), adjust = TRUE)
+  )
+  # initials() finds x by name where opt() is called
+  optimise <- function(m, x, setting) {
+    opt(
+      m,
+      optimiser = setting$optimiser,
+      adjust = setting$adjust,
+      initial_values = initials(x = c(1, 2)),
+      max_iterations = 30
+    )
+  }
+  optimise_new_model <- function(setting) {
+    x <- lognormal(0, 1, dim = 2)
+    optimise(model(x), x, setting)
+  }
+
+  x <- lognormal(0, 1, dim = 2)
+  m <- model(x)
+  on_one_model <- lapply(settings, \(setting) optimise(m, x, setting))
+  on_new_models <- lapply(settings, optimise_new_model)
+  expect_identical(on_one_model, on_new_models)
+})
+
 test_that("opt accepts initial values for TFP optimisers", {
   skip_if_not(check_tf_version())
 
