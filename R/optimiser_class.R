@@ -124,62 +124,100 @@ tf_optimiser <- R6Class(
   "tf_optimiser",
   inherit = optimiser,
   public = list(
-    # create an op to minimise the objective
     run_tf_minimiser = function() {
+      self$run_minimiser <- function(inits) {
+        loop <- self$optimiser_loop()
+        loop$restart(inits)
+        result <- loop$minimise(
+          tensorflow::as_tensor(self$max_iterations, dtype = tf$int32),
+          tensorflow::as_tensor(self$tolerance, dtype = tf_float())
+        )
+        self$it <- as.numeric(result[[1]])
+        self$old_obj <- as.numeric(result[[2]])
+        self$diff <- as.numeric(result[[3]])
+        self$converged <- self$diff <= self$tolerance
+
+        # The objective value can reach numerical overflow, so we error and
+        # suggest changing initial values or changing sampler, e.g., `adam`.
+        # With max_iterations = 0 there is no objective yet to check
+        has_objective <- self$it > 0
+        if (has_objective) {
+          self$check_numerical_overflow(self$old_obj)
+        }
+
+        self$model$dag$tf_environment$free_state <- loop$free_state
+      }
+    },
+
+    # Each call to opt() makes a new optimiser, so it looks its traced loop
+    # up on the model rather than trace it again, keyed by the Keras optimiser,
+    # its settings and adjust, which the trace reads. The loop comes with the
+    # free state's variable and the Keras optimiser it steps, and restart()
+    # puts both back where they start: the free state at the initial values,
+    # and the optimiser's own variables, such as Adam's moments and its count
+    # of iterations, at their values when it was built.
+    optimiser_loop = function() {
       dag <- self$model$dag
-      tfe <- dag$tf_environment
+      key <- paste(
+        self$method,
+        paste(deparse(self$parameters), collapse = ""),
+        self$adjust,
+        sep = "|"
+      )
+      if (is.null(dag$optimiser_functions[[key]])) {
+        dag$optimiser_functions[[key]] <- self$new_optimiser_loop()
+      }
+      dag$optimiser_functions[[key]]
+    },
 
-      optimise_fun <- eval(parse(text = self$method))
-
-      tfe$tf_optimiser <- do.call(
-        optimise_fun,
+    new_optimiser_loop = function() {
+      float <- tf_float()
+      free_state <- tf$Variable(matrix(0, 1, self$n_free), dtype = float)
+      keras_optimiser <- do.call(
+        eval(parse(text = self$method)),
         self$parameters
       )
+      # A tf_function may not create variables on a retrace, so the
+      # optimiser's slot variables have to exist before tracing.
+      keras_optimiser$build(list(free_state))
+      start_values <- lapply(
+        keras_optimiser$variables,
+        \(variable) variable$numpy()
+      )
 
-      self$run_minimiser <- function(inits) {
-        free_state <- tf$Variable(inits)
+      # Keras 3 removed Optimizer$minimize(), so take the gradient step by
+      # hand.
+      tf_log_prob <- self$tf_log_prob
+      objective <- if (self$adjust) {
+        \() -tf_log_prob(free_state)$adjusted
+      } else {
+        \() -tf_log_prob(free_state)$unadjusted
+      }
 
-        objective_adjusted <- function() {
-          -self$tf_log_prob(free_state)$adjusted
-        }
+      # the objective and its gradient at the current free state, from one
+      # evaluation of the log density
+      objective_and_gradient <- function() {
+        with(tf$GradientTape() %as% tape, {
+          objective_value <- objective()
+        })
+        gradient <- tape$gradient(objective_value, list(free_state))[[1]]
+        # the free state has one row, so the objective has one element
+        list(tf$reshape(objective_value, shape = list()), gradient)
+      }
 
-        objective_unadjusted <- function() {
-          -self$tf_log_prob(free_state)$unadjusted
-        }
-
-        # Keras 3 removed Optimizer$minimize(), so take the gradient step by
-        # hand.
-        objective <- if (self$adjust) {
-          objective_adjusted
-        } else {
-          objective_unadjusted
-        }
-
-        # A tf_function may not create variables on a retrace, so the
-        # optimiser's slot variables have to exist before tracing.
-        tfe$tf_optimiser$build(list(free_state))
-
-        # the objective and its gradient at the current free state, from one
-        # evaluation of the log density
-        objective_and_gradient <- function() {
-          with(tf$GradientTape() %as% tape, {
-            objective_value <- objective()
-          })
-          gradient <- tape$gradient(objective_value, list(free_state))[[1]]
-          # the free state has one row, so the objective has one element
-          list(tf$reshape(objective_value, shape = list()), gradient)
-        }
-
-        # The whole optimisation is one call to TensorFlow, with the
-        # convergence and overflow checks as tensors: stepping from an R loop
-        # cost about 0.9 ms per iteration on the linear example, mostly that
-        # loop's own body rather than the model (greta.benchmarks run
-        # 2026-08-22-optimiser-r-loop). A non-finite objective stops the loop,
-        # so the overflow check below sees it.
-        max_iterations <- self$max_iterations
-        tolerance <- self$tolerance
-        minimise <- tensorflow::tf_function(function() {
-          infinity <- tf$constant(Inf, dtype = tf_float())
+      # The whole optimisation is one call to TensorFlow, with the
+      # convergence and overflow checks as tensors: stepping from an R loop
+      # cost about 0.9 ms per iteration on the linear example, mostly that
+      # loop's own body rather than the model (greta.benchmarks run
+      # 2026-08-22-optimiser-r-loop). A non-finite objective stops the loop,
+      # so the overflow check in run_minimiser() sees it.
+      minimise <- tensorflow::tf_function(
+        input_signature = list(
+          tf$TensorSpec(shape = list(), dtype = tf$int32),
+          tf$TensorSpec(shape = list(), dtype = float)
+        ),
+        function(max_iterations, tolerance) {
+          infinity <- tf$constant(Inf, dtype = float)
           keep_going <- function(iteration, old_objective, difference, ...) {
             tf$logical_and(
               tf$less(iteration, max_iterations),
@@ -193,7 +231,7 @@ tf_optimiser <- R6Class(
           # the objective and gradient at the new one, which the next step
           # reuses rather than evaluating the log density again
           one_step <- function(iteration, old_objective, difference, gradient) {
-            tfe$tf_optimiser$apply_gradients(
+            keras_optimiser$apply_gradients(
               list(reticulate::tuple(gradient, free_state))
             )
             evaluated <- objective_and_gradient()
@@ -210,27 +248,18 @@ tf_optimiser <- R6Class(
             body = one_step,
             loop_vars = list(tf$constant(0L), infinity, infinity, start[[2]])
           )
-        })
-
-        result <- minimise()
-        # minimise's closure is this frame, which also holds minimise, so
-        # each would keep the other alive after opt() returns
-        minimise <- NULL
-        self$it <- as.numeric(result[[1]])
-        self$old_obj <- as.numeric(result[[2]])
-        self$diff <- as.numeric(result[[3]])
-        self$converged <- self$diff <= self$tolerance
-
-        # The objective value can reach numerical overflow, so we error and
-        # suggest changing initial values or changing sampler, e.g., `adam`.
-        # With max_iterations = 0 there is no objective yet to check
-        has_objective <- self$it > 0
-        if (has_objective) {
-          self$check_numerical_overflow(self$old_obj)
         }
+      )
 
-        tfe$free_state <- free_state
+      restart <- function(inits) {
+        free_state$assign(inits)
+        variables <- keras_optimiser$variables
+        for (i in seq_along(variables)) {
+          variables[[i]]$assign(start_values[[i]])
+        }
       }
+
+      list(free_state = free_state, minimise = minimise, restart = restart)
     },
 
     check_numerical_overflow = function(
