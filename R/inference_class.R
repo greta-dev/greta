@@ -22,7 +22,6 @@ inference <- R6Class(
     # where to write the traced values to
     trace_log_file = NULL,
     parameters = list(),
-    tuning_periods = list(),
 
     # free state values for the last burst
     last_burst_free_states = list(),
@@ -168,15 +167,6 @@ inference <- R6Class(
     # the initial values traces the function the inference goes on to use
     tf_log_prob = function(free_state) {
       self$model$dag$tf_log_prob_function(free_state)
-    },
-
-    # run a burst of sampling, and put the resulting free state values in
-    # last_burst_free_states
-    run_burst = function() {
-      cli::cli_abort(
-        "no method to run a burst in the base inference class"
-      )
-      self$last_burst_free_states <- free_states
     },
 
     # store the free state, and/or corresponding values of the target greta

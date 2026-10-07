@@ -63,10 +63,6 @@ sampler <- R6Class(
       if (!has_diag_sd_per_parameter) {
         self$parameters$diag_sd <- rep(self$parameters$diag_sd[1], self$n_free)
       }
-
-      # every call to TensorFlow passes the tuning state, including those of a
-      # chain with no warmup
-      self$reset_tuning_state()
     },
 
     # The settings read in R while the loop is traced. Samplers of one model
@@ -123,13 +119,16 @@ sampler <- R6Class(
           scalar_integer,
           scalar_integer,
           scalar_integer,
-          # sampler_param_vec
+          # param_vec
           tf$TensorSpec(
             shape = list(length(unlist(self$sampler_parameter_values()))),
             dtype = float
           ),
           # tuning, welford_mean and welford_m2
-          tf$TensorSpec(shape = list(6L), dtype = float),
+          tf$TensorSpec(
+            shape = list(length(self$tuning_state$tuning)),
+            dtype = float
+          ),
           tf$TensorSpec(shape = list(self$n_free), dtype = float),
           tf$TensorSpec(shape = list(self$n_free), dtype = float),
           # seed
@@ -161,7 +160,6 @@ sampler <- R6Class(
       one_by_one,
       plan_is,
       n_cores,
-      float_type,
       trace_batch_size,
       from_scratch = TRUE
     ) {
@@ -188,6 +186,10 @@ sampler <- R6Class(
 
         dag$define_tf_log_prob_function()
       }
+
+      # warmup tunes from a fresh state, and every call to TensorFlow passes
+      # the tuning state, sampling's included
+      self$reset_tuning_state()
       self$tf_iterations <- self$sampler_function()
 
       # extra_samples() appends to the trace the sampler already has
@@ -204,7 +206,6 @@ sampler <- R6Class(
       }
 
       if (warmup > 0) {
-        self$reset_tuning_state()
         self$run_phase(
           phase = "warmup",
           n_iterations = warmup,
@@ -239,8 +240,7 @@ sampler <- R6Class(
     # to TensorFlow each. Tuning and thinning happen inside TensorFlow, so a
     # burst returns to R only to update the progress bar, or after every
     # iteration with one_by_one, so that a numerical error rejects only its
-    # own proposal. Without a progress bar, run_samplers() makes pb_update
-    # the whole phase.
+    # own proposal. Without either, the phase is one call.
     run_phase = function(
       phase,
       n_iterations,
@@ -265,7 +265,13 @@ sampler <- R6Class(
         )
       }
 
-      iterations_per_burst <- if (one_by_one) 1L else pb_update
+      iterations_per_burst <- if (one_by_one) {
+        1L
+      } else if (verbose) {
+        pb_update
+      } else {
+        n_iterations
+      }
       burst_lengths <- self$burst_lengths(n_iterations, iterations_per_burst)
       completed_iterations <- cumsum(burst_lengths)
 
@@ -320,35 +326,22 @@ sampler <- R6Class(
       # numbers
       seed <- c(self$seed, 0L)
 
-      float <- tf_float()
-      param_vec <- unlist(self$sampler_parameter_values())
+      tuning <- self$tuning_tensors()
       result <- cleanly(
         self$tf_iterations(
-          free_state = tensorflow::as_tensor(self$free_state, dtype = float),
+          free_state = tensorflow::as_tensor(
+            self$free_state,
+            dtype = tf_float()
+          ),
           n_iterations = tensorflow::as_tensor(n_iterations),
           first_iteration = tensorflow::as_tensor(first_iteration),
           warmup = tensorflow::as_tensor(as.integer(self$warmup)),
           sampling_start = tensorflow::as_tensor(self$sampling_start),
           thin = tensorflow::as_tensor(as.integer(self$thin)),
-          sampler_param_vec = tensorflow::as_tensor(
-            param_vec,
-            dtype = float,
-            shape = length(param_vec)
-          ),
-          tuning = tensorflow::as_tensor(
-            unname(self$tuning_state$tuning),
-            dtype = float
-          ),
-          welford_mean = tensorflow::as_tensor(
-            self$tuning_state$welford_mean,
-            dtype = float,
-            shape = self$n_free
-          ),
-          welford_m2 = tensorflow::as_tensor(
-            self$tuning_state$welford_m2,
-            dtype = float,
-            shape = self$n_free
-          ),
+          param_vec = tuning$param_vec,
+          tuning = tuning$tuning,
+          welford_mean = tuning$welford_mean,
+          welford_m2 = tuning$welford_m2,
           seed = tensorflow::as_tensor(seed, dtype = tf$int32)
         )
       )
@@ -364,14 +357,13 @@ sampler <- R6Class(
         dim(free_state) <- c(self$n_chains, self$n_free)
         self$free_state <- free_state
         self$last_burst_free_states <- split_chains(as.array(result$draws))
-        self$keep_tuning(
-          result$sampler_param_vec,
-          result$tuning,
-          result$welford_mean,
-          result$welford_m2
-        )
         self$numerical_rejections <- self$numerical_rejections +
           as.numeric(result$numerical_rejections)
+
+        includes_warmup <- first_iteration < self$sampling_start
+        if (includes_warmup) {
+          self$keep_tuning(result)
+        }
       }
 
       # counted once they have run, so that an interrupted call leaves the
@@ -380,19 +372,51 @@ sampler <- R6Class(
       invisible(self)
     },
 
+    # The sampler's parameters and tuning state, as the tensors the traced
+    # function and tf_tune() take. The shapes are given so that a model with
+    # one free parameter still passes vectors, as the signature expects.
+    tuning_tensors = function() {
+      float <- tf_float()
+      param_vec <- unlist(self$sampler_parameter_values())
+      list(
+        param_vec = tensorflow::as_tensor(
+          param_vec,
+          dtype = float,
+          shape = length(param_vec)
+        ),
+        tuning = tensorflow::as_tensor(
+          unname(self$tuning_state$tuning),
+          dtype = float
+        ),
+        welford_mean = tensorflow::as_tensor(
+          self$tuning_state$welford_mean,
+          dtype = float,
+          shape = self$n_free
+        ),
+        welford_m2 = tensorflow::as_tensor(
+          self$tuning_state$welford_m2,
+          dtype = float,
+          shape = self$n_free
+        )
+      )
+    },
+
     # keeps the tuned parameters and the tuning state TensorFlow returned
-    keep_tuning = function(param_vec, tuning, welford_mean, welford_m2) {
-      tuned <- as.numeric(param_vec)
-      indices <- self$tuning_indices()
-      if (!is.null(indices)) {
-        self$parameters$epsilon <- tuned[indices$epsilon + 1]
-        self$parameters$diag_sd <- tuned[indices$diag_sd + 1]
+    keep_tuning = function(tuned) {
+      if (self$tunes()) {
+        param_vec <- as.numeric(tuned$param_vec)
+        indices <- self$tuning_indices()
+        self$parameters$epsilon <- param_vec[indices$epsilon + 1]
+        self$parameters$diag_sd <- param_vec[indices$diag_sd + 1]
       }
 
       self$tuning_state <- list(
-        tuning = setNames(as.numeric(tuning), names(self$tuning_state$tuning)),
-        welford_mean = as.numeric(welford_mean),
-        welford_m2 = as.numeric(welford_m2)
+        tuning = setNames(
+          as.numeric(tuned$tuning),
+          names(self$tuning_state$tuning)
+        ),
+        welford_mean = as.numeric(tuned$welford_mean),
+        welford_m2 = as.numeric(tuned$welford_m2)
       )
     },
 
@@ -402,14 +426,18 @@ sampler <- R6Class(
       NULL
     },
 
+    tunes = function() {
+      !is.null(self$tuning_indices())
+    },
+
     # A numerical error in a call of one iteration came from its only
     # proposal, so the sampler rejects that proposal: the state stays where
-    # it was, and is kept as a draw if one was due
+    # it was, and is kept as a draw if one was due, by the rule
+    # define_iterations() uses
     reject_iteration = function(iteration) {
       self$numerical_rejections <- self$numerical_rejections + self$n_chains
 
-      tunes_iteration <- iteration < self$sampling_start &&
-        is.finite(self$tuning_interval)
+      tunes_iteration <- iteration < self$sampling_start && self$tunes()
       if (tunes_iteration) {
         self$tune_rejected_iteration(iteration)
       }
@@ -440,39 +468,19 @@ sampler <- R6Class(
         ),
         is_accepted = tensorflow::as_tensor(rep(FALSE, self$n_chains))
       )
-      param_vec <- unlist(self$sampler_parameter_values())
+      tuning <- self$tuning_tensors()
       tuned <- self$tf_tune(
         completed = tensorflow::as_tensor(
           as.integer(iteration - warmup_start + 1L)
         ),
         total = tensorflow::as_tensor(as.integer(self$warmup)),
         step = rejected_step,
-        param_vec = tensorflow::as_tensor(
-          param_vec,
-          dtype = float,
-          shape = length(param_vec)
-        ),
-        tuning = tensorflow::as_tensor(
-          unname(self$tuning_state$tuning),
-          dtype = float
-        ),
-        welford_mean = tensorflow::as_tensor(
-          self$tuning_state$welford_mean,
-          dtype = float,
-          shape = self$n_free
-        ),
-        welford_m2 = tensorflow::as_tensor(
-          self$tuning_state$welford_m2,
-          dtype = float,
-          shape = self$n_free
-        )
+        param_vec = tuning$param_vec,
+        tuning = tuning$tuning,
+        welford_mean = tuning$welford_mean,
+        welford_m2 = tuning$welford_m2
       )
-      self$keep_tuning(
-        tuned$param_vec,
-        tuned$tuning,
-        tuned$welford_mean,
-        tuned$welford_m2
-      )
+      self$keep_tuning(tuned)
     },
 
     # In a call of more than one iteration, the sampler cannot tell which
@@ -607,18 +615,14 @@ sampler <- R6Class(
       warmup,
       sampling_start,
       thin,
-      sampler_param_vec,
+      param_vec,
       tuning,
       welford_mean,
       welford_m2,
       seed
     ) {
-      kernel_results <- self$tf_bootstrap_results(
-        free_state,
-        sampler_param_vec,
-        seed
-      )
-      tunes <- is.finite(self$tuning_interval)
+      kernel_results <- self$tf_bootstrap_results(free_state, param_vec, seed)
+      tunes <- self$tunes()
       warmup_start <- sampling_start - warmup
 
       draws_after <- function(iterations) {
@@ -634,6 +638,9 @@ sampler <- R6Class(
         size = draws_after(first_iteration + n_iterations) - draws_before_call,
         element_shape = list(self$n_chains, self$n_free)
       )
+      # the chain's count of completed iterations at which the next draw is
+      # kept, carried through the loop so each iteration only compares it
+      next_draw_at <- sampling_start + (draws_before_call + 1L) * thin
 
       body <- function(
         iteration,
@@ -644,6 +651,8 @@ sampler <- R6Class(
         welford_mean,
         welford_m2,
         draws,
+        n_drawn,
+        next_draw_at,
         numerical_rejections
       ) {
         chain_iteration <- first_iteration + iteration
@@ -655,11 +664,13 @@ sampler <- R6Class(
           chain_iteration
         )
 
-        is_numerical_rejection <- tf$logical_not(
-          tf$math$is_finite(step$log_accept_ratio)
-        )
-        numerical_rejections <- numerical_rejections +
-          tf$reduce_sum(tf$cast(is_numerical_rejection, tf$int32))
+        if (self$uses_metropolis) {
+          is_numerical_rejection <- tf$logical_not(
+            tf$math$is_finite(step$log_accept_ratio)
+          )
+          numerical_rejections <- numerical_rejections +
+            tf$reduce_sum(tf$cast(is_numerical_rejection, tf$int32))
+        }
 
         if (tunes) {
           tune <- function() {
@@ -685,14 +696,17 @@ sampler <- R6Class(
           welford_m2 <- tuned[[4]]
         }
 
-        draws_so_far <- draws_after(chain_iteration + 1L)
-        is_draw <- tf$greater(draws_so_far, draws_after(chain_iteration))
-        draws <- tf$cond(
+        is_draw <- tf$equal(chain_iteration + 1L, next_draw_at)
+        kept <- tf$cond(
           is_draw,
           function() {
-            draws$write(draws_so_far - draws_before_call - 1L, step$state)
+            list(
+              draws$write(n_drawn, step$state),
+              n_drawn + 1L,
+              next_draw_at + thin
+            )
           },
-          \() draws
+          \() list(draws, n_drawn, next_draw_at)
         )
 
         list(
@@ -703,7 +717,9 @@ sampler <- R6Class(
           tuning,
           welford_mean,
           welford_m2,
-          draws,
+          kept[[1]],
+          kept[[2]],
+          kept[[3]],
           numerical_rejections
         )
       }
@@ -718,23 +734,25 @@ sampler <- R6Class(
           tf$constant(0L),
           free_state,
           kernel_results,
-          sampler_param_vec,
+          param_vec,
           tuning,
           welford_mean,
           welford_m2,
           draws,
+          tf$constant(0L),
+          next_draw_at,
           tf$constant(0L)
         )
       )
 
       list(
         free_state = loop[[2]],
-        sampler_param_vec = loop[[4]],
+        param_vec = loop[[4]],
         tuning = loop[[5]],
         welford_mean = loop[[6]],
         welford_m2 = loop[[7]],
         draws = loop[[8]]$stack(),
-        numerical_rejections = loop[[9]]
+        numerical_rejections = loop[[11]]
       )
     },
 
@@ -804,8 +822,9 @@ sampler <- R6Class(
         tf$equal(completed, total)
       )
 
-      epsilon_index <- self$tuning_indices()$epsilon
-      diag_sd_index <- self$tuning_indices()$diag_sd
+      indices <- self$tuning_indices()
+      epsilon_index <- indices$epsilon
+      diag_sd_index <- indices$diag_sd
 
       update <- function() {
         completed_value <- tf$cast(completed, dtype)
@@ -817,11 +836,9 @@ sampler <- R6Class(
           )
         }
 
-        mean_accept <- tf$where(
-          tf$greater(accept_count, 0),
-          accept_sum / tf$maximum(accept_count, tf$constant(1, dtype)),
-          tf$constant(0, dtype)
-        )
+        # accept_sum is zero whenever accept_count is, so this is zero then
+        mean_accept <- accept_sum /
+          tf$maximum(accept_count, tf$constant(1, dtype))
 
         # dual averaging
         kappa <- 0.75
@@ -880,37 +897,25 @@ sampler <- R6Class(
             axis = 0L
           )
         )
-        zero <- tf$constant(0, dtype)
-        list(
-          new_param_vec,
-          tf$stack(list(
-            hbar,
-            log_epsilon_bar,
-            count,
-            n_for_shrinkage,
-            zero,
-            zero
-          ))
-        )
+        list(new_param_vec, hbar, log_epsilon_bar)
       }
       keep <- function() {
-        list(
-          param_vec,
-          tf$stack(list(
-            hbar,
-            log_epsilon_bar,
-            count,
-            n_for_shrinkage,
-            accept_sum,
-            accept_count
-          ))
-        )
+        list(param_vec, hbar, log_epsilon_bar)
       }
       updated <- tf$cond(at_tuning_point, update, keep)
 
+      # the acceptance counts start again after each update
+      zero <- tf$constant(0, dtype)
       list(
         param_vec = updated[[1]],
-        tuning = updated[[2]],
+        tuning = tf$stack(list(
+          updated[[2]],
+          updated[[3]],
+          count,
+          n_for_shrinkage,
+          tf$where(at_tuning_point, zero, accept_sum),
+          tf$where(at_tuning_point, zero, accept_count)
+        )),
         welford_mean = welford_mean,
         welford_m2 = welford_m2
       )

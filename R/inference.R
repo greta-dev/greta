@@ -301,18 +301,9 @@ run_samplers <- function(
   warmup <- as.integer(warmup)
   thin <- as.integer(thin)
 
-  # without a progress bar to update, make each phase one burst, or one per
-  # iteration with one_by_one, since every burst is a round trip from R to
-  # TensorFlow
-  if (!verbose) {
-    pb_update <- Inf
-  }
   pb_update <- min(pb_update, max(warmup, n_samples))
 
-  dag <- samplers[[1]]$model$dag
-  chains <- samplers[[1]]$n_chains
   n_cores <- check_n_cores(n_cores, length(samplers), plan_is)
-  float_type <- dag$tf_float
 
   # stash the samplers now, to retrieve draws later
   greta_stash$samplers <- samplers
@@ -369,7 +360,6 @@ run_samplers <- function(
         one_by_one = one_by_one,
         plan_is = plan_is,
         n_cores = n_cores,
-        float_type = float_type,
         trace_batch_size = trace_batch_size,
         from_scratch = from_scratch
       ),
