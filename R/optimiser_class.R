@@ -173,23 +173,16 @@ tf_optimiser <- R6Class(
       }
 
       dag <- self$model$dag
-      # deparse() rounds numbers to 15 significant digits unless asked for
-      # 17, which tell any two doubles apart
-      every_digit <- c(
-        "keepNA",
-        "keepInteger",
-        "niceNames",
-        "showAttributes",
-        "digits17"
+      # "all" writes numbers to 17 significant digits, which tell any two
+      # doubles apart
+      key <- deparse1(
+        list(self$method, self$parameters, self$adjust, self$compute_options),
+        control = "all"
       )
-      key <- paste(
-        self$method,
-        deparse1(self$parameters, control = every_digit),
-        self$adjust,
-        self$compute_options,
-        sep = "|"
-      )
+      # one loop at a time, so a sweep over settings does not keep a traced
+      # graph for each
       if (is.null(dag$optimiser_functions[[key]])) {
+        dag$optimiser_functions <- list()
         dag$optimiser_functions[[key]] <- self$new_optimiser_loop()
       }
       dag$optimiser_functions[[key]]
@@ -210,13 +203,20 @@ tf_optimiser <- R6Class(
         \(variable) variable$numpy()
       )
 
+      restart <- function(inits) {
+        free_state$assign(inits)
+        variables <- keras_optimiser$variables
+        for (i in seq_along(variables)) {
+          variables[[i]]$assign(start_values[[i]])
+        }
+      }
+
       # Keras 3 removed Optimizer$minimize(), so take the gradient step by
       # hand.
-      tf_log_prob <- self$tf_log_prob
       objective <- if (self$adjust) {
-        \() -tf_log_prob(free_state)$adjusted
+        \() -self$tf_log_prob(free_state)$adjusted
       } else {
-        \() -tf_log_prob(free_state)$unadjusted
+        \() -self$tf_log_prob(free_state)$unadjusted
       }
 
       # the objective and its gradient at the current free state, from one
@@ -236,55 +236,55 @@ tf_optimiser <- R6Class(
       # loop's own body rather than the model (greta.benchmarks run
       # 2026-08-22-optimiser-r-loop). A non-finite objective stops the loop,
       # so the overflow check in run_minimiser() sees it.
-      minimise <- tensorflow::tf_function(
-        input_signature = list(
-          tf$TensorSpec(shape = list(), dtype = tf$int32),
-          tf$TensorSpec(shape = list(), dtype = float)
-        ),
-        function(max_iterations, tolerance) {
-          infinity <- tf$constant(Inf, dtype = float)
-          keep_going <- function(iteration, old_objective, difference, ...) {
+      loop_to_convergence <- function(max_iterations, tolerance) {
+        infinity <- tf$constant(Inf, dtype = float)
+        keep_going <- function(iteration, old_objective, difference, ...) {
+          tf$logical_and(
+            tf$less(iteration, max_iterations),
             tf$logical_and(
-              tf$less(iteration, max_iterations),
-              tf$logical_and(
-                tf$greater(difference, tolerance),
-                tf$math$is_finite(old_objective) | tf$equal(iteration, 0L)
-              )
+              tf$greater(difference, tolerance),
+              tf$math$is_finite(old_objective) | tf$equal(iteration, 0L)
             )
-          }
-          # each step applies the gradient at the current state, then takes
-          # the objective and gradient at the new one, which the next step
-          # reuses rather than evaluating the log density again
-          one_step <- function(iteration, old_objective, difference, gradient) {
-            keras_optimiser$apply_gradients(
-              list(reticulate::tuple(gradient, free_state))
-            )
-            evaluated <- objective_and_gradient()
-            list(
-              iteration + 1L,
-              evaluated[[1]],
-              tf$abs(old_objective - evaluated[[1]]),
-              evaluated[[2]]
-            )
-          }
-          start <- objective_and_gradient()
-          tf$while_loop(
-            cond = keep_going,
-            body = one_step,
-            loop_vars = list(tf$constant(0L), infinity, infinity, start[[2]])
           )
         }
-      )
-
-      restart <- function(inits) {
-        free_state$assign(inits)
-        variables <- keras_optimiser$variables
-        for (i in seq_along(variables)) {
-          variables[[i]]$assign(start_values[[i]])
+        # each step applies the gradient at the current state, then takes
+        # the objective and gradient at the new one, which the next step
+        # reuses rather than evaluating the log density again
+        one_step <- function(iteration, old_objective, difference, gradient) {
+          keras_optimiser$apply_gradients(
+            list(reticulate::tuple(gradient, free_state))
+          )
+          evaluated <- objective_and_gradient()
+          list(
+            iteration + 1L,
+            evaluated[[1]],
+            tf$abs(old_objective - evaluated[[1]]),
+            evaluated[[2]]
+          )
         }
+        start <- objective_and_gradient()
+        tf$while_loop(
+          cond = keep_going,
+          body = one_step,
+          loop_vars = list(tf$constant(0L), infinity, infinity, start[[2]])
+        )
       }
 
-      list(free_state = free_state, minimise = minimise, restart = restart)
+      list(
+        free_state = free_state,
+        restart = restart,
+        # traced here rather than assigned in this frame: reticulate keeps the
+        # R function it wraps, whose enclosure is this frame, alive for as long
+        # as the Python function, so a binding here would keep each alive
+        # through the other after opt() is done with them
+        minimise = tensorflow::tf_function(
+          loop_to_convergence,
+          input_signature = list(
+            tf$TensorSpec(shape = list(), dtype = tf$int32),
+            tf$TensorSpec(shape = list(), dtype = float)
+          )
+        )
+      )
     },
 
     check_numerical_overflow = function(

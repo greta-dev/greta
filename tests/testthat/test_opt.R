@@ -198,6 +198,8 @@ test_that("opt() calls with different settings on one model match new models", {
   on_one_model <- lapply(settings, \(setting) optimise(m, x, setting))
   on_new_models <- lapply(settings, optimise_new_model)
   expect_identical(on_one_model, on_new_models)
+  # one loop at a time, the last cached
+  expect_length(m$dag$optimiser_functions, 1)
 })
 
 test_that("opt accepts initial values for TFP optimisers", {

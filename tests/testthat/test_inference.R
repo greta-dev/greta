@@ -697,7 +697,7 @@ test_that("a numerical error at the end of warmup still tunes", {
   sampler$parameters$epsilon <- 1
   sampler$chain_tensors <- sampler$state_tensors()
   sampler$reject_iteration(sampler$sampling_start - 1L)
-  sampler$keep_in_r(sampler$chain_tensors)
+  sampler$keep_in_r()
 
   log_epsilon_bar <- sampler$tuning_state$tuning[["log_epsilon_bar"]]
   expect_equal(sampler$parameters$epsilon, exp(log_epsilon_bar))
