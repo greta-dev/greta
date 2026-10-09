@@ -125,6 +125,29 @@ dag_class <- R6Class(
 
       # rebuilt from the new log-density function the next time it is used
       self$tf_log_prob_function_one_row <- NULL
+      self$sampler_functions <- list()
+      self$optimiser_functions <- list()
+    },
+
+    # the samplers' and opt()'s traced functions, keyed by a hash of their
+    # trace_settings(). Each traces the log-density function into its own
+    # graph, so they are dropped whenever that function is rebuilt
+    sampler_functions = list(),
+    optimiser_functions = list(),
+
+    # The traced function kept in `cache` under these settings, made by build()
+    # the first time. keep_one drops the others first, so a sweep over
+    # settings keeps one traced graph rather than one each.
+    traced_function = function(cache, settings, build, keep_one = FALSE) {
+      name <- rlang::hash(settings)
+      already_traced <- !is.null(self[[cache]][[name]])
+      if (!already_traced) {
+        if (keep_one) {
+          self[[cache]] <- list()
+        }
+        self[[cache]][[name]] <- build()
+      }
+      self[[cache]][[name]]
     },
 
     # opt() always passes one row, and a graph traced for a known number of

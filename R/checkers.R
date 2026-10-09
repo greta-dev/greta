@@ -938,6 +938,37 @@ check_positive_integer <- function(x, name = "", call = rlang::caller_env()) {
   x
 }
 
+# n_samples = 0 is allowed, to run warmup alone
+check_thin <- function(thin, n_samples, call = rlang::caller_env()) {
+  thin <- check_positive_integer(thin, "thin", call = call)
+  keeps_no_draws <- n_samples > 0 && thin > n_samples
+  if (keeps_no_draws) {
+    cli::cli_abort(
+      message = c(
+        "{.arg thin} must not be larger than {.arg n_samples}",
+        "x" = "{.arg thin} is {thin} and {.arg n_samples} is {n_samples}, so \\
+        no draws would be kept"
+      ),
+      call = call
+    )
+  }
+  thin
+}
+
+# hmc() draws its leapfrog count uniformly from Lmin to Lmax inside
+# TensorFlow, which errors when the range is empty
+check_leapfrog_range <- function(Lmin, Lmax, call = rlang::caller_env()) {
+  if (Lmin > Lmax) {
+    cli::cli_abort(
+      message = c(
+        "{.arg Lmin} must not be larger than {.arg Lmax}",
+        "x" = "{.arg Lmin} is {Lmin} and {.arg Lmax} is {Lmax}"
+      ),
+      call = call
+    )
+  }
+}
+
 # batch sizes must be positive numerics, rounded off to integers
 check_trace_batch_size <- function(x, call = rlang::caller_env()) {
   valid <- is.numeric(x) && length(x) == 1 && x >= 1

@@ -17,17 +17,23 @@ NULL
 #' @param n_samples number of MCMC samples to draw per chain (after any warm-up,
 #'   but before thinning)
 #' @param thin MCMC thinning rate; every `thin` samples is retained, the
-#'   rest are discarded
+#'   rest are discarded. For example:
+#'
+#'   - `n_samples = 1000, thin = 10`: 10 divides 1000 exactly, so all 1000
+#'   iterations are run and iterations 10, 20, ..., 1000 are kept: 100 draws.
+#'   - `n_samples = 1000, thin = 3`: 3 does not divide 1000 exactly, so
+#'   iterations 3, 6, ..., 999 are kept: 333 draws. Iteration 1000 is still
+#'   run, but keeps no draw.
 #' @param warmup number of samples to spend warming up the mcmc sampler (moving
 #'   chains toward the highest density area and tuning sampler hyperparameters).
 #' @param chains number of MCMC chains to run. Default is 2. We recommend using more chains as this helps improve convergence. However the number of chains specified can increase the CPU load, so we have to set a lower default value.
 #' @param n_cores the maximum number of CPU cores used by each sampler (see
 #'   details). If NULL (default), it sets them to 2 cores.
 #' @param verbose whether to print progress information to the console
-#' @param pb_update how regularly to update the progress bar (in iterations).
-#'   If `pb_update` is less than or equal to `thin`, it will be set
-#'   to `thin + 1` to ensure at least one saved iteration per
-#'   `pb_update` iterations.
+#' @param pb_update how often to update the progress bar, in iterations.
+#'   Warmup and sampling each run in bursts of `pb_update` iterations, and the
+#'   bar updates between them, showing the number of iterations run. It does
+#'   not change the draws.
 #' @param one_by_one whether to run TensorFlow MCMC code one iteration at a
 #'   time, so that greta can handle numerical errors as 'bad' proposals (see
 #'   below).
@@ -102,10 +108,10 @@ NULL
 #' @note `set.seed()` is all you need to make MCMC reproducible: greta draws
 #'   its own seed from R's random number generator and passes it to the
 #'   sampler, so both the initial values and the sampler are seeded. See
-#'   examples below. The draws also depend on how sampling is split between
-#'   progress updates, and on how chains are split between parallel workers,
-#'   so a run is repeated exactly only with the same `verbose`, `pb_update`,
-#'   `one_by_one` and future plan (including its number of workers). The
+#'   examples below. `verbose`, `pb_update` and `one_by_one` do not change the
+#'   draws, but how chains are split between parallel workers does, so a run
+#'   is repeated exactly only with the same future plan (including its number
+#'   of workers). The
 #'   [Reproducible results](https://greta-dev.github.io/greta/articles/webpages/reproducibility.html)
 #'   article shows each of these, and how greta compares with Stan and PyMC.
 #'
@@ -213,9 +219,9 @@ NULL
 mcmc <- function(
   model,
   sampler = hmc(),
-  n_samples = 1000,
+  n_samples = 2000,
   thin = 1,
-  warmup = 1000,
+  warmup = 2000,
   chains = 2,
   n_cores = NULL,
   verbose = TRUE,
@@ -238,6 +244,8 @@ mcmc <- function(
 
     chains <- check_positive_integer(chains, "chains")
 
+    thin <- check_thin(thin, n_samples)
+
     # get the dag containing the target nodes
     dag <- model$dag
 
@@ -252,15 +260,6 @@ mcmc <- function(
       model = model,
       compute_options = compute_options
     )
-
-    # if verbose = FALSE, make pb_update as big as possible to speed up sampling
-    if (!verbose) {
-      pb_update <- Inf
-    }
-
-    # now make it finite
-    pb_update <- min(pb_update, max(warmup, n_samples))
-    pb_update <- max(pb_update, thin + 1)
 
     run_samplers(
       samplers = samplers,
@@ -302,10 +301,9 @@ run_samplers <- function(
   warmup <- as.integer(warmup)
   thin <- as.integer(thin)
 
-  dag <- samplers[[1]]$model$dag
-  chains <- samplers[[1]]$n_chains
+  pb_update <- min(pb_update, max(warmup, n_samples))
+
   n_cores <- check_n_cores(n_cores, length(samplers), plan_is)
-  float_type <- dag$tf_float
 
   # stash the samplers now, to retrieve draws later
   greta_stash$samplers <- samplers
@@ -362,7 +360,6 @@ run_samplers <- function(
         one_by_one = one_by_one,
         plan_is = plan_is,
         n_cores = n_cores,
-        float_type = float_type,
         trace_batch_size = trace_batch_size,
         from_scratch = from_scratch
       ),
@@ -487,7 +484,7 @@ stashed_samples <- function() {
 #'
 extra_samples <- function(
   draws,
-  n_samples = 1000,
+  n_samples = 2000,
   thin = 1,
   n_cores = NULL,
   verbose = TRUE,
@@ -496,16 +493,13 @@ extra_samples <- function(
   trace_batch_size = 100,
   compute_options = cpu_only()
 ) {
-  model_info <- get_model_info(draws)
-  samplers <- model_info$samplers
+  thin <- check_thin(thin, n_samples)
 
-  # set the last values as the current free state values
-  for (sampler in samplers) {
-    free_state_draws <- sampler$traced_free_state
-    n_draws <- nrow(free_state_draws[[1]])
-    free_state_draws <- lapply(free_state_draws, `[`, n_draws, )
-    sampler$free_state <- do.call(rbind, free_state_draws)
-  }
+  model_info <- get_model_info(draws)
+
+  # each sampler carries on from its free state, the state its chains last
+  # reached, which with thin above 1 can be after the last kept draw
+  samplers <- model_info$samplers
 
   run_samplers(
     samplers = samplers,
@@ -726,8 +720,9 @@ print.initials <- function(x, ...) {
 #'     model at the parameters 'par'
 #'    \item `iterations` the number of iterations taken by the optimiser
 #'    \item `convergence` an integer code, 0 indicates successful
-#'     completion, 1 indicates the iteration limit `max_iterations` had
-#'     been reached
+#'     completion, 1 that the optimiser did not converge: it reached the
+#'     iteration limit `max_iterations`, or `bfgs()` or `nelder_mead()`
+#'     stopped without converging
 #'   \item `hessian` (if `hessian = TRUE`) a named list of hessian
 #'     matrices/arrays for the parameters (w.r.t. `value`)
 #'  }
@@ -761,7 +756,8 @@ opt <- function(
       other_args = optimiser$other_args,
       max_iterations = max_iterations,
       tolerance = tolerance,
-      adjust = adjust
+      adjust = adjust,
+      compute_options = compute_options
     )
 
     # run it and get the outputs
