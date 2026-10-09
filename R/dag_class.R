@@ -135,6 +135,21 @@ dag_class <- R6Class(
     sampler_functions = list(),
     optimiser_functions = list(),
 
+    # The traced function kept in `cache` under these settings, made by build()
+    # the first time. keep_one drops the others first, so a sweep over
+    # settings keeps one traced graph rather than one each.
+    traced_function = function(cache, settings, build, keep_one = FALSE) {
+      name <- rlang::hash(settings)
+      already_traced <- !is.null(self[[cache]][[name]])
+      if (!already_traced) {
+        if (keep_one) {
+          self[[cache]] <- list()
+        }
+        self[[cache]][[name]] <- build()
+      }
+      self[[cache]][[name]]
+    },
+
     # opt() always passes one row, and a graph traced for a known number of
     # rows runs faster per step than one traced for any number: 100 adam steps
     # on the linear example took 0.075s this way and 0.101s through the open
