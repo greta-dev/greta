@@ -561,17 +561,19 @@ test_that("one_by_one runs one iteration per burst, whatever thin is", {
   skip_if_not(check_tf_version())
   x <- uniform(0, 1)
   m <- model(x)
+  warmup <- 10L
+  n_samples <- 30L
   draws <- mcmc(
     m,
-    warmup = 10,
-    n_samples = 30,
+    warmup = warmup,
+    n_samples = n_samples,
     thin = 3,
     one_by_one = TRUE,
     chains = 1,
     verbose = FALSE
   )
   sampler <- get_model_info(draws)$samplers[[1]]
-  expect_identical(sampler$n_bursts, 10L + 30L)
+  expect_identical(sampler$n_bursts, warmup + n_samples)
   expect_equal(coda::niter(draws), 10)
 })
 

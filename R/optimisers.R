@@ -181,7 +181,7 @@ nelder_mead <- function(
 ) {
   define_tfp_optimiser(
     name = "nelder_mead",
-    method = "tfp$optimizer$nelder_mead_minimize",
+    method = \() tfp$optimizer$nelder_mead_minimize,
     parameters = list(
       objective_function = objective_function,
       initial_simplex = NULL,
@@ -265,7 +265,7 @@ bfgs <- function(
 ) {
   define_tfp_optimiser(
     name = "bfgs",
-    method = "tfp$optimizer$bfgs_minimize",
+    method = \() tfp$optimizer$bfgs_minimize,
     parameters = list(
       value_and_gradients_function = value_and_gradients_function,
       initial_position = initial_position,
@@ -356,7 +356,7 @@ gradient_descent <- function(
 ) {
   define_tf_optimiser(
     name = "gradient_descent",
-    method = "tf$keras$optimizers$SGD",
+    method = \() tf$keras$optimizers$SGD,
     parameters = list(
       learning_rate = learning_rate,
       momentum = momentum,
@@ -374,7 +374,7 @@ gradient_descent <- function(
 adadelta <- function(learning_rate = 0.001, rho = 1, epsilon = 1e-08) {
   define_tf_optimiser(
     name = "adadelta",
-    method = "tf$keras$optimizers$Adadelta",
+    method = \() tf$keras$optimizers$Adadelta,
     parameters = list(
       learning_rate = learning_rate,
       rho = rho,
@@ -396,7 +396,7 @@ adagrad <- function(
 ) {
   define_tf_optimiser(
     name = "adagrad",
-    method = "tf$keras$optimizers$Adagrad",
+    method = \() tf$keras$optimizers$Adagrad,
     parameters = list(
       learning_rate = learning_rate,
       initial_accumulator_value = initial_accumulator_value,
@@ -431,7 +431,7 @@ adagrad_da <- function(
 
   define_tf_compat_optimiser(
     name = "adagrad_da",
-    method = "tf$compat$v1$train$AdagradDAOptimizer",
+    method = \() tf$compat$v1$train$AdagradDAOptimizer,
     parameters = list(
       learning_rate = learning_rate,
       global_step = global_step,
@@ -460,7 +460,7 @@ adam <- function(
 ) {
   define_tf_optimiser(
     name = "adam",
-    method = "tf$keras$optimizers$Adam",
+    method = \() tf$keras$optimizers$Adam,
     parameters = list(
       learning_rate = learning_rate,
       beta_1 = beta_1,
@@ -482,7 +482,7 @@ adamax <- function(
 ) {
   define_tf_optimiser(
     name = "adamax",
-    method = "tf$keras$optimizers$Adamax",
+    method = \() tf$keras$optimizers$Adamax,
     parameters = list(
       learning_rate = learning_rate,
       beta_1 = beta_1,
@@ -514,7 +514,7 @@ ftrl <- function(
 ) {
   define_tf_optimiser(
     name = "ftrl",
-    method = "tf$keras$optimizers$Ftrl",
+    method = \() tf$keras$optimizers$Ftrl,
     parameters = list(
       learning_rate = learning_rate,
       learning_rate_power = learning_rate_power,
@@ -542,7 +542,7 @@ proximal_gradient_descent <- function(
 
   define_tf_compat_optimiser(
     name = "proximal_gradient_descent",
-    method = "tf$compat$v1$train$ProximalGradientDescentOptimizer",
+    method = \() tf$compat$v1$train$ProximalGradientDescentOptimizer,
     parameters = list(
       learning_rate = learning_rate,
       l1_regularization_strength = l1_regularization_strength,
@@ -568,7 +568,7 @@ proximal_adagrad <- function(
 
   define_tf_compat_optimiser(
     name = "proximal_adagrad",
-    method = "tf$compat$v1$train$ProximalAdagradOptimizer",
+    method = \() tf$compat$v1$train$ProximalAdagradOptimizer,
     parameters = list(
       learning_rate = learning_rate,
       initial_accumulator_value = initial_accumulator_value,
@@ -589,7 +589,7 @@ nadam <- function(
 ) {
   define_tf_optimiser(
     name = "nadam",
-    method = "tf$keras$optimizers$Nadam",
+    method = \() tf$keras$optimizers$Nadam,
     parameters = list(
       learning_rate = learning_rate,
       beta_1 = beta_1,
@@ -615,7 +615,7 @@ rms_prop <- function(
 ) {
   define_tf_optimiser(
     name = "rms_prop",
-    method = "tf$keras$optimizers$RMSprop",
+    method = \() tf$keras$optimizers$RMSprop,
     parameters = list(
       learning_rate = learning_rate,
       rho = rho,

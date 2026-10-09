@@ -139,7 +139,7 @@ test_that("opt accepts initial values for TF optimisers", {
   expect_true(all(abs(x - o$par$z) < 1e-3))
 })
 
-test_that("a later opt() call reuses its traced loop and starts afresh", {
+test_that("a second opt() call reuses the traced optimiser and starts afresh", {
   skip_if_not(check_tf_version())
   x <- normal(0, 1, dim = 2)
   m <- model(x)
@@ -170,7 +170,7 @@ test_that("opt() calls with different settings on one model match new models", {
       decay_rate = 0.5
     )
   }
-  # the two schedules are Python objects, which deparse() writes alike
+  # the two schedules are Python objects, which can't key a cached loop
   settings <- list(
     list(optimiser = adam(learning_rate = 0.1), adjust = TRUE),
     list(optimiser = adam(learning_rate = 0.2), adjust = TRUE),
@@ -212,7 +212,7 @@ test_that("opt() traces again for a setting past 15 digits or another device", {
   }
 
   first <- loop_key(optimiser = adam(learning_rate = 0.1))
-  # deparse() writes this as 0.1 too, to its default 15 digits
+  # 0.1 to 15 significant digits, so a key that rounds would share a loop
   nearby_rate <- 0.1 * (1 + 4 * .Machine$double.eps)
   nearby <- loop_key(optimiser = adam(learning_rate = nearby_rate))
   on_gpu <- suppressMessages(

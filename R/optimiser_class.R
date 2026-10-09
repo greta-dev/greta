@@ -9,7 +9,9 @@ optimiser <- R6Class(
 
     # optimiser information
     name = "",
-    method = "method",
+    # returns TF/TFP class or function to call, e.g., tf$keras$optimizers$Adam.
+    # Written as a function, so defining an optimiser doesn't trigger python/TF
+    method = NULL,
     parameters = list(),
     other_args = list(),
     max_iterations = 100L,
@@ -128,9 +130,9 @@ tf_optimiser <- R6Class(
   public = list(
     run_tf_minimiser = function() {
       self$run_minimiser <- function(inits) {
-        loop <- self$optimiser_loop()
-        loop$restart(inits)
-        result <- loop$minimise(
+        traced_optimiser <- self$optimiser_function()
+        traced_optimiser$restart(inits)
+        result <- traced_optimiser$minimise(
           tensorflow::as_tensor(self$max_iterations, dtype = tf$int32),
           tensorflow::as_tensor(self$tolerance, dtype = tf_float())
         )
@@ -147,54 +149,52 @@ tf_optimiser <- R6Class(
           self$check_numerical_overflow(self$old_obj)
         }
 
-        self$model$dag$tf_environment$free_state <- loop$free_state
+        self$model$dag$tf_environment$free_state <- traced_optimiser$free_state
       }
     },
 
-    # Each call to opt() makes a new optimiser, so it looks its traced loop
-    # up on the model rather than trace it again, keyed by the Keras optimiser,
-    # its settings and adjust, which the trace reads, and by the device its
-    # variables are made on. The loop comes with the free state's variable and
-    # the Keras optimiser it steps, and restart() puts both back where they
-    # start: the free state at the initial values, and the optimiser's own
-    # variables, such as Adam's moments and its count of iterations, at their
-    # values when it was built.
-    optimiser_loop = function() {
-      # deparse() writes every Python object, such as a Keras learning rate
-      # schedule, the same way, so a loop with one among its settings is
-      # traced for this call alone
-      has_plain_settings <- all(vapply(
-        self$parameters,
-        \(setting) is.null(setting) || is.atomic(setting),
-        logical(1)
-      ))
-      if (!has_plain_settings) {
-        return(self$new_optimiser_loop())
+    # Every parameter is a realised value (number or TRUE), rather than an
+    # object that makes a value (Keras learning rate schedule). rlang::hash()
+    # identifies an object by its place in memory, which a later
+    # object can reuse, so an optimiser with one is traced for its call alone.
+    parameters_realised = function() {
+      is_realised <- \(parameter) is.null(parameter) || is.atomic(parameter)
+      all(vapply(self$parameters, is_realised, logical(1)))
+    },
+
+    # what traced optimiser reads - optimisers with same settings share a trace
+    trace_settings = function() {
+      list(
+        optimiser = self$name,
+        parameters = self$parameters,
+        adjust = self$adjust,
+        compute_options = self$compute_options
+      )
+    },
+
+    # Each call to opt() makes a new optimiser, so its traced function is kept
+    # on the model, under a hash of trace_settings()
+    optimiser_function = function() {
+      if (!self$parameters_realised()) {
+        return(self$new_optimiser_function())
       }
 
       dag <- self$model$dag
-      # "all" writes numbers to 17 significant digits, which tell any two
-      # doubles apart
-      key <- deparse1(
-        list(self$method, self$parameters, self$adjust, self$compute_options),
-        control = "all"
-      )
-      # one loop at a time, so a sweep over settings does not keep a traced
-      # graph for each
-      if (is.null(dag$optimiser_functions[[key]])) {
+      name <- rlang::hash(self$trace_settings())
+      already_traced <- !is.null(dag$optimiser_functions[[name]])
+      if (!already_traced) {
+        # one at a time, so a sweep over settings does not keep a traced graph
+        # for each
         dag$optimiser_functions <- list()
-        dag$optimiser_functions[[key]] <- self$new_optimiser_loop()
+        dag$optimiser_functions[[name]] <- self$new_optimiser_function()
       }
-      dag$optimiser_functions[[key]]
+      dag$optimiser_functions[[name]]
     },
 
-    new_optimiser_loop = function() {
+    new_optimiser_function = function() {
       float <- tf_float()
       free_state <- tf$Variable(matrix(0, 1, self$n_free), dtype = float)
-      keras_optimiser <- do.call(
-        eval(parse(text = self$method)),
-        self$parameters
-      )
+      keras_optimiser <- do.call(self$method(), self$parameters)
       # A tf_function may not create variables on a retrace, so the
       # optimiser's slot variables have to exist before tracing.
       keras_optimiser$build(list(free_state))
@@ -203,12 +203,11 @@ tf_optimiser <- R6Class(
         \(variable) variable$numpy()
       )
 
+      # back to the initial values, and the optimiser's own variables, such as
+      # Adam's moments, back to where they started
       restart <- function(inits) {
         free_state$assign(inits)
-        variables <- keras_optimiser$variables
-        for (i in seq_along(variables)) {
-          variables[[i]]$assign(start_values[[i]])
-        }
+        assign_each(keras_optimiser$variables, start_values)
       }
 
       # Keras 3 removed Optimizer$minimize(), so take the gradient step by
@@ -225,19 +224,16 @@ tf_optimiser <- R6Class(
         with(tf$GradientTape() %as% tape, {
           objective_value <- objective()
         })
-        gradient <- tape$gradient(objective_value, list(free_state))[[1]]
+        gradient <- tape$gradient(objective_value, free_state)
         # the free state has one row, so the objective has one element
         list(tf$reshape(objective_value, shape = list()), gradient)
       }
 
-      # The whole optimisation is one call to TensorFlow, with the
-      # convergence and overflow checks as tensors: stepping from an R loop
-      # cost about 0.9 ms per iteration on the linear example, mostly that
-      # loop's own body rather than the model (greta.benchmarks run
-      # 2026-08-22-optimiser-r-loop). A non-finite objective stops the loop,
-      # so the overflow check in run_minimiser() sees it.
+      # the whole optimisation in one call to TensorFlow, which is much faster
+      # than stepping from R (greta.benchmarks run 2026-08-22-optimiser-r-loop)
       loop_to_convergence <- function(max_iterations, tolerance) {
         infinity <- tf$constant(Inf, dtype = float)
+        # stops at a non-finite objective, for run_minimiser()'s overflow check
         keep_going <- function(iteration, old_objective, difference, ...) {
           tf$logical_and(
             tf$less(iteration, max_iterations),
@@ -273,10 +269,8 @@ tf_optimiser <- R6Class(
       list(
         free_state = free_state,
         restart = restart,
-        # traced here rather than assigned in this frame: reticulate keeps the
-        # R function it wraps, whose enclosure is this frame, alive for as long
-        # as the Python function, so a binding here would keep each alive
-        # through the other after opt() is done with them
+        # not assigned to a variable first: a binding in this frame and the
+        # traced function would keep each other alive
         minimise = tensorflow::tf_function(
           loop_to_convergence,
           input_signature = list(
@@ -316,7 +310,7 @@ tfp_optimiser <- R6Class(
       dag <- self$model$dag
       tfe <- dag$tf_environment
 
-      optimise_fun <- eval(parse(text = self$method))
+      optimise_fun <- self$method()
 
       if (self$adjust) {
         objective <- function(x) {
@@ -401,7 +395,7 @@ tf_compat_optimiser <- R6Class(
       tfe <- dag$tf_environment
       self$sanitise_dtypes()
 
-      optimise_fun <- eval(parse(text = self$method))
+      optimise_fun <- self$method()
 
       tfe$tf_optimiser <- do.call(
         optimise_fun,
@@ -476,4 +470,11 @@ run_optimiser.tfp_optimiser <- function(self) {
 #' @export
 run_optimiser.tf_compat_optimiser <- function(self) {
   self$run_tf_compat_minimiser()
+}
+
+# sets each TensorFlow variable to the value in the same position
+assign_each <- function(variables, values) {
+  for (i in seq_along(variables)) {
+    variables[[i]]$assign(values[[i]])
+  }
 }

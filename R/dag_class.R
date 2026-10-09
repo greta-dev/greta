@@ -129,9 +129,9 @@ dag_class <- R6Class(
       self$optimiser_functions <- list()
     },
 
-    # the samplers' and opt()'s traced loops, keyed by sampler$trace_key() and
-    # by optimiser. Each traces the log-density function into its own graph,
-    # so they are dropped whenever that function is rebuilt
+    # the samplers' and opt()'s traced functions, keyed by a hash of their
+    # trace_settings(). Each traces the log-density function into its own
+    # graph, so they are dropped whenever that function is rebuilt
     sampler_functions = list(),
     optimiser_functions = list(),
 
