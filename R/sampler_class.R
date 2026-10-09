@@ -80,23 +80,25 @@ sampler <- R6Class(
       )
     },
 
-    # Each call to mcmc() makes new samplers, so the traced function is kept on
-    # the model, under a hash of trace_settings()
+    # each call to mcmc() makes new samplers, so the traced function is kept on
+    # the model
     sampler_function = function() {
-      dag <- self$model$dag
-      name <- rlang::hash(self$trace_settings())
-      already_traced <- !is.null(dag$sampler_functions[[name]])
-      if (!already_traced) {
-        # the traced function keeps the sampler it was built from alive, so
-        # build it from a copy with no draws
-        template <- self$clone()
-        template$traced_free_state <- list()
-        template$traced_values <- list()
-        template$last_burst_free_states <- list()
-        template$tf_iterations <- NULL
-        dag$sampler_functions[[name]] <- template$new_tf_iterations()
-      }
-      dag$sampler_functions[[name]]
+      self$model$dag$traced_function(
+        cache = "sampler_functions",
+        settings = self$trace_settings(),
+        build = self$new_tf_iterations_without_draws
+      )
+    },
+
+    # the traced function keeps the sampler it was built from alive, so it is
+    # built from a copy with no draws
+    new_tf_iterations_without_draws = function() {
+      template <- self$clone()
+      template$traced_free_state <- list()
+      template$traced_values <- list()
+      template$last_burst_free_states <- list()
+      template$tf_iterations <- NULL
+      template$new_tf_iterations()
     },
 
     # warmup and sampling call the same traced function, so the loop is traced

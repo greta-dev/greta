@@ -172,23 +172,18 @@ tf_optimiser <- R6Class(
       )
     },
 
-    # Each call to opt() makes a new optimiser, so its traced function is kept
-    # on the model, under a hash of trace_settings()
+    # each call to opt() makes a new optimiser, so its traced function is kept
+    # on the model
     optimiser_function = function() {
       if (!self$parameters_realised()) {
         return(self$new_optimiser_function())
       }
-
-      dag <- self$model$dag
-      name <- rlang::hash(self$trace_settings())
-      already_traced <- !is.null(dag$optimiser_functions[[name]])
-      if (!already_traced) {
-        # one at a time, so a sweep over settings does not keep a traced graph
-        # for each
-        dag$optimiser_functions <- list()
-        dag$optimiser_functions[[name]] <- self$new_optimiser_function()
-      }
-      dag$optimiser_functions[[name]]
+      self$model$dag$traced_function(
+        cache = "optimiser_functions",
+        settings = self$trace_settings(),
+        build = self$new_optimiser_function,
+        keep_one = TRUE
+      )
     },
 
     new_optimiser_function = function() {
@@ -231,10 +226,10 @@ tf_optimiser <- R6Class(
 
       # the whole optimisation in one call to TensorFlow, which is much faster
       # than stepping from R (greta.benchmarks run 2026-08-22-optimiser-r-loop)
-      loop_to_convergence <- function(max_iterations, tolerance) {
+      minimise <- function(max_iterations, tolerance) {
         infinity <- tf$constant(Inf, dtype = float)
         # stops at a non-finite objective, for run_minimiser()'s overflow check
-        keep_going <- function(iteration, old_objective, difference, ...) {
+        not_finished <- function(iteration, old_objective, difference, ...) {
           tf$logical_and(
             tf$less(iteration, max_iterations),
             tf$logical_and(
@@ -260,7 +255,7 @@ tf_optimiser <- R6Class(
         }
         start <- objective_and_gradient()
         tf$while_loop(
-          cond = keep_going,
+          cond = not_finished,
           body = one_step,
           loop_vars = list(tf$constant(0L), infinity, infinity, start[[2]])
         )
@@ -272,7 +267,7 @@ tf_optimiser <- R6Class(
         # not assigned to a variable first: a binding in this frame and the
         # traced function would keep each other alive
         minimise = tensorflow::tf_function(
-          loop_to_convergence,
+          minimise,
           input_signature = list(
             tf$TensorSpec(shape = list(), dtype = tf$int32),
             tf$TensorSpec(shape = list(), dtype = float)
