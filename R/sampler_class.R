@@ -10,10 +10,8 @@ sampler <- R6Class(
     numerical_rejections = 0,
     # the number of calls to TensorFlow so far, which only the tests read
     n_bursts = 0L,
-    # every iteration's random numbers, whether it tunes, and whether its
-    # state is a draw all come from its number in the chain, so seeded draws
-    # do not depend on how pb_update, verbose or one_by_one split the chain
-    # into calls
+    # an iteration's random numbers, tuning and thinning follow from its
+    # number in the chain, not from how the chain is split into calls
     iterations_run = 0L,
     sampling_start = 0L,
     thin = 1,
@@ -65,42 +63,40 @@ sampler <- R6Class(
       }
     },
 
-    # The settings read in R while the loop is traced. Samplers of one model
-    # that share them share a trace, and everything else, such as epsilon, the
-    # seed and the chain's position, goes in with each call. A parameter that
-    # is not a number, such as rwmh()'s proposal, picks the code that is
-    # traced rather than a value.
-    trace_key = function() {
-      code_parameters <- Filter(is.character, self$parameters)
-      paste(
-        class(self)[1],
-        self$n_chains,
-        length(unlist(self$sampler_parameter_values())),
-        self$tuning_interval,
-        self$accept_target,
-        self$uses_metropolis,
-        paste(unlist(code_parameters), collapse = ","),
-        paste(self$compute_options, collapse = ","),
-        sep = "|"
+    # What the traced function reads in R, so samplers with the same settings
+    # share one trace. Numbers such as epsilon and the seed go in with each
+    # call instead.
+    trace_settings = function() {
+      list(
+        sampler = class(self)[1],
+        n_chains = self$n_chains,
+        n_parameters = length(unlist(self$sampler_parameter_values())),
+        tuning_interval = self$tuning_interval,
+        accept_target = self$accept_target,
+        uses_metropolis = self$uses_metropolis,
+        # such as rwmh()'s proposal, which picks the code that is traced
+        text_parameters = Filter(is.character, self$parameters),
+        compute_options = self$compute_options
       )
     },
 
-    # Each call to mcmc() makes new samplers, so they look their traced
-    # function up on the model rather than trace the loop again. The function
-    # keeps the sampler it was built from alive, so it is built from a copy
-    # with no draws, or the model would hold on to the first sampler's draws.
+    # Each call to mcmc() makes new samplers, so the traced function is kept on
+    # the model, under a hash of trace_settings()
     sampler_function = function() {
       dag <- self$model$dag
-      key <- self$trace_key()
-      if (is.null(dag$sampler_functions[[key]])) {
+      name <- rlang::hash(self$trace_settings())
+      already_traced <- !is.null(dag$sampler_functions[[name]])
+      if (!already_traced) {
+        # the traced function keeps the sampler it was built from alive, so
+        # build it from a copy with no draws
         template <- self$clone()
         template$traced_free_state <- list()
         template$traced_values <- list()
         template$last_burst_free_states <- list()
         template$tf_iterations <- NULL
-        dag$sampler_functions[[key]] <- template$new_tf_iterations()
+        dag$sampler_functions[[name]] <- template$new_tf_iterations()
       }
-      dag$sampler_functions[[key]]
+      dag$sampler_functions[[name]]
     },
 
     # warmup and sampling call the same traced function, so the loop is traced
@@ -113,23 +109,29 @@ sampler <- R6Class(
         input_signature = list(
           # free_state
           self$free_state_signature(),
-          # n_iterations, first_iteration, warmup, sampling_start and thin
+          # n_iterations
           scalar_integer,
+          # first_iteration
           scalar_integer,
+          # warmup
           scalar_integer,
+          # sampling_start
           scalar_integer,
+          # thin
           scalar_integer,
           # param_vec
           tf$TensorSpec(
             shape = list(length(unlist(self$sampler_parameter_values()))),
             dtype = float
           ),
-          # tuning, welford_mean and welford_m2
+          # tuning
           tf$TensorSpec(
             shape = list(length(self$tuning_state$tuning)),
             dtype = float
           ),
+          # welford_mean
           tf$TensorSpec(shape = list(self$n_free), dtype = float),
+          # welford_m2
           tf$TensorSpec(shape = list(self$n_free), dtype = float),
           # seed
           tf$TensorSpec(shape = list(2L), dtype = tf$int32)
@@ -138,17 +140,13 @@ sampler <- R6Class(
     },
     tf_iterations = NULL,
 
-    # A sampler runs the same number of chains for as long as it exists, so
-    # its function is traced for exactly that many rows, where the
-    # log-density function's is traced for any number. TensorFlow runs a graph
-    # whose shapes it knows faster: a second mcmc() call took 0.55 to 0.62
-    # times as long this way on greta's example models (the tf-warmup and
-    # branch versions in greta.benchmarks run 2026-10-07-tf-warmup-i547, at
-    # greta.benchmarks commit c5d7064)
+    # A sampler always runs the same number of chains, so its function is
+    # traced for exactly that many rows, which runs faster than any number:
+    # with any number, a second mcmc() call took 1.6 to 1.8 times as long
+    # (greta.benchmarks run 2026-10-07-tf-warmup-i547, at commit c5d7064)
     free_state_signature = function() {
-      self$model$dag$free_state_signature(n_rows = as.integer(self$n_chains))[[
-        1
-      ]]
+      n_rows <- as.integer(self$n_chains)
+      self$model$dag$free_state_signature(n_rows = n_rows)[[1]]
     },
 
     run_chain = function(
@@ -219,8 +217,7 @@ sampler <- R6Class(
       }
 
       if (n_samples > 0) {
-        # turn the free state trace into values on exit, even if the user
-        # interrupts sampling, so the draws so far are kept
+        # keep draws so far by turning free state into values on exit
         on.exit(self$trace_values(trace_batch_size), add = TRUE)
         self$run_phase(
           phase = "sampling",
@@ -275,11 +272,8 @@ sampler <- R6Class(
       burst_lengths <- self$burst_lengths(n_iterations, iterations_per_burst)
       completed_iterations <- cumsum(burst_lengths)
 
-      # The state and tuning stay as tensors from one call to the next, and
-      # come back to R once, when the phase ends or stops, and the inputs
-      # that are the same for the whole phase are made into tensors once, so
-      # a phase of many short calls, as with one_by_one, does not convert them
-      # on every call
+      # state and tuning stay as tensors between calls and come back to R once,
+      # when the phase ends; inputs fixed for the phase become tensors once
       self$chain_tensors <- self$state_tensors()
       on.exit(self$keep_in_r(), add = TRUE)
       phase_inputs <- self$phase_inputs()
