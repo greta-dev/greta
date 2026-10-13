@@ -103,4 +103,4 @@ Briefly, this is a warning that you can safely ignore. Less briefly, it means th
 
 # How do I make my results reproducible?
 
-Call `set.seed()` before `mcmc()` or `calculate()`. greta takes its random numbers from R's, so the same seed gives the same starting values and the same draws. To repeat a run exactly, also keep `verbose`, `pb_update`, `one_by_one` and the future plan (including its number of workers) the same. See the ["Reproducible results"](webpages/reproducibility.html) article for examples, and for how this compares with Stan and PyMC.
+Call `set.seed()` before `mcmc()` or `calculate()`. greta takes its random numbers from R's, so the same seed gives the same starting values and the same draws. To repeat a run exactly, also keep the future plan (including its number of workers) the same. See the ["Reproducible results"](webpages/reproducibility.html) article for examples, and for how this compares with Stan and PyMC.

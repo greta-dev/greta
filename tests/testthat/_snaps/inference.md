@@ -50,7 +50,8 @@
       draws <- mock_mcmc(1010)
     Message
       
-        sampling          1010/1010 | eta:  0s | <1% bad
+        sampling ======== 1010/1010 | eta:  0s | <1% bad
+      
 
 ---
 
@@ -58,7 +59,8 @@
       draws <- mock_mcmc(500)
     Message
       
-        sampling            500/500 | eta:  0s | 2% bad 
+        sampling ========== 500/500 | eta:  0s | 2% bad 
+      
 
 ---
 
@@ -217,4 +219,22 @@
     Output
       hmc sampler object with parameters:
         Lmin = 1, Lmax = 10, epsilon = 0.1, diag_sd = 1
+
+# hmc() errors informatively when Lmin is larger than Lmax
+
+    Code
+      hmc(Lmin = 10, Lmax = 5)
+    Condition
+      Error in `hmc()`:
+      ! `Lmin` must not be larger than `Lmax`
+      x `Lmin` is 10 and `Lmax` is 5
+
+# thin larger than n_samples is an informative error
+
+    Code
+      mcmc(m, n_samples = 10, warmup = 20, thin = 20, verbose = FALSE)
+    Condition
+      Error in `mcmc()`:
+      ! `thin` must not be larger than `n_samples`
+      x `thin` is 20 and `n_samples` is 10, so no draws would be kept
 

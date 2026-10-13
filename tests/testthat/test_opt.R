@@ -83,6 +83,18 @@ test_that("opt converges with TFP optimisers", {
   expect_true(all(abs(x - o$par$z) < 1e-2))
 })
 
+test_that("opt reports convergence as the optimiser does", {
+  skip_if_not(check_tf_version())
+  x <- normal(0, 1, dim = 3)
+  m <- model(x)
+
+  # BFGS reaches the optimum of a standard normal in one iteration, one short
+  # of an iteration limit of two. greta-dev/greta#569
+  o <- opt(m, optimiser = bfgs(), max_iterations = 2)
+  expect_equal(o$iterations, 1)
+  expect_identical(o$convergence, 0)
+})
+
 test_that("opt fails with defunct optimisers", {
   skip_if_not(check_tf_version())
 
@@ -125,6 +137,130 @@ test_that("opt accepts initial values for TF optimisers", {
 
   # should be close to the truth
   expect_true(all(abs(x - o$par$z) < 1e-3))
+})
+
+test_that("a second opt() call reuses the traced optimiser and starts afresh", {
+  skip_if_not(check_tf_version())
+  x <- normal(0, 1, dim = 2)
+  m <- model(x)
+  optimise <- function() {
+    opt(
+      m,
+      optimiser = adam(),
+      initial_values = initials(x = c(1, -1)),
+      max_iterations = 50
+    )
+  }
+
+  first <- optimise()
+  # adam()'s moments and iteration count are restarted, so the same initial
+  # values give the same result
+  expect_identical(optimise(), first)
+  loops <- m$dag$optimiser_functions
+  expect_length(loops, 1)
+  expect_identical(trace_count(loops[[1]]$minimise), 1L)
+})
+
+test_that("opt() calls with different settings on one model match new models", {
+  skip_if_not(check_tf_version())
+  schedule <- function(rate) {
+    tf$keras$optimizers$schedules$ExponentialDecay(
+      initial_learning_rate = rate,
+      decay_steps = 5L,
+      decay_rate = 0.5
+    )
+  }
+  # the two schedules are Python objects, which can't key a cached loop
+  settings <- list(
+    list(optimiser = adam(learning_rate = 0.1), adjust = TRUE),
+    list(optimiser = adam(learning_rate = 0.2), adjust = TRUE),
+    list(optimiser = adam(learning_rate = 0.1), adjust = FALSE),
+    list(optimiser = adam(learning_rate = schedule(0.001)), adjust = TRUE),
+    list(optimiser = adam(learning_rate = schedule(0.5)), adjust = TRUE)
+  )
+  # initials() finds x by name where opt() is called
+  optimise <- function(m, x, setting) {
+    opt(
+      m,
+      optimiser = setting$optimiser,
+      adjust = setting$adjust,
+      initial_values = initials(x = c(1, 2)),
+      max_iterations = 30
+    )
+  }
+  optimise_new_model <- function(setting) {
+    x <- lognormal(0, 1, dim = 2)
+    optimise(model(x), x, setting)
+  }
+
+  x <- lognormal(0, 1, dim = 2)
+  m <- model(x)
+  on_one_model <- lapply(settings, \(setting) optimise(m, x, setting))
+  on_new_models <- lapply(settings, optimise_new_model)
+  expect_identical(on_one_model, on_new_models)
+  # one loop at a time, the last cached
+  expect_length(m$dag$optimiser_functions, 1)
+})
+
+test_that("opt() traces again for a setting past 15 digits or another device", {
+  skip_if_not(check_tf_version())
+  x <- normal(0, 1, dim = 2)
+  m <- model(x)
+  loop_key <- function(...) {
+    opt(m, max_iterations = 5, ...)
+    names(m$dag$optimiser_functions)
+  }
+
+  first <- loop_key(optimiser = adam(learning_rate = 0.1))
+  # 0.1 to 15 significant digits, so a key that rounds would share a loop
+  nearby_rate <- 0.1 * (1 + 4 * .Machine$double.eps)
+  nearby <- loop_key(optimiser = adam(learning_rate = nearby_rate))
+  on_gpu <- suppressMessages(
+    loop_key(
+      optimiser = adam(learning_rate = 0.1),
+      compute_options = gpu_only()
+    )
+  )
+  expect_false(identical(nearby, first))
+  expect_false(identical(on_gpu, first))
+})
+
+test_that("an opt() loop traced for one call does not outlive it", {
+  skip_if_not(check_tf_version())
+  python <- reticulate::py_run_string(
+    "
+def count_traced_functions():
+    import gc
+    import tensorflow as tf
+    gc.collect()
+    traced = tf.types.experimental.GenericFunction
+    return sum(isinstance(o, traced) for o in gc.get_objects())
+",
+    local = TRUE
+  )
+  count_traced_functions <- function() {
+    gc()
+    python$count_traced_functions()
+  }
+  x <- normal(0, 1, dim = 2)
+  m <- model(x)
+  # a learning rate schedule is a Python object, so opt() traces a loop for
+  # each call rather than keep one on the model
+  schedule <- tf$keras$optimizers$schedules$ExponentialDecay(
+    initial_learning_rate = 0.1,
+    decay_steps = 5L,
+    decay_rate = 0.5
+  )
+  optimise <- function() {
+    opt(m, optimiser = adam(learning_rate = schedule), max_iterations = 5)
+  }
+
+  optimise()
+  before <- count_traced_functions()
+  for (i in 1:3) {
+    optimise()
+  }
+  expect_identical(count_traced_functions(), before)
 })
 
 test_that("opt accepts initial values for TFP optimisers", {

@@ -222,6 +222,16 @@ test_that("progress bar gives a range of messages", {
   expect_snapshot(draws <- mock_mcmc(10))
 })
 
+test_that("progress bar reaches its total when pb_update does not divide it", {
+  pb <- create_progress_bar("sampling", c(0, 13), pb_update = 6, width = 50)
+  out <- get_output(
+    for (it in c(0, 6, 12, 13)) {
+      iterate_progress_bar(pb, it, rejects = 0, chains = 1)
+    }
+  )
+  expect_match(out, "13/13")
+})
+
 test_that("extra_samples works", {
   skip_if_not(check_tf_version())
 
@@ -324,6 +334,38 @@ test_that("model errors nicely", {
   a <- 1
   b <- normal(0, a)
   expect_snapshot(error = TRUE, model(a, b))
+})
+
+test_that("hmc() draws its leapfrog count every iteration", {
+  skip_if_not(check_tf_version())
+  x <- as_data(rep(0, 10))
+  z <- normal(0, 10)
+  distribution(x) <- normal(z, 1)
+  m <- model(z)
+
+  # With a step size equal to the posterior sd, each leapfrog step turns the
+  # chain a sixth of a circle, so 6 steps bring every proposal back to where
+  # it started and 9 steps to its mirror image. A leapfrog count drawn once for
+  # the whole call freezes the chain whenever it is 6 or 9.
+  # greta-dev/greta#547
+  posterior_sd <- 1 / sqrt(10 + 1 / 100)
+  spread <- vapply(
+    1:10,
+    function(seed) {
+      local_greta_seed(seed)
+      draws <- mcmc(
+        m,
+        sampler = hmc(Lmin = 6, Lmax = 9, epsilon = posterior_sd),
+        warmup = 0,
+        n_samples = 200,
+        chains = 1,
+        verbose = FALSE
+      )
+      sd(abs(as.vector(draws[[1]])))
+    },
+    numeric(1)
+  )
+  expect_gt(min(spread), 0.05)
 })
 
 test_that("mcmc supports rwmh sampler with normal proposals", {
@@ -465,20 +507,304 @@ test_that("samplers print informatively", {
   # expect_match(out, "Lmin = 1")
 })
 
-test_that("pb_update > thin to avoid bursts with no saved iterations", {
+test_that("hmc() errors informatively when Lmin is larger than Lmax", {
+  expect_snapshot(error = TRUE, hmc(Lmin = 10, Lmax = 5))
+})
+
+test_that("thinning keeps n_samples %/% thin draws, whatever the bursts", {
   skip_if_not(check_tf_version())
   set.seed(5)
   x <- uniform(0, 1)
   m <- model(x)
+
+  # verbose = TRUE, since bursts follow pb_update only when the progress bar
+  # is shown. Each case leaves bursts shorter than thin, which keep no draws:
+  # the last burst (#609, #318), every burst with pb_update below thin, and
+  # every burst with one_by_one (#567)
+  cases <- list(
+    list(n_samples = 1000, thin = 100, pb_update = 101, one_by_one = FALSE),
+    list(n_samples = 100, thin = 3, pb_update = 2, one_by_one = FALSE),
+    list(n_samples = 30, thin = 2, pb_update = 50, one_by_one = TRUE)
+  )
+  for (case in cases) {
+    quietly(
+      draws <- mcmc(
+        m,
+        n_samples = case$n_samples,
+        warmup = 10,
+        thin = case$thin,
+        pb_update = case$pb_update,
+        one_by_one = case$one_by_one,
+        chains = 1,
+        verbose = TRUE
+      )
+    )
+    expect_equal(coda::niter(draws), case$n_samples %/% case$thin)
+    expect_equal(thin(draws), case$thin)
+  }
+
+  # extra_samples() takes its own thin and pb_update (#567)
+  quietly(draws <- mcmc(m, n_samples = 30, warmup = 10, chains = 1))
+  quietly(
+    more <- extra_samples(
+      draws,
+      n_samples = 202,
+      thin = 3,
+      pb_update = 50,
+      verbose = TRUE
+    )
+  )
+  expect_equal(coda::niter(more), 30 + 202 %/% 3)
+})
+
+test_that("one_by_one runs one iteration per burst, whatever thin is", {
+  skip_if_not(check_tf_version())
+  x <- uniform(0, 1)
+  m <- model(x)
+  warmup <- 10L
+  n_samples <- 30L
+  draws <- mcmc(
+    m,
+    warmup = warmup,
+    n_samples = n_samples,
+    thin = 3,
+    one_by_one = TRUE,
+    chains = 1,
+    verbose = FALSE
+  )
+  sampler <- get_model_info(draws)$samplers[[1]]
+  expect_identical(sampler$n_bursts, warmup + n_samples)
+  expect_equal(coda::niter(draws), 10)
+})
+
+test_that("warmup tunes inside one call to TensorFlow without a progress bar", {
+  skip_if_not(check_tf_version())
+  x <- normal(0, 1)
+  m <- model(x)
+  draws <- mcmc(m, warmup = 200, n_samples = 100, chains = 2, verbose = FALSE)
+  sampler <- get_model_info(draws)$samplers[[1]]
+  # one call for warmup and one for sampling
+  expect_identical(sampler$n_bursts, 2L)
+  expect_false(isTRUE(all.equal(
+    sampler$parameters$epsilon,
+    hmc()$parameters$epsilon
+  )))
+})
+
+test_that("a sampler's function is traced for its number of chains", {
+  skip_if_not(check_tf_version())
+  x <- normal(0, 1, dim = 2)
+  m <- model(x)
+  draws <- mcmc(m, warmup = 10, n_samples = 10, chains = 3, verbose = FALSE)
+  sampler <- get_model_info(draws)$samplers[[1]]
+
+  signature <- sampler$tf_iterations$input_signature[[1]]
+  expect_identical(as.integer(unlist(signature$shape$as_list())), c(3L, 2L))
+})
+
+test_that("slice() runs a single chain", {
+  skip_if_not(check_tf_version())
+  x <- normal(0, 1)
+  m <- model(x)
   expect_ok(
     draws <- mcmc(
       m,
-      n_samples = 100,
-      warmup = 100,
-      thin = 3,
-      pb_update = 2,
+      sampler = slice(),
+      warmup = 10,
+      n_samples = 10,
+      chains = 1,
       verbose = FALSE
     )
   )
-  expect_identical(thin(draws), 3)
+  expect_equal(coda::niter(draws), 10)
+})
+
+test_that("mcmc() traces a model's sampler loop once, across calls", {
+  skip_if_not(check_tf_version())
+  x <- normal(0, 1)
+  m <- model(x)
+  sampler_function <- function() {
+    draws <- mcmc(m, warmup = 10, n_samples = 10, chains = 2, verbose = FALSE)
+    get_model_info(draws)$samplers[[1]]$tf_iterations
+  }
+  first <- sampler_function()
+  second <- sampler_function()
+  expect_identical(reticulate::py_id(second), reticulate::py_id(first))
+  expect_identical(trace_count(second), 1L)
+})
+
+test_that("samplers sharing a model get the draws they would get alone", {
+  skip_if_not(check_tf_version())
+  x <- normal(0, 1)
+  m <- model(x)
+  runs <- list(
+    list(sampler = rwmh("normal"), chains = 2),
+    list(sampler = rwmh("uniform"), chains = 2),
+    list(sampler = rwmh("normal"), chains = 3),
+    list(sampler = hmc(), chains = 2),
+    list(sampler = slice(), chains = 2),
+    list(sampler = rwmh("normal"), chains = 2)
+  )
+  draws_from <- function(run) {
+    local_greta_seed()
+    draws <- mcmc(
+      m,
+      sampler = run$sampler,
+      warmup = 20,
+      n_samples = 10,
+      chains = run$chains,
+      verbose = FALSE
+    )
+    as.matrix(draws)
+  }
+  shared <- lapply(runs, draws_from)
+  alone <- lapply(runs, function(run) {
+    m$dag$define_tf_log_prob_function()
+    draws_from(run)
+  })
+  expect_identical(shared, alone)
+})
+
+test_that("extra_samples() carries each chain on from its last iteration", {
+  skip_if_not(check_tf_version())
+  x <- normal(0, 1)
+  m <- model(x)
+  draws_with <- function(...) {
+    local_greta_seed()
+    mcmc(m, warmup = 20, chains = 2, verbose = FALSE, ...)
+  }
+
+  # with thin = 3, the first run keeps iterations 3, 6 and 9 and ends after
+  # 10, and extra_samples() starts its own thinning from there
+  every_iteration <- as.matrix(draws_with(n_samples = 19))
+  first <- draws_with(n_samples = 10, thin = 3)
+  more <- extra_samples(first, n_samples = 9, thin = 3, verbose = FALSE)
+  kept <- c(3, 6, 9, 13, 16, 19)
+  expect_identical(
+    as.matrix(more),
+    every_iteration[c(kept, kept + 19), , drop = FALSE]
+  )
+})
+
+test_that("a numerical error at the end of warmup still tunes", {
+  skip_if_not(check_tf_version())
+  x <- normal(0, 1)
+  m <- model(x)
+  draws <- mcmc(m, warmup = 30, n_samples = 10, chains = 2, verbose = FALSE)
+  sampler <- get_model_info(draws)$samplers[[1]]
+
+  # replay warmup's last iteration as one that errored with one_by_one, from
+  # an epsilon that tuning would not leave, holding the chain's state as
+  # tensors as a phase does
+  sampler$parameters$epsilon <- 1
+  sampler$chain_tensors <- sampler$state_tensors()
+  sampler$reject_iteration(sampler$sampling_start - 1L)
+  sampler$keep_in_r()
+
+  log_epsilon_bar <- sampler$tuning_state$tuning[["log_epsilon_bar"]]
+  expect_equal(sampler$parameters$epsilon, exp(log_epsilon_bar))
+})
+
+test_that("a numerical error with one_by_one repeats the draw before it", {
+  skip_if_not(check_tf_version())
+  local_greta_seed()
+  # solve() errors on the singular matrix whenever round(r) is 1 or -1
+  r <- normal(0, 1)
+  singular_at_one <- diag(2) + (1 - diag(2)) * round(r)
+  y <- as_data(0.5)
+  distribution(y) <- normal(sum(solve(singular_at_one)), 1)
+  m <- model(r)
+
+  draws <- mcmc(
+    m,
+    sampler = rwmh(epsilon = 1),
+    warmup = 0,
+    n_samples = 40,
+    chains = 1,
+    initial_values = initials(r = 0.2),
+    one_by_one = TRUE,
+    verbose = FALSE
+  )
+  sampler <- get_model_info(draws)$samplers[[1]]
+  expect_gt(sampler$numerical_rejections, 0)
+
+  chain <- as.numeric(draws[[1]])
+  repeated <- which(duplicated(chain))
+  expect_identical(chain[repeated], chain[repeated - 1])
+})
+
+test_that("numerical errors in warmup with one_by_one still tune", {
+  skip_if_not(check_tf_version())
+  local_greta_seed()
+  # solve() errors on the singular matrix whenever round(r) is 1 or -1
+  r <- normal(0, 1)
+  singular_at_one <- diag(2) + (1 - diag(2)) * round(r)
+  y <- as_data(0.5)
+  distribution(y) <- normal(sum(solve(singular_at_one)), 1)
+  m <- model(r)
+
+  warmup <- 30
+  chains <- 2
+  draws <- mcmc(
+    m,
+    sampler = rwmh(epsilon = 1),
+    warmup = warmup,
+    n_samples = 1,
+    chains = chains,
+    initial_values = list(initials(r = 0.2), initials(r = -0.2)),
+    one_by_one = TRUE,
+    verbose = FALSE
+  )
+  sampler <- get_model_info(draws)$samplers[[1]]
+
+  # every warmup iteration adds each chain's state to the variance estimate,
+  # whether or not its proposal errored
+  expect_equal(sampler$tuning_state$tuning[["count"]], warmup * chains)
+})
+
+test_that("thin larger than n_samples is an informative error", {
+  skip_if_not(check_tf_version())
+  x <- uniform(0, 1)
+  m <- model(x)
+  expect_snapshot(
+    error = TRUE,
+    mcmc(m, n_samples = 10, warmup = 20, thin = 20, verbose = FALSE)
+  )
+})
+
+test_that("each draw is thin iterations after the last, across bursts", {
+  skip_if_not(check_tf_version())
+  # rwmh accepts every proposal on a target this wide, and each of the n
+  # parameters takes an independent step with sd epsilon / n, so the variance
+  # across parameters of the move between two states, over one step's
+  # variance, counts the iterations between them
+  n <- 2000
+  x <- normal(0, 1e6, dim = n)
+  m <- model(x)
+  step_var <- (0.1 / n)^2
+  thin <- 3
+
+  # without one_by_one, pb_update = 2 * thin cuts sampling into bursts of two
+  # draws, and the one iteration left after the last draw runs on its own; with
+  # it, every iteration is a burst of its own
+  for (one_by_one in c(FALSE, TRUE)) {
+    quietly(
+      draws <- mcmc(
+        m,
+        sampler = rwmh(epsilon = 0.1, diag_sd = 1),
+        warmup = 0,
+        n_samples = 4 * thin + 1,
+        thin = thin,
+        pb_update = 2 * thin,
+        one_by_one = one_by_one,
+        chains = 1,
+        initial_values = initials(x = rep(0, n)),
+        verbose = TRUE
+      )
+    )
+    final_state <- get_model_info(draws)$samplers[[1]]$free_state
+    states <- rbind(0, as.matrix(draws), final_state)
+    iterations <- apply(diff(states), 1, stats::var) / step_var
+    expect_identical(round(iterations), c(thin, thin, thin, thin, 1))
+  }
 })
