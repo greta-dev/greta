@@ -191,9 +191,8 @@ issue</a>, and might in the future make it easier to resolve.</p>
 <p>Call <code><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed()</a></code> before <code><a href="../reference/inference.html">mcmc()</a></code> or
 <code><a href="../reference/calculate.html">calculate()</a></code>. greta takes its random numbers from R’s, so
 the same seed gives the same starting values and the same draws. To
-repeat a run exactly, also keep <code>verbose</code>,
-<code>pb_update</code>, <code>one_by_one</code> and the future plan
-(including its number of workers) the same. See the <a href="webpages/reproducibility.html">“Reproducible results”</a> article
+repeat a run exactly, also keep the future plan (including its number of
+workers) the same. See the <a href="webpages/reproducibility.html">“Reproducible results”</a> article
 for examples, and for how this compares with Stan and PyMC.</p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

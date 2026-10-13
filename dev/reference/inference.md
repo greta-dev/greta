@@ -9,9 +9,9 @@ likelihood/posterior optimisation.
 mcmc(
   model,
   sampler = hmc(),
-  n_samples = 1000,
+  n_samples = 2000,
   thin = 1,
-  warmup = 1000,
+  warmup = 2000,
   chains = 2,
   n_cores = NULL,
   verbose = TRUE,
@@ -26,7 +26,7 @@ stashed_samples()
 
 extra_samples(
   draws,
-  n_samples = 1000,
+  n_samples = 2000,
   thin = 1,
   n_cores = NULL,
   verbose = TRUE,
@@ -70,7 +70,15 @@ opt(
 - thin:
 
   MCMC thinning rate; every `thin` samples is retained, the rest are
-  discarded
+  discarded. For example:
+
+  - `n_samples = 1000, thin = 10`: 10 divides 1000 exactly, so all 1000
+    iterations are run and iterations 10, 20, ..., 1000 are kept: 100
+    draws.
+
+  - `n_samples = 1000, thin = 3`: 3 does not divide 1000 exactly, so
+    iterations 3, 6, ..., 999 are kept: 333 draws. Iteration 1000 is
+    still run, but keeps no draw.
 
 - warmup:
 
@@ -95,10 +103,10 @@ opt(
 
 - pb_update:
 
-  how regularly to update the progress bar (in iterations). If
-  `pb_update` is less than or equal to `thin`, it will be set to
-  `thin + 1` to ensure at least one saved iteration per `pb_update`
-  iterations.
+  how often to update the progress bar, in iterations. Warmup and
+  sampling each run in bursts of `pb_update` iterations, and the bar
+  updates between them, showing the number of iterations run. It does
+  not change the draws.
 
 - one_by_one:
 
@@ -180,7 +188,12 @@ contain mcmc samples of the greta arrays used to create `model`.
 - `iterations` the number of iterations taken by the optimiser
 
 - `convergence` an integer code, 0 indicates successful completion, 1
-  indicates the iteration limit `max_iterations` had been reached
+  that the optimiser did not converge: it reached the iteration limit
+  `max_iterations`, or
+  [`bfgs()`](https://greta-dev.github.io/greta/dev/reference/optimisers.md)
+  or
+  [`nelder_mead()`](https://greta-dev.github.io/greta/dev/reference/optimisers.md)
+  stopped without converging
 
 - `hessian` (if `hessian = TRUE`) a named list of hessian
   matrices/arrays for the parameters (w.r.t. `value`)
@@ -271,11 +284,10 @@ See example.
 [`set.seed()`](https://rdrr.io/r/base/Random.html) is all you need to
 make MCMC reproducible: greta draws its own seed from R's random number
 generator and passes it to the sampler, so both the initial values and
-the sampler are seeded. See examples below. The draws also depend on how
-sampling is split between progress updates, and on how chains are split
-between parallel workers, so a run is repeated exactly only with the
-same `verbose`, `pb_update`, `one_by_one` and future plan (including its
-number of workers). The [Reproducible
+the sampler are seeded. See examples below. `verbose`, `pb_update` and
+`one_by_one` do not change the draws, but how chains are split between
+parallel workers does, so a run is repeated exactly only with the same
+future plan (including its number of workers). The [Reproducible
 results](https://greta-dev.github.io/greta/articles/webpages/reproducibility.html)
 article shows each of these, and how greta compares with Stan and PyMC.
 

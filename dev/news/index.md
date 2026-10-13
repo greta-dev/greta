@@ -176,15 +176,19 @@
   [`install_greta_deps()`](https://greta-dev.github.io/greta/dev/reference/install_greta_deps.md),
   which creates an environment rather than replacing an existing one
   ([\#684](https://github.com/greta-dev/greta/issues/684)).
-- [`hmc()`](https://greta-dev.github.io/greta/dev/reference/samplers.md)’s
-  documentation now says that the number of leapfrog steps is not
-  redrawn at every iteration: greta draws a new value each time it
-  returns from TensorFlow, which during warmup is roughly every 3
-  iterations and during sampling is every `pb_update` iterations.
-  `one_by_one = TRUE` draws a new value every iteration. The behaviour
-  is unchanged — HMC is valid for any fixed number of steps, so this
-  affects mixing rather than the distribution being sampled
-  ([\#745](https://github.com/greta-dev/greta/issues/745)).
+- [`hmc()`](https://greta-dev.github.io/greta/dev/reference/samplers.md)
+  now draws its number of leapfrog steps afresh at every iteration,
+  inside TensorFlow. It drew one value each time greta returned from
+  TensorFlow, so every iteration of a burst, or of all of sampling when
+  `verbose = FALSE`, used the same value, and a chain whose step size
+  and leapfrog count brought each proposal back to where it started
+  stopped mixing. With `Lmin` equal to `Lmax`, it also drew from 1 to
+  `Lmin` rather than taking `Lmin`.
+  [`hmc()`](https://greta-dev.github.io/greta/dev/reference/samplers.md)
+  now errors when `Lmin` or `Lmax` is less than 1, or `Lmin` is larger
+  than `Lmax`. Draws taken with a fixed seed differ from previous
+  versions ([\#547](https://github.com/greta-dev/greta/issues/547),
+  [\#745](https://github.com/greta-dev/greta/issues/745)).
 - [`install_greta_deps()`](https://greta-dev.github.io/greta/dev/reference/install_greta_deps.md)
   now stops when an installation step fails. It used to judge a step
   only by whether it printed anything, so a pip error such as “Could not
@@ -252,6 +256,112 @@
   wrapped by reticulate in the same one, so the first traces of several
   models’ functions look to it like one function retracing
   ([\#546](https://github.com/greta-dev/greta/issues/546)).
+- [`mcmc()`](https://greta-dev.github.io/greta/dev/reference/inference.md)
+  and
+  [`extra_samples()`](https://greta-dev.github.io/greta/dev/reference/inference.md)
+  now run `thin` iterations per kept draw, rather than `thin + 1`, and
+  one iteration per warmup step, rather than two. TensorFlow Probability
+  keeps one draw in every `num_steps_between_results + 1` iterations,
+  and greta passed `thin` itself, so every run did roughly twice the
+  work it reported, including at the default `thin = 1`. With `thin`
+  above 1, the first draw of each burst of sampling also came only one
+  iteration after the draw before it, so with the progress bar shown,
+  some draws were much closer together than `thin` says. The same
+  arguments therefore now take 1.3 to 1.5 times less time and give
+  roughly half the effective samples. To keep the effective samples a
+  default run gave before,
+  [`mcmc()`](https://greta-dev.github.io/greta/dev/reference/inference.md)’s
+  defaults are now `warmup = 2000` and `n_samples = 2000`, up from 1000,
+  and
+  [`extra_samples()`](https://greta-dev.github.io/greta/dev/reference/inference.md)’s
+  `n_samples` default is now 2000; a script that sets `warmup` or
+  `n_samples` itself needs them doubled to match a previous run. Draws
+  taken with a fixed seed differ from previous versions
+  ([\#318](https://github.com/greta-dev/greta/issues/318)).
+- [`mcmc()`](https://greta-dev.github.io/greta/dev/reference/inference.md)
+  and
+  [`extra_samples()`](https://greta-dev.github.io/greta/dev/reference/inference.md)
+  now keep `n_samples %/% thin` draws whatever `pb_update` and
+  `one_by_one` are. Sampling ran in bursts of `pb_update` iterations,
+  and a burst shorter than `thin` asked TensorFlow for no draws, which
+  failed: a final partial burst, `one_by_one = TRUE` with `thin` above
+  1, and
+  [`extra_samples()`](https://greta-dev.github.io/greta/dev/reference/inference.md)
+  with a `pb_update` at or below `thin` all errored. greta now picks the
+  draws to keep inside TensorFlow, from each iteration’s place in the
+  chain, so a burst of any length works, and a `thin` larger than
+  `n_samples` is an informative error. When `thin` does not divide
+  `n_samples`, the iterations after the last kept draw are now run too,
+  so the chain runs all `n_samples` iterations and
+  [`extra_samples()`](https://greta-dev.github.io/greta/dev/reference/inference.md)
+  continues from the last of them. With `one_by_one = TRUE`, every burst
+  is a single iteration whatever `thin` is, and greta keeps every
+  `thin`-th state, so a numerical error rejects only the proposal that
+  caused it.
+  [`extra_samples()`](https://greta-dev.github.io/greta/dev/reference/inference.md)
+  with `verbose = FALSE` now runs each phase in a single burst, as
+  [`mcmc()`](https://greta-dev.github.io/greta/dev/reference/inference.md)
+  does, rather than stopping every `pb_update` iterations for a progress
+  bar it does not show
+  ([\#241](https://github.com/greta-dev/greta/issues/241),
+  [\#318](https://github.com/greta-dev/greta/issues/318),
+  [\#567](https://github.com/greta-dev/greta/issues/567),
+  [\#609](https://github.com/greta-dev/greta/issues/609)).
+- [`mcmc()`](https://greta-dev.github.io/greta/dev/reference/inference.md)’s
+  progress bar now reaches its total when `pb_update` does not divide
+  the number of iterations, and fills in step with the iterations run.
+  It stopped at the last multiple of `pb_update`, and each update filled
+  it by `pb_update` whatever had run, so a bar could read 1010/1010
+  while still empty
+  ([\#318](https://github.com/greta-dev/greta/issues/318)).
+- [`mcmc()`](https://greta-dev.github.io/greta/dev/reference/inference.md)
+  now tunes
+  [`hmc()`](https://greta-dev.github.io/greta/dev/reference/samplers.md)
+  and
+  [`rwmh()`](https://greta-dev.github.io/greta/dev/reference/samplers.md)
+  inside TensorFlow during warmup, so warmup returns to R only to update
+  the progress bar, and runs as one call to TensorFlow when
+  `verbose = FALSE`. It returned to R every 3 iterations to tune the
+  step size and `diag_sd`, and to keep a trace of the warmup draws that
+  it then threw away. The sampler’s TensorFlow function is also traced
+  for its number of chains. With the tracing changes below, on greta’s
+  example models and with each version’s defaults, greta 0.6.0 takes 2.5
+  to 3.2 times as long for each
+  [`mcmc()`](https://greta-dev.github.io/greta/dev/reference/inference.md)
+  call after the first on a model, and 1.9 to 2.3 times as long for the
+  first call, for half the draws
+  ([benchmarks](https://greta-dev.github.io/greta.benchmarks/posts/2026-10-07-tf-warmup-i547/#the-pr-at-a-glance))
+  ([\#547](https://github.com/greta-dev/greta/issues/547),
+  [\#834](https://github.com/greta-dev/greta/issues/834)).
+- [`mcmc()`](https://greta-dev.github.io/greta/dev/reference/inference.md)
+  traces its sampler’s TensorFlow loop once per model, kind of sampler
+  and number of chains: a later call to
+  [`mcmc()`](https://greta-dev.github.io/greta/dev/reference/inference.md)
+  on the same model reuses it, where every call used to trace it afresh.
+  Under a parallel `future` plan, each worker still traces its own copy
+  on every call
+  ([\#547](https://github.com/greta-dev/greta/issues/547)).
+- [`mcmc()`](https://greta-dev.github.io/greta/dev/reference/inference.md)
+  keeps the chain’s state and tuning in TensorFlow from one call to the
+  next within warmup and within sampling, and makes the inputs that stay
+  the same through a phase into tensors once, rather than converting
+  them between R and TensorFlow on every call. This matters most with
+  `one_by_one = TRUE`, which calls TensorFlow every iteration: on
+  greta’s example models, converting the state on every call took 3.6 to
+  3.7 times as long for each call after the first on a model. With the
+  progress bar, which returns to R every `pb_update` iterations, it took
+  1.14 to 1.21 times as long
+  ([benchmarks](https://greta-dev.github.io/greta.benchmarks/posts/2026-10-07-call-overhead-i547/#summary))
+  ([\#547](https://github.com/greta-dev/greta/issues/547)).
+- [`mcmc()`](https://greta-dev.github.io/greta/dev/reference/inference.md)
+  and
+  [`extra_samples()`](https://greta-dev.github.io/greta/dev/reference/inference.md)
+  draws taken with a fixed seed no longer depend on `pb_update`,
+  `verbose` or `one_by_one`, which only decide how often greta returns
+  from TensorFlow to R: each iteration’s random numbers now come from
+  the sampler’s seed and the iteration’s place in the chain. Tuning no
+  longer depends on them either
+  ([\#547](https://github.com/greta-dev/greta/issues/547)).
 - [`nadam()`](https://greta-dev.github.io/greta/dev/reference/optimisers.md)
   now defaults to a `learning_rate` of 0.1, up from 0.001, which was too
   small to reach the optimum of even a five-parameter model within 2000
@@ -272,13 +382,34 @@
   than read as HTML
   ([\#663](https://github.com/greta-dev/greta/issues/663),
   [\#713](https://github.com/greta-dev/greta/issues/713)).
+- [`opt()`](https://greta-dev.github.io/greta/dev/reference/inference.md)’s
+  `convergence` now comes from the optimiser:
+  [`bfgs()`](https://greta-dev.github.io/greta/dev/reference/optimisers.md)
+  and
+  [`nelder_mead()`](https://greta-dev.github.io/greta/dev/reference/optimisers.md)
+  report whether they converged, and a Keras optimiser such as
+  [`adam()`](https://greta-dev.github.io/greta/dev/reference/optimisers.md)
+  has converged when its last step changed the objective by no more than
+  `tolerance`. It was guessed from whether the optimiser stopped before
+  `max_iterations - 1`, so one that converged on its last iteration but
+  one was reported as not converging
+  ([\#569](https://github.com/greta-dev/greta/issues/569)).
+- [`opt()`](https://greta-dev.github.io/greta/dev/reference/inference.md)
+  with a Keras optimiser such as
+  [`adam()`](https://greta-dev.github.io/greta/dev/reference/optimisers.md)
+  keeps its traced loop on the model, so a later call with the same
+  optimiser and settings reuses it rather than tracing it again,
+  starting afresh from the initial values each time. On greta’s example
+  models a later call of 2000 iterations takes a median of 0.03 to 0.05
+  seconds, and greta 0.6.0 takes 29 to 47 times as long
+  ([benchmarks](https://greta-dev.github.io/greta.benchmarks/posts/2026-10-07-call-overhead-i547/#summary))
+  ([\#547](https://github.com/greta-dev/greta/issues/547)).
 - [`opt()`](https://greta-dev.github.io/greta/dev/reference/inference.md)
   traces the model’s log-density function once, where it used to trace
   it twice with a Keras optimiser such as
   [`adam()`](https://greta-dev.github.io/greta/dev/reference/optimisers.md):
   once to check the initial values, and again inside the optimiser’s
-  step. Its first call is 20% to 28% faster on greta’s example models,
-  and later calls are as fast as before
+  step. Its first call is 20% to 28% faster on greta’s example models
   ([\#546](https://github.com/greta-dev/greta/issues/546)).
 - [`opt()`](https://greta-dev.github.io/greta/dev/reference/inference.md)
   with `hessian = TRUE` is faster, and no longer prints TensorFlow’s
@@ -303,7 +434,16 @@
   is faster, as the gradient step is now compiled with `tf_function()`
   rather than making several R to Python calls per iteration; this
   measured at roughly twice as fast on a small linear regression
-  ([\#633](https://github.com/greta-dev/greta/issues/633)).
+  ([\#633](https://github.com/greta-dev/greta/issues/633)). Its whole
+  loop, convergence and overflow checks included, now also runs in one
+  call to TensorFlow, rather than returning to R after every iteration,
+  and each iteration evaluates the model’s log density once rather than
+  twice: 2000 iterations of
+  [`adam()`](https://greta-dev.github.io/greta/dev/reference/optimisers.md)
+  on greta’s example models take a median of 0.13 seconds, down from
+  0.36 with the compiled step alone
+  ([benchmarks](https://greta-dev.github.io/greta.benchmarks/posts/2026-10-07-tf-warmup-i547/#opt-with-adam))
+  ([\#547](https://github.com/greta-dev/greta/issues/547)).
 
 ## greta 0.6.0
 

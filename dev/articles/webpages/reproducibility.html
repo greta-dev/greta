@@ -186,16 +186,17 @@ its own:</p>
 <h2 id="what-else-has-to-stay-the-same">What else has to stay the same<a class="anchor" aria-label="anchor" href="#what-else-has-to-stay-the-same"></a>
 </h2>
 <p>A seed fixes the random numbers. To get the same draws, the sampler
-also has to use them in the same way, and a few arguments change
-that.</p>
+also has to use them in the same way. The progress bar’s arguments do
+not change that, but the future plan can.</p>
 <div class="section level3">
 <h3 id="progress-updates">Progress updates<a class="anchor" aria-label="anchor" href="#progress-updates"></a>
 </h3>
 <p><code><a href="../../reference/inference.html">mcmc()</a></code> runs the sampler in bursts, returning to R
-between them to update the progress bar. Each burst takes its own random
-numbers, so changing where the bursts break changes the draws.
-<code>verbose</code>, <code>pb_update</code> and <code>one_by_one</code>
-all do that:</p>
+between them to update the progress bar. Each iteration’s random numbers
+come from the seed and the iteration’s place in the chain, not from the
+burst it falls in, so <code>verbose</code>, <code>pb_update</code> and
+<code>one_by_one</code>, which decide where the bursts break, do not
+change the draws:</p>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">2026</span> <span class="op">-</span> <span class="fl">09</span> <span class="op">-</span> <span class="fl">27</span><span class="op">)</span></span>
 <span><span class="va">quiet</span> <span class="op">&lt;-</span> <span class="fu"><a href="../../reference/inference.html">mcmc</a></span><span class="op">(</span><span class="va">m</span>, warmup <span class="op">=</span> <span class="fl">100</span>, n_samples <span class="op">=</span> <span class="fl">100</span>, chains <span class="op">=</span> <span class="fl">2</span>, verbose <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
@@ -204,10 +205,7 @@ all do that:</p>
 <span><span class="va">chatty</span> <span class="op">&lt;-</span> <span class="fu"><a href="../../reference/inference.html">mcmc</a></span><span class="op">(</span><span class="va">m</span>, warmup <span class="op">=</span> <span class="fl">100</span>, n_samples <span class="op">=</span> <span class="fl">100</span>, chains <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></code></pre></div>
 <div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/identical.html" class="external-link">identical</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix</a></span><span class="op">(</span><span class="va">quiet</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix</a></span><span class="op">(</span><span class="va">chatty</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<pre><code>[1] FALSE</code></pre>
-<p>Both runs are equally valid samples from the posterior; they are just
-not the same sample. To repeat a run exactly, repeat these arguments as
-well as the seed.</p>
+<pre><code>[1] TRUE</code></pre>
 </div>
 <div class="section level3">
 <h3 id="parallel-chains-and-the-future-plan">Parallel chains and the future plan<a class="anchor" aria-label="anchor" href="#parallel-chains-and-the-future-plan"></a>
@@ -255,11 +253,19 @@ run with <code>plan(multisession)</code> and no <code>workers</code>
 argument uses as many workers as the machine has cores, which differs
 between machines: set <code>workers</code> explicitly if the run needs
 to be repeated elsewhere.</p>
-<p><code><a href="../../reference/samplers.html">hmc()</a></code>, the default sampler, also differs between plans
-with a single chain. It chooses its number of leapfrog steps from R’s
-random numbers, and future starts each worker at its own place in the
-sequence, so a chain run in a worker gets different leapfrog steps from
-one run in your session.</p>
+<p>With a single chain there is one sampler whatever the plan, so the
+plan does not change the draws:</p>
+<div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">future</span><span class="fu">::</span><span class="fu"><a href="https://future.futureverse.org/reference/plan.html" class="external-link">plan</a></span><span class="op">(</span><span class="fu">future</span><span class="fu">::</span><span class="va"><a href="https://future.futureverse.org/reference/multisession.html" class="external-link">multisession</a></span>, workers <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">2026</span> <span class="op">-</span> <span class="fl">09</span> <span class="op">-</span> <span class="fl">27</span><span class="op">)</span></span>
+<span><span class="va">par_single</span> <span class="op">&lt;-</span> <span class="fu"><a href="../../reference/inference.html">mcmc</a></span><span class="op">(</span><span class="va">m</span>, warmup <span class="op">=</span> <span class="fl">100</span>, n_samples <span class="op">=</span> <span class="fl">100</span>, chains <span class="op">=</span> <span class="fl">1</span>, verbose <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">future</span><span class="fu">::</span><span class="fu"><a href="https://future.futureverse.org/reference/plan.html" class="external-link">plan</a></span><span class="op">(</span><span class="fu">future</span><span class="fu">::</span><span class="va"><a href="https://future.futureverse.org/reference/sequential.html" class="external-link">sequential</a></span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">2026</span> <span class="op">-</span> <span class="fl">09</span> <span class="op">-</span> <span class="fl">27</span><span class="op">)</span></span>
+<span><span class="va">seq_single</span> <span class="op">&lt;-</span> <span class="fu"><a href="../../reference/inference.html">mcmc</a></span><span class="op">(</span><span class="va">m</span>, warmup <span class="op">=</span> <span class="fl">100</span>, n_samples <span class="op">=</span> <span class="fl">100</span>, chains <span class="op">=</span> <span class="fl">1</span>, verbose <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/identical.html" class="external-link">identical</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix</a></span><span class="op">(</span><span class="va">par_single</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix</a></span><span class="op">(</span><span class="va">seq_single</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<pre><code>[1] TRUE</code></pre>
 </div>
 </div>
 <div class="section level2">
@@ -303,7 +309,7 @@ TensorFlow operations add numbers up in an order that varies from run to
 run, so results can differ slightly between runs with the same seed. To
 make GPU runs repeatable, turn on TensorFlow’s deterministic operations
 before sampling, at some cost in speed:</p>
-<div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb34"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">tensorflow</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/pkg/tensorflow/man/tf.html" class="external-link">tf</a></span><span class="op">$</span><span class="va">config</span><span class="op">$</span><span class="va">experimental</span><span class="op">$</span><span class="fu">enable_op_determinism</span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p>Runs on the CPU, greta’s default, do not need this.</p>
 </div>

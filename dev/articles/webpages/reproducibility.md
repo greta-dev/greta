@@ -138,15 +138,17 @@ identical(c1, c2)
 ## What else has to stay the same
 
 A seed fixes the random numbers. To get the same draws, the sampler also
-has to use them in the same way, and a few arguments change that.
+has to use them in the same way. The progress bar’s arguments do not
+change that, but the future plan can.
 
 ### Progress updates
 
 [`mcmc()`](https://greta-dev.github.io/greta/dev/reference/inference.md)
 runs the sampler in bursts, returning to R between them to update the
-progress bar. Each burst takes its own random numbers, so changing where
-the bursts break changes the draws. `verbose`, `pb_update` and
-`one_by_one` all do that:
+progress bar. Each iteration’s random numbers come from the seed and the
+iteration’s place in the chain, not from the burst it falls in, so
+`verbose`, `pb_update` and `one_by_one`, which decide where the bursts
+break, do not change the draws:
 
 ``` r
 
@@ -162,11 +164,7 @@ chatty <- mcmc(m, warmup = 100, n_samples = 100, chains = 2)
 identical(as.matrix(quiet), as.matrix(chatty))
 ```
 
-    [1] FALSE
-
-Both runs are equally valid samples from the posterior; they are just
-not the same sample. To repeat a run exactly, repeat these arguments as
-well as the seed.
+    [1] TRUE
 
 ### Parallel chains and the future plan
 
@@ -240,11 +238,23 @@ with `plan(multisession)` and no `workers` argument uses as many workers
 as the machine has cores, which differs between machines: set `workers`
 explicitly if the run needs to be repeated elsewhere.
 
-[`hmc()`](https://greta-dev.github.io/greta/dev/reference/samplers.md),
-the default sampler, also differs between plans with a single chain. It
-chooses its number of leapfrog steps from R’s random numbers, and future
-starts each worker at its own place in the sequence, so a chain run in a
-worker gets different leapfrog steps from one run in your session.
+With a single chain there is one sampler whatever the plan, so the plan
+does not change the draws:
+
+``` r
+
+future::plan(future::multisession, workers = 2)
+set.seed(2026 - 09 - 27)
+par_single <- mcmc(m, warmup = 100, n_samples = 100, chains = 1, verbose = FALSE)
+
+future::plan(future::sequential)
+set.seed(2026 - 09 - 27)
+seq_single <- mcmc(m, warmup = 100, n_samples = 100, chains = 1, verbose = FALSE)
+
+identical(as.matrix(par_single), as.matrix(seq_single))
+```
+
+    [1] TRUE
 
 ## How this compares with other software
 
