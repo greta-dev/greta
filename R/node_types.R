@@ -58,6 +58,9 @@ data_node <- R6Class(
         # expand up to batch size - so we can run multiple chains
         tiling <- c(tfe$.batch_size, rep(1L, length(self$dim)))
         batched_tensor <- tf$tile(unbatched_tensor, tiling)
+
+        # keep the single copy for operations that can use it untiled
+        assign(paste0(tf_name, "_unbatched"), unbatched_tensor, envir = tfe)
       }
 
       assign(tf_name, batched_tensor, envir = tfe)
@@ -75,6 +78,7 @@ operation_node <- R6Class(
     operation_args = NA,
     arguments = list(),
     tf_function_env = NA,
+    untiled_data = FALSE,
     initialize = function(
       operation,
       ...,
@@ -84,7 +88,8 @@ operation_node <- R6Class(
       value = NULL,
       representations = list(),
       tf_function_env = parent.frame(3),
-      expand_scalars = FALSE
+      expand_scalars = FALSE,
+      untiled_data = FALSE
     ) {
       # coerce all arguments to nodes, and remember the operation
       dots <- lapply(list(...), as.greta_array)
@@ -115,6 +120,7 @@ operation_node <- R6Class(
       self$representations <- representations
       self$make_antirepresentations(representations)
       self$tf_function_env <- tf_function_env
+      self$untiled_data <- untiled_data
 
       # assign empty value of the right dimension, or the values passed via the
       # operation
@@ -148,6 +154,22 @@ operation_node <- R6Class(
         # fetch the tensors from the environment
         arg_tf_names <- lapply(self$list_parents(dag), dag$tf_name)
         tf_args <- lapply(arg_tf_names, get, envir = tfe)
+
+        # data parents hand over their single copy when the operation can use
+        # it; otherwise the tensor under the parent's own name stays
+        if (self$untiled_data) {
+          unbatched_names <- paste0(arg_tf_names, "_unbatched")
+          is_data <- vapply(
+            self$list_parents(dag),
+            \(parent) node_type(parent) == "data",
+            logical(1)
+          )
+          for (i in which(is_data)) {
+            if (exists(unbatched_names[[i]], envir = tfe, inherits = FALSE)) {
+              tf_args[[i]] <- get(unbatched_names[[i]], envir = tfe)
+            }
+          }
+        }
 
         # fetch additional (non-tensor) arguments, if any
         multiple_operation_args <- length(self$operation_args) > 0

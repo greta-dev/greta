@@ -148,13 +148,29 @@ NULL
   check_both_2d(x, y)
   check_compatible_dimensions(x, y)
 
-  op(
-    "matrix multiply",
-    x,
-    y,
-    dim = c(nrow(x), ncol(y)),
-    tf_operation = "tf$matmul"
-  )
+  x_is_data <- node_type(get_node(x)) == "data"
+  y_is_data <- node_type(get_node(y)) == "data"
+
+  if (xor(x_is_data, y_is_data)) {
+    data_side <- if (x_is_data) "left" else "right"
+    op(
+      "matrix multiply",
+      x,
+      y,
+      dim = c(nrow(x), ncol(y)),
+      untiled_data = TRUE,
+      operation_args = list(data_side = data_side),
+      tf_operation = "tf_matmul_data"
+    )
+  } else {
+    op(
+      "matrix multiply",
+      x,
+      y,
+      dim = c(nrow(x), ncol(y)),
+      tf_operation = "tf$matmul"
+    )
+  }
 }
 
 # logical operators

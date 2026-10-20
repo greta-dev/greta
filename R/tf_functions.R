@@ -526,6 +526,27 @@ tf_rbind <- function(...) {
   tf$concat(elem_list, axis = 1L)
 }
 
+# multiply a matrix by data. The data operand arrives untiled, with a leading
+# dimension of 1, when it was handed over as a single copy; the other operand
+# has the batch dimension, so einsum shares the one matrix across the batch.
+tf_matmul_data <- function(x, y, data_side) {
+  data <- if (data_side == "left") x else y
+
+  if (isTRUE(dim(data)[[1]] == 1L)) {
+    mat <- tf$squeeze(tf$convert_to_tensor(data, dtype = tf_float()), axis = 0L)
+    if (data_side == "left") {
+      tf$einsum("nm,bmk->bnk", mat, y)
+    } else {
+      tf$einsum("bkm,mn->bkn", x, mat)
+    }
+  } else {
+    tf$matmul(
+      tf$convert_to_tensor(x, dtype = tf_float()),
+      tf$convert_to_tensor(y, dtype = tf_float())
+    )
+  }
+}
+
 tf_abind <- function(..., axis) {
   elem_list <- list(...)
   tf$concat(elem_list, axis = axis)
@@ -754,6 +775,7 @@ tf_functions_module <- function() {
     tf_flatten,
     tf_replace,
     tf_cbind,
+    tf_matmul_data,
     tf_rbind,
     tf_only_eigenvalues,
     tf_extract_eigenvectors,

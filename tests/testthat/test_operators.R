@@ -133,3 +133,54 @@ test_that("%*% works when one is a non-greta array", {
   expect_snapshot(calculate(res_2, nsim = 1))
   expect_snapshot(calculate(res_3, nsim = 1))
 })
+
+test_that("%*% with data multiplies the data's single copy, not a copy per chain", {
+  skip_if_not(check_tf_version())
+
+  for (data_function in list(as_data, as_data_mutable)) {
+    X <- data_function(matrix(rnorm(21), 7, 3))
+    w <- normal(0, 1, dim = c(3, 1))
+    y <- rnorm(7)
+    distribution(y) <- normal(X %*% w, 1)
+    m <- model(w)
+
+    graph <- m$dag$tf_log_prob_function$get_concrete_function()$graph
+    ops <- graph$get_operations()
+    op_types <- vapply(ops, \(op) op$type, character(1))
+    input_shapes <- function(op) {
+      lapply(op$inputs, \(input) unlist(input$shape$as_list()))
+    }
+    has_shape <- function(op, shape) {
+      any(vapply(input_shapes(op), identical, logical(1), as.integer(shape)))
+    }
+
+    einsum_reads_data <- any(vapply(
+      ops[op_types == "Einsum"],
+      has_shape,
+      logical(1),
+      shape = c(7, 3)
+    ))
+    data_tiles_unused <- all(vapply(
+      ops[op_types == "Tile" & vapply(ops, has_shape, logical(1), c(1, 7, 3))],
+      \(op) length(op$outputs[[1]]$consumers()) == 0,
+      logical(1)
+    ))
+
+    expect_true(einsum_reads_data)
+    expect_true(data_tiles_unused)
+  }
+})
+
+test_that("%*% with data and nsim = 1 works in single precision", {
+  skip_if_not(check_tf_version())
+  withr::local_options(greta_tf_float = "float32")
+
+  X_value <- matrix(rnorm(21), 7, 3)
+  X2 <- matrix(rnorm(21), 7, 3)
+  X <- as_data(X_value)
+  w <- normal(0, 1, dim = c(3, 1))
+  out <- NULL
+  expect_no_error(out <- calculate(X %*% w, w, values = list(X = X2), nsim = 1))
+  skip_if(is.null(out))
+  expect_equal(out[[1]][1, , ], drop(X2 %*% out$w[1, , ]), tolerance = 1e-4)
+})
