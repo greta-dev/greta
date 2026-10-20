@@ -1152,3 +1152,71 @@ find_thinning <- function(draws, max_thin = 100, autocorr_threshold = 0.01) {
 trace_count <- function(traced) {
   as.integer(traced$experimental_get_tracing_count())
 }
+
+# a model of y ~ normal(X %*% w, 1), or normal(t(w) %*% t(X), 1) for
+# side = "right", with X wrapped by `wrap`. Pass `\(d) as_data(d) * 1` to put an
+# operation between the data and %*%, so it takes the tf$matmul path. `w` has
+# `k` columns, and `y` is drawn when it is NULL.
+matmul_model <- function(
+  X,
+  y = NULL,
+  side = c("left", "right"),
+  k = 1,
+  wrap = as_data
+) {
+  side <- match.arg(side)
+  w <- normal(0, 1, dim = c(ncol(X), k))
+
+  if (side == "left") {
+    data <- wrap(X)
+    product <- data %*% w
+    y_dim <- c(nrow(X), k)
+  } else {
+    data <- wrap(t(X))
+    product <- t(w) %*% data
+    y_dim <- c(k, nrow(X))
+  }
+
+  if (is.null(y)) {
+    y <- array(rnorm(prod(y_dim)), y_dim)
+  }
+  distribution(y) <- normal(product, 1)
+  list(model = model(w), X = data, w = w)
+}
+
+# the same model on the einsum path and on the tf$matmul path, with one y
+matmul_model_pair <- function(X, side = c("left", "right"), k = 1) {
+  side <- match.arg(side)
+  y_dim <- if (side == "left") c(nrow(X), k) else c(k, nrow(X))
+  y <- array(rnorm(prod(y_dim)), y_dim)
+  list(
+    fit = matmul_model(X, y, side, k)$model,
+    ref = matmul_model(X, y, side, k, wrap = \(d) as_data(d) * 1)$model
+  )
+}
+
+log_prob_and_grad <- function(log_prob, free_state) {
+  free_state <- tf$constant(free_state, dtype = tf_float())
+  with(tf$GradientTape() %as% tape, {
+    tape$watch(free_state)
+    value <- log_prob(free_state)
+  })
+  list(
+    value = as.array(value),
+    grad = as.array(tape$gradient(value, free_state))
+  )
+}
+
+expect_same_log_prob <- function(
+  model,
+  reference,
+  free_state,
+  tolerance = 1e-10,
+  log_prob = \(model, s) model$dag$tf_log_prob_function(s)$adjusted
+) {
+  expect_equal(
+    log_prob_and_grad(\(s) log_prob(model, s), free_state),
+    log_prob_and_grad(\(s) log_prob(reference, s), free_state),
+    tolerance = tolerance
+  )
+}

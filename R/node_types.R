@@ -1,3 +1,8 @@
+# the name under which a data node's single, unbatched tensor is kept
+unbatched_tf_name <- function(tf_name) {
+  paste0(tf_name, "_unbatched")
+}
+
 data_node <- R6Class(
   "data_node",
   inherit = node,
@@ -59,8 +64,8 @@ data_node <- R6Class(
         tiling <- c(tfe$.batch_size, rep(1L, length(self$dim)))
         batched_tensor <- tf$tile(unbatched_tensor, tiling)
 
-        # keep the single copy for operations that can use it untiled
-        assign(paste0(tf_name, "_unbatched"), unbatched_tensor, envir = tfe)
+        # keep the single copy for operations that can use it unbatched
+        assign(unbatched_tf_name(tf_name), unbatched_tensor, envir = tfe)
       }
 
       assign(tf_name, batched_tensor, envir = tfe)
@@ -78,7 +83,7 @@ operation_node <- R6Class(
     operation_args = NA,
     arguments = list(),
     tf_function_env = NA,
-    untiled_data = FALSE,
+    unbatched_data = FALSE,
     initialize = function(
       operation,
       ...,
@@ -89,7 +94,7 @@ operation_node <- R6Class(
       representations = list(),
       tf_function_env = parent.frame(3),
       expand_scalars = FALSE,
-      untiled_data = FALSE
+      unbatched_data = FALSE
     ) {
       # coerce all arguments to nodes, and remember the operation
       dots <- lapply(list(...), as.greta_array)
@@ -120,7 +125,7 @@ operation_node <- R6Class(
       self$representations <- representations
       self$make_antirepresentations(representations)
       self$tf_function_env <- tf_function_env
-      self$untiled_data <- untiled_data
+      self$unbatched_data <- unbatched_data
 
       # assign empty value of the right dimension, or the values passed via the
       # operation
@@ -152,21 +157,22 @@ operation_node <- R6Class(
 
       if (mode == "forward") {
         # fetch the tensors from the environment
-        arg_tf_names <- lapply(self$list_parents(dag), dag$tf_name)
+        parents <- self$list_parents(dag)
+        arg_tf_names <- lapply(parents, dag$tf_name)
         tf_args <- lapply(arg_tf_names, get, envir = tfe)
 
         # data parents hand over their single copy when the operation can use
-        # it; otherwise the tensor under the parent's own name stays
-        if (self$untiled_data) {
-          unbatched_names <- paste0(arg_tf_names, "_unbatched")
-          is_data <- vapply(
-            self$list_parents(dag),
-            \(parent) node_type(parent) == "data",
-            logical(1)
-          )
-          for (i in which(is_data)) {
-            if (exists(unbatched_names[[i]], envir = tfe, inherits = FALSE)) {
-              tf_args[[i]] <- get(unbatched_names[[i]], envir = tfe)
+        # it; otherwise the tensor under the parent's own name stays. A parent
+        # that arrives batched (drawn data, fixed values with nsim above 1 or in
+        # hybrid mode, an as_tf_function() input) has no single copy stored.
+        if (self$unbatched_data) {
+          for (i in seq_along(parents)) {
+            if (is.data_node(parents[[i]])) {
+              unbatched_name <- unbatched_tf_name(arg_tf_names[[i]])
+              unbatched <- get0(unbatched_name, envir = tfe, inherits = FALSE)
+              if (!is.null(unbatched)) {
+                tf_args[[i]] <- unbatched
+              }
             }
           }
         }

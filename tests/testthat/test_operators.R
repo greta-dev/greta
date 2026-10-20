@@ -137,31 +137,37 @@ test_that("%*% works when one is a non-greta array", {
 test_that("%*% with data multiplies the data's single copy, not a copy per chain", {
   skip_if_not(check_tf_version())
 
-  for (data_function in list(as_data, as_data_mutable)) {
-    X <- data_function(matrix(rnorm(21), 7, 3))
-    w <- normal(0, 1, dim = c(3, 1))
-    y <- rnorm(7)
-    distribution(y) <- normal(X %*% w, 1)
-    m <- model(w)
+  input_shapes <- function(op) {
+    lapply(op$inputs, \(input) {
+      vapply(
+        input$shape$as_list(),
+        \(d) if (is.null(d)) NA_integer_ else as.integer(d),
+        integer(1)
+      )
+    })
+  }
+  has_input_shape <- function(op, shape) {
+    any(vapply(input_shapes(op), identical, logical(1), as.integer(shape)))
+  }
 
-    graph <- m$dag$tf_log_prob_function$get_concrete_function()$graph
+  for (data_function in list(as_data, as_data_mutable)) {
+    fixture <- matmul_model(matrix(rnorm(21), 7, 3), wrap = data_function)
+
+    graph <- fixture$model$dag$tf_log_prob_function$get_concrete_function()$graph
     ops <- graph$get_operations()
     op_types <- vapply(ops, \(op) op$type, character(1))
-    input_shapes <- function(op) {
-      lapply(op$inputs, \(input) unlist(input$shape$as_list()))
-    }
-    has_shape <- function(op, shape) {
-      any(vapply(input_shapes(op), identical, logical(1), as.integer(shape)))
-    }
+    einsums <- ops[op_types == "Einsum"]
+    tiles <- ops[op_types == "Tile"]
 
     einsum_reads_data <- any(vapply(
-      ops[op_types == "Einsum"],
-      has_shape,
+      einsums,
+      has_input_shape,
       logical(1),
       shape = c(7, 3)
     ))
+    data_tiles <- tiles[vapply(tiles, has_input_shape, logical(1), c(1, 7, 3))]
     data_tiles_unused <- all(vapply(
-      ops[op_types == "Tile" & vapply(ops, has_shape, logical(1), c(1, 7, 3))],
+      data_tiles,
       \(op) length(op$outputs[[1]]$consumers()) == 0,
       logical(1)
     ))
@@ -185,75 +191,27 @@ test_that("%*% with data and nsim = 1 works in single precision", {
   expect_equal(out[[1]][1, , ], drop(X2 %*% out$w[1, , ]), tolerance = 1e-4)
 })
 
-matmul_model <- function(
-  X,
-  y,
-  side = c("left", "right"),
-  mutable = FALSE,
-  via_op = FALSE
-) {
-  side <- match.arg(side)
-  as_data_fun <- if (mutable) as_data_mutable else as_data
-  w <- normal(0, 1, dim = c(ncol(X), 1))
-
-  if (side == "left") {
-    data <- if (via_op) as_data(X) * 1 else as_data_fun(X)
-    product <- data %*% w
-  } else {
-    data <- if (via_op) as_data(t(X)) * 1 else as_data_fun(t(X))
-    product <- t(w) %*% data
-  }
-
-  distribution(y) <- normal(product, 1)
-  list(model = model(w), X = data, w = w)
-}
-
-log_prob_and_grad <- function(log_prob, free_state) {
-  free_state <- tf$constant(free_state, dtype = tf_float())
-  with(tf$GradientTape() %as% tape, {
-    tape$watch(free_state)
-    value <- log_prob(free_state)
-  })
-  list(
-    value = as.array(value),
-    grad = as.array(tape$gradient(value, free_state))
-  )
-}
-
-matmul_y <- function(n, side) {
-  y <- rnorm(n)
-  if (side == "right") {
-    y <- matrix(y, 1, n)
-  }
-  y
-}
-
 test_that("%*% with data gives the same log density, gradient and hessian as the operation path", {
   skip_if_not(check_tf_version())
 
   X <- matrix(rnorm(21), 7, 3)
   for (side in c("left", "right")) {
-    y <- matmul_y(7, side)
-    for (mutable in c(FALSE, TRUE)) {
-      fit <- matmul_model(X, y, side, mutable = mutable)
-      ref <- matmul_model(X, y, side, via_op = TRUE)
+    y <- matrix(rnorm(7), if (side == "left") 7 else 1)
+    ref <- matmul_model(X, y, side, wrap = \(d) as_data(d) * 1)
+    for (data_function in list(as_data, as_data_mutable)) {
+      fit <- matmul_model(X, y, side, wrap = data_function)
 
       for (n_chains in c(1, 4)) {
         fs <- matrix(rnorm(3 * n_chains), n_chains, 3)
-        fit_fun <- \(s) fit$model$dag$tf_log_prob_function(s)$adjusted
-        ref_fun <- \(s) ref$model$dag$tf_log_prob_function(s)$adjusted
-        expect_equal(
-          log_prob_and_grad(fit_fun, fs),
-          log_prob_and_grad(ref_fun, fs),
-          tolerance = 1e-10
-        )
+        expect_same_log_prob(fit$model, ref$model, fs)
       }
 
       fs <- matrix(rnorm(3), 1, 3)
-      expect_equal(
-        log_prob_and_grad(\(s) fit$model$dag$one_row_log_prob(s)$adjusted, fs),
-        log_prob_and_grad(\(s) ref$model$dag$one_row_log_prob(s)$adjusted, fs),
-        tolerance = 1e-10
+      expect_same_log_prob(
+        fit$model,
+        ref$model,
+        fs,
+        log_prob = \(model, s) model$dag$one_row_log_prob(s)$adjusted
       )
       expect_equal(
         fit$model$dag$hessians(free_state = tf$Variable(fs)),
@@ -270,21 +228,27 @@ test_that("%*% with data gives the same log density and gradient in single preci
 
   X <- matrix(rnorm(21), 7, 3)
   for (side in c("left", "right")) {
-    y <- matmul_y(7, side)
-    fit <- matmul_model(X, y, side)
-    ref <- matmul_model(X, y, side, via_op = TRUE)
+    models <- matmul_model_pair(X, side)
     fs <- matrix(rnorm(12), 4, 3)
-    expect_equal(
-      log_prob_and_grad(
-        \(s) fit$model$dag$tf_log_prob_function(s)$adjusted,
-        fs
-      ),
-      log_prob_and_grad(
-        \(s) ref$model$dag$tf_log_prob_function(s)$adjusted,
-        fs
-      ),
-      tolerance = 1e-4
-    )
+    expect_same_log_prob(models$fit, models$ref, fs, tolerance = 1e-4)
+  }
+})
+
+test_that("%*% with data of other shapes matches the operation path", {
+  skip_if_not(check_tf_version())
+
+  cases <- list(
+    one_row = list(X = matrix(rnorm(3), 1, 3), k = 1),
+    one_column = list(X = matrix(rnorm(7), 7, 1), k = 1),
+    integer = list(X = matrix(1:21, 7), k = 1),
+    two_columns = list(X = matrix(rnorm(21), 7, 3), k = 2)
+  )
+  for (case in cases) {
+    for (side in c("left", "right")) {
+      models <- matmul_model_pair(case$X, side, case$k)
+      fs <- matrix(rnorm(4 * ncol(case$X) * case$k), 4)
+      expect_same_log_prob(models$fit, models$ref, fs)
+    }
   }
 })
 
@@ -325,7 +289,7 @@ test_that("calculate() of %*% with data takes each draw of an mcmc() run", {
   skip_if_not(check_tf_version())
 
   X_value <- matrix(rnorm(21), 7, 3)
-  fixture <- matmul_model(X_value, rnorm(7))
+  fixture <- matmul_model(X_value)
   draws <- mcmc(
     fixture$model,
     n_samples = 10,
@@ -333,6 +297,7 @@ test_that("calculate() of %*% with data takes each draw of an mcmc() run", {
     chains = 2,
     verbose = FALSE
   )
+  expect_identical(dim(as.matrix(draws)), c(20L, 3L))
 
   products <- calculate(fixture$X %*% fixture$w, values = draws)
   for (chain in 1:2) {
@@ -349,19 +314,25 @@ test_that("calculate() of %*% with data takes each draw of an mcmc() run", {
   }
 })
 
+drawn_data <- function() {
+  X_value <- matrix(rnorm(21), 7, 3)
+  X <- as_data(X_value)
+  distribution(X) <- normal(0, 1)
+  list(X_value = X_value, X = X, w = normal(0, 1, dim = c(3, 1)))
+}
+
 test_that("calculate() of %*% with drawn data that isn't a target draws the data", {
   skip_if_not(check_tf_version())
 
-  X_value <- matrix(rnorm(21), 7, 3)
+  drawn <- drawn_data()
+  X <- drawn$X
+  w <- drawn$w
   w0 <- matrix(rnorm(3), 3, 1)
-  X <- as_data(X_value)
-  distribution(X) <- normal(0, 1)
-  w <- normal(0, 1, dim = c(3, 1))
 
   for (nsim in c(3, 1)) {
     p <- calculate(X %*% w, values = list(w = w0), nsim = nsim)
     for (i in seq_len(nsim)) {
-      expect_gt(max(abs(p[[1]][i, , ] - drop(X_value %*% w0))), 1e-6)
+      expect_gt(max(abs(p[[1]][i, , ] - drop(drawn$X_value %*% w0))), 1e-6)
     }
   }
 })
@@ -369,10 +340,9 @@ test_that("calculate() of %*% with drawn data that isn't a target draws the data
 test_that("calculate() of %*% with drawn data and drawn parameters uses both draws", {
   skip_if_not(check_tf_version())
 
-  X_value <- matrix(rnorm(21), 7, 3)
-  X <- as_data(X_value)
-  distribution(X) <- normal(0, 1)
-  w <- normal(0, 1, dim = c(3, 1))
+  drawn <- drawn_data()
+  X <- drawn$X
+  w <- drawn$w
   y <- rnorm(7)
   distribution(y) <- normal(X %*% w, 1)
   m <- model(w)
@@ -384,13 +354,13 @@ test_that("calculate() of %*% with drawn data and drawn parameters uses both dra
   expect_identical(dim(p$w), c(3L, 3L, 1L))
   for (i in 1:3) {
     expect_gt(
-      max(abs(p[[1]][i, , ] - drop(X_value %*% p$w[i, , ]))),
+      max(abs(p[[1]][i, , ] - drop(drawn$X_value %*% p$w[i, , ]))),
       1e-6
     )
   }
 })
 
-test_that("simulate() and mcmc() work on %*% with data", {
+test_that("simulate() works on %*% with data", {
   skip_if_not(check_tf_version())
 
   X <- as_data(matrix(rnorm(21), 7, 3))
@@ -401,9 +371,6 @@ test_that("simulate() and mcmc() work on %*% with data", {
 
   sims <- simulate(m, nsim = 5)
   expect_identical(dim(sims$y), c(5L, 7L, 1L))
-
-  draws <- mcmc(m, n_samples = 10, warmup = 10, chains = 2, verbose = FALSE)
-  expect_identical(dim(as.matrix(draws)), c(20L, 3L))
 })
 
 test_that("data_values<-() on %*% with mutable data matches a rebuilt model without retracing", {
@@ -414,22 +381,17 @@ test_that("data_values<-() on %*% with mutable data matches a rebuilt model with
   y <- rnorm(7)
   fs <- matrix(rnorm(12), 4, 3)
 
-  fixture <- matmul_model(X, y, mutable = TRUE)
-  log_prob <- \(s) fixture$model$dag$tf_log_prob_function(s)$adjusted
-  log_prob_and_grad(log_prob, fs)
+  fixture <- matmul_model(X, y, wrap = as_data_mutable)
+  log_prob_and_grad(
+    \(s) fixture$model$dag$tf_log_prob_function(s)$adjusted,
+    fs
+  )
   traces_before <- trace_count(fixture$model$dag$tf_log_prob_function)
 
   data_values(fixture$model, fixture$X) <- X2
 
   rebuilt <- matmul_model(X2, y)
-  expect_equal(
-    log_prob_and_grad(log_prob, fs),
-    log_prob_and_grad(
-      \(s) rebuilt$model$dag$tf_log_prob_function(s)$adjusted,
-      fs
-    ),
-    tolerance = 1e-10
-  )
+  expect_same_log_prob(fixture$model, rebuilt$model, fs)
   expect_identical(
     trace_count(fixture$model$dag$tf_log_prob_function),
     traces_before
@@ -462,47 +424,19 @@ test_that("one data node in two %*% products matches the operation path", {
   y <- rnorm(7)
   fs <- matrix(rnorm(24), 4, 6)
 
-  two_products <- function(via_op) {
-    X <- if (via_op) as_data(X_value) * 1 else as_data(X_value)
+  two_products <- function(wrap) {
+    X <- wrap(X_value)
     w1 <- normal(0, 1, dim = c(3, 1))
     w2 <- normal(0, 1, dim = c(3, 1))
     distribution(y) <- normal(X %*% w1 + X %*% w2, 1)
     model(w1, w2)
   }
-  fit <- two_products(FALSE)
-  ref <- two_products(TRUE)
 
-  expect_equal(
-    log_prob_and_grad(\(s) fit$dag$tf_log_prob_function(s)$adjusted, fs),
-    log_prob_and_grad(\(s) ref$dag$tf_log_prob_function(s)$adjusted, fs),
-    tolerance = 1e-10
+  expect_same_log_prob(
+    two_products(as_data),
+    two_products(\(d) as_data(d) * 1),
+    fs
   )
-})
-
-test_that("%*% with one-row and one-column data matches the operation path", {
-  skip_if_not(check_tf_version())
-
-  shapes <- list(c(1, 3), c(7, 1))
-  for (shape in shapes) {
-    for (side in c("left", "right")) {
-      X <- matrix(rnorm(prod(shape)), shape[1], shape[2])
-      y <- matmul_y(shape[1], side)
-      fit <- matmul_model(X, y, side)
-      ref <- matmul_model(X, y, side, via_op = TRUE)
-      fs <- matrix(rnorm(4 * shape[2]), 4, shape[2])
-      expect_equal(
-        log_prob_and_grad(
-          \(s) fit$model$dag$tf_log_prob_function(s)$adjusted,
-          fs
-        ),
-        log_prob_and_grad(
-          \(s) ref$model$dag$tf_log_prob_function(s)$adjusted,
-          fs
-        ),
-        tolerance = 1e-10
-      )
-    }
-  }
 })
 
 test_that("%*% with data that is also a likelihood target matches the operation path", {
@@ -512,42 +446,13 @@ test_that("%*% with data that is also a likelihood target matches the operation 
   y <- rnorm(7)
   fs <- matrix(rnorm(12), 4, 3)
 
-  targeted <- function(via_op) {
+  targeted <- function(wrap) {
     X <- as_data(X_value)
     distribution(X) <- normal(0, 1)
     w <- normal(0, 1, dim = c(3, 1))
-    distribution(y) <- normal((if (via_op) X * 1 else X) %*% w, 1)
+    distribution(y) <- normal(wrap(X) %*% w, 1)
     model(w)
   }
-  fit <- targeted(FALSE)
-  ref <- targeted(TRUE)
 
-  expect_equal(
-    log_prob_and_grad(\(s) fit$dag$tf_log_prob_function(s)$adjusted, fs),
-    log_prob_and_grad(\(s) ref$dag$tf_log_prob_function(s)$adjusted, fs),
-    tolerance = 1e-10
-  )
-})
-
-test_that("%*% with an integer matrix as data is cast to float (guard on data_node$tf())", {
-  skip_if_not(check_tf_version())
-
-  X <- matrix(1:21, 7)
-  for (side in c("left", "right")) {
-    y <- matmul_y(7, side)
-    fit <- matmul_model(X, y, side)
-    ref <- matmul_model(X, y, side, via_op = TRUE)
-    fs <- matrix(rnorm(12), 4, 3)
-    expect_equal(
-      log_prob_and_grad(
-        \(s) fit$model$dag$tf_log_prob_function(s)$adjusted,
-        fs
-      ),
-      log_prob_and_grad(
-        \(s) ref$model$dag$tf_log_prob_function(s)$adjusted,
-        fs
-      ),
-      tolerance = 1e-10
-    )
-  }
+  expect_same_log_prob(targeted(identity), targeted(\(d) d * 1), fs)
 })

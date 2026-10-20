@@ -526,24 +526,22 @@ tf_rbind <- function(...) {
   tf$concat(elem_list, axis = 1L)
 }
 
-# multiply a matrix by data. The data operand arrives untiled, with a leading
-# dimension of 1, when it was handed over as a single copy; the other operand
-# has the batch dimension, so einsum shares the one matrix across the batch.
+# multiply a matrix by data. A data operand handed over as its single copy has
+# a leading dimension of 1, so einsum shares that one matrix across the batch
+# of the other operand. Data that arrives batched (drawn data, fixed values with
+# nsim above 1 or in hybrid mode, an as_tf_function() input) goes to tf$matmul.
 tf_matmul_data <- function(x, y, data_side) {
   data <- if (data_side == "left") x else y
 
   if (isTRUE(dim(data)[[1]] == 1L)) {
-    mat <- tf$squeeze(tf$convert_to_tensor(data, dtype = tf_float()), axis = 0L)
+    mat <- tf$squeeze(tf_as_float(data), axis = 0L)
     if (data_side == "left") {
       tf$einsum("nm,bmk->bnk", mat, y)
     } else {
       tf$einsum("bkm,mn->bkn", x, mat)
     }
   } else {
-    tf$matmul(
-      tf$convert_to_tensor(x, dtype = tf_float()),
-      tf$convert_to_tensor(y, dtype = tf_float())
-    )
+    tf$matmul(tf_as_float(x), tf_as_float(y))
   }
 }
 
