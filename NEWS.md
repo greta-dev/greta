@@ -62,6 +62,7 @@
 
 ## Minor improvements and bug fixes
 
+* `%*%` no longer copies a data matrix once per chain; when one side is data, it multiplies the data's single copy, so models such as `X %*% beta` run faster with several chains (#858).
 * `[<-` on a greta array fills a matrix or array replacement column by column, as R does (#844).
 * `mcmc()` and `extra_samples()` keep `n_samples %/% thin` draws, regardless of values of `pb_update` and `one_by_one`. A burst shorter than `thin` used to error, as in a final partial burst, `one_by_one = TRUE` with `thin` above 1, or `extra_samples()` with `pb_update` at or below `thin`. They run all `n_samples` iterations even when `thin` does not divide it, `one_by_one = TRUE` rejects only the proposal that caused a numerical error, and a `thin` larger than `n_samples` is an informative error (#241, #318, #567, #609).
 * `mcmc()`'s progress bar reaches its total when `pb_update` does not divide the number of iterations, and fills in step with the iterations run; a bar could read 1010/1010 while still empty (#318).
