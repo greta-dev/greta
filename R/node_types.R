@@ -1,6 +1,19 @@
 # the name under which a data node's single, unbatched tensor is kept
 unbatched_tf_name <- function(tf_name) {
-  paste0(tf_name, "_unbatched")
+  sprintf("%s_unbatched", tf_name)
+}
+
+# the tensor an operation that can use unbatched data reads from one parent: a
+# data parent's single copy if it has one, otherwise the parent's own tensor. A
+# data node stores its single copy only when it is defined as a constant or a
+# variable; one that arrives batched (drawn data, fixed values with nsim above 1
+# or in hybrid mode, an as_tf_function() input) has none
+operand_tensor <- function(node, tf_name, tfe) {
+  unbatched_name <- unbatched_tf_name(tf_name)
+  has_single_copy <- is.data_node(node) &&
+    exists(unbatched_name, envir = tfe, inherits = FALSE)
+  operand_name <- if (has_single_copy) unbatched_name else tf_name
+  get(operand_name, envir = tfe)
 }
 
 data_node <- R6Class(
@@ -159,22 +172,10 @@ operation_node <- R6Class(
         # fetch the tensors from the environment
         parents <- self$list_parents(dag)
         arg_tf_names <- lapply(parents, dag$tf_name)
-        tf_args <- lapply(arg_tf_names, get, envir = tfe)
-
-        # data parents hand over their single copy when the operation can use
-        # it; otherwise the tensor under the parent's own name stays. A parent
-        # that arrives batched (drawn data, fixed values with nsim above 1 or in
-        # hybrid mode, an as_tf_function() input) has no single copy stored.
-        if (self$unbatched_data) {
-          for (i in seq_along(parents)) {
-            if (is.data_node(parents[[i]])) {
-              unbatched_name <- unbatched_tf_name(arg_tf_names[[i]])
-              unbatched <- get0(unbatched_name, envir = tfe, inherits = FALSE)
-              if (!is.null(unbatched)) {
-                tf_args[[i]] <- unbatched
-              }
-            }
-          }
+        tf_args <- if (self$unbatched_data) {
+          Map(operand_tensor, parents, arg_tf_names, MoreArgs = list(tfe = tfe))
+        } else {
+          lapply(arg_tf_names, get, envir = tfe)
         }
 
         # fetch additional (non-tensor) arguments, if any

@@ -531,18 +531,19 @@ tf_rbind <- function(...) {
 # of the other operand. Data that arrives batched (drawn data, fixed values with
 # nsim above 1 or in hybrid mode, an as_tf_function() input) goes to tf$matmul.
 tf_matmul_data <- function(x, y, data_side) {
-  data <- if (data_side == "left") x else y
+  data <- switch(data_side, left = x, right = y)
+  data_is_single_copy <- isTRUE(dim(data)[[1]] == 1L)
 
-  if (isTRUE(dim(data)[[1]] == 1L)) {
-    mat <- tf$squeeze(tf_as_float(data), axis = 0L)
-    if (data_side == "left") {
-      tf$einsum("nm,bmk->bnk", mat, y)
-    } else {
-      tf$einsum("bkm,mn->bkn", x, mat)
-    }
-  } else {
-    tf$matmul(tf_as_float(x), tf_as_float(y))
+  if (!data_is_single_copy) {
+    return(tf$matmul(tf_as_float(x), tf_as_float(y)))
   }
+
+  data_matrix <- tf$squeeze(tf_as_float(data), axis = 0L)
+  switch(
+    data_side,
+    left = tf$einsum("nm,bmk->bnk", data_matrix, y),
+    right = tf$einsum("bkm,mn->bkn", x, data_matrix)
+  )
 }
 
 tf_abind <- function(..., axis) {
