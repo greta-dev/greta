@@ -177,44 +177,15 @@ test_that("data_operand_side() names the operand that is data", {
 test_that("%*% with data multiplies the data's single copy, not a copy per chain", {
   skip_if_not(check_tf_version())
 
-  input_shapes <- function(op) {
-    lapply(op$inputs, \(input) {
-      vapply(
-        input$shape$as_list(),
-        \(d) if (is.null(d)) NA_integer_ else as.integer(d),
-        integer(1)
-      )
-    })
-  }
-  has_input_shape <- function(op, shape) {
-    any(vapply(input_shapes(op), identical, logical(1), as.integer(shape)))
-  }
+  constant_graph <- matmul_log_prob_graph(as_data)
+  mutable_graph <- matmul_log_prob_graph(as_data_mutable)
+  constant_ops <- graph_ops_by_type(constant_graph)
+  mutable_ops <- graph_ops_by_type(mutable_graph)
 
-  for (data_function in list(as_data, as_data_mutable)) {
-    fixture <- matmul_model(matrix(rnorm(21), 7, 3), wrap = data_function)
-
-    graph <- fixture$model$dag$tf_log_prob_function$get_concrete_function()$graph
-    ops <- graph$get_operations()
-    op_types <- vapply(ops, \(op) op$type, character(1))
-    einsums <- ops[op_types == "Einsum"]
-    tiles <- ops[op_types == "Tile"]
-
-    einsum_reads_data <- any(vapply(
-      einsums,
-      has_input_shape,
-      logical(1),
-      shape = c(7, 3)
-    ))
-    data_tiles <- tiles[vapply(tiles, has_input_shape, logical(1), c(1, 7, 3))]
-    data_tiles_unused <- all(vapply(
-      data_tiles,
-      \(op) length(op$outputs[[1]]$consumers()) == 0,
-      logical(1)
-    ))
-
-    expect_true(einsum_reads_data)
-    expect_true(data_tiles_unused)
-  }
+  expect_true(einsum_reads_shape(constant_ops, c(7, 3)))
+  expect_true(einsum_reads_shape(mutable_ops, c(7, 3)))
+  expect_true(tiles_of_shape_unused(constant_ops, c(1, 7, 3)))
+  expect_true(tiles_of_shape_unused(mutable_ops, c(1, 7, 3)))
 })
 
 test_that("%*% with data and nsim = 1 works in single precision", {
@@ -228,38 +199,48 @@ test_that("%*% with data and nsim = 1 works in single precision", {
   out <- NULL
   expect_no_error(out <- calculate(X %*% w, w, values = list(X = X2), nsim = 1))
   skip_if(is.null(out))
-  expect_equal(out[[1]][1, , ], drop(X2 %*% out$w[1, , ]), tolerance = 1e-4)
+
+  product_draw <- out[[1]][1, , ]
+  w_draw <- out$w[1, , ]
+  expected_product <- drop(X2 %*% w_draw)
+  expect_equal(product_draw, expected_product, tolerance = 1e-4)
 })
 
 test_that("%*% with data gives the same log density, gradient and hessian as the operation path", {
   skip_if_not(check_tf_version())
 
   X <- matrix(rnorm(21), 7, 3)
-  for (side in c("left", "right")) {
-    y <- matrix(rnorm(7), if (side == "left") 7 else 1)
-    ref <- matmul_model(X, y, side, wrap = \(d) as_data(d) * 1)
-    for (data_function in list(as_data, as_data_mutable)) {
-      fit <- matmul_model(X, y, side, wrap = data_function)
+  left <- matmul_operation_path(X, side = "left")
+  right <- matmul_operation_path(X, side = "right")
 
-      for (n_chains in c(1, 4)) {
-        fs <- matrix(rnorm(3 * n_chains), n_chains, 3)
-        expect_same_log_prob(fit$model, ref$model, fs)
-      }
-
-      fs <- matrix(rnorm(3), 1, 3)
-      expect_same_log_prob(
-        fit$model,
-        ref$model,
-        fs,
-        log_prob = \(model, s) model$dag$one_row_log_prob(s)$adjusted
-      )
-      expect_equal(
-        fit$model$dag$hessians(free_state = tf$Variable(fs)),
-        ref$model$dag$hessians(free_state = tf$Variable(fs)),
-        tolerance = 1e-10
-      )
-    }
-  }
+  expect_matmul_matches_operation_path(
+    left,
+    wrap = as_data,
+    n_chains = c(1, 4),
+    check_one_row = TRUE,
+    check_hessian = TRUE
+  )
+  expect_matmul_matches_operation_path(
+    left,
+    wrap = as_data_mutable,
+    n_chains = c(1, 4),
+    check_one_row = TRUE,
+    check_hessian = TRUE
+  )
+  expect_matmul_matches_operation_path(
+    right,
+    wrap = as_data,
+    n_chains = c(1, 4),
+    check_one_row = TRUE,
+    check_hessian = TRUE
+  )
+  expect_matmul_matches_operation_path(
+    right,
+    wrap = as_data_mutable,
+    n_chains = c(1, 4),
+    check_one_row = TRUE,
+    check_hessian = TRUE
+  )
 })
 
 test_that("%*% with data gives the same log density and gradient in single precision", {
@@ -267,29 +248,64 @@ test_that("%*% with data gives the same log density and gradient in single preci
   withr::local_options(greta_tf_float = "float32")
 
   X <- matrix(rnorm(21), 7, 3)
-  for (side in c("left", "right")) {
-    models <- matmul_model_pair(X, side)
-    fs <- matrix(rnorm(12), 4, 3)
-    expect_same_log_prob(models$fit, models$ref, fs, tolerance = 1e-4)
-  }
+  left <- matmul_operation_path(X, side = "left")
+  right <- matmul_operation_path(X, side = "right")
+
+  expect_matmul_matches_operation_path(
+    left,
+    wrap = as_data,
+    n_chains = 4,
+    tolerance = 1e-4
+  )
+  expect_matmul_matches_operation_path(
+    right,
+    wrap = as_data,
+    n_chains = 4,
+    tolerance = 1e-4
+  )
 })
 
 test_that("%*% with data of other shapes matches the operation path", {
   skip_if_not(check_tf_version())
 
-  cases <- list(
-    one_row = list(X = matrix(rnorm(3), 1, 3), k = 1),
-    one_column = list(X = matrix(rnorm(7), 7, 1), k = 1),
-    integer = list(X = matrix(1:21, 7), k = 1),
-    two_columns = list(X = matrix(rnorm(21), 7, 3), k = 2)
+  one_row_matrix <- matrix(rnorm(3), 1, 3)
+  one_column_matrix <- matrix(rnorm(7), 7, 1)
+  integer_matrix <- matrix(1:21, 7)
+  X <- matrix(rnorm(21), 7, 3)
+
+  one_row_left <- matmul_operation_path(one_row_matrix, side = "left")
+  one_row_right <- matmul_operation_path(one_row_matrix, side = "right")
+  one_column_left <- matmul_operation_path(one_column_matrix, side = "left")
+  one_column_right <- matmul_operation_path(one_column_matrix, side = "right")
+  integer_left <- matmul_operation_path(integer_matrix, side = "left")
+  integer_right <- matmul_operation_path(integer_matrix, side = "right")
+  two_columns_left <- matmul_operation_path(X, side = "left", k = 2)
+  two_columns_right <- matmul_operation_path(X, side = "right", k = 2)
+
+  expect_matmul_matches_operation_path(one_row_left, as_data, n_chains = 4)
+  expect_matmul_matches_operation_path(one_row_right, as_data, n_chains = 4)
+  expect_matmul_matches_operation_path(one_column_left, as_data, n_chains = 4)
+  expect_matmul_matches_operation_path(one_column_right, as_data, n_chains = 4)
+  expect_matmul_matches_operation_path(integer_left, as_data, n_chains = 4)
+  expect_matmul_matches_operation_path(integer_right, as_data, n_chains = 4)
+  expect_matmul_matches_operation_path(two_columns_left, as_data, n_chains = 4)
+  expect_matmul_matches_operation_path(two_columns_right, as_data, n_chains = 4)
+})
+
+test_that("expect_same_log_prob() fails when the log densities differ", {
+  skip_if_not(check_tf_version())
+
+  X <- matrix(rnorm(21), 7, 3)
+  y <- matrix(rnorm(7), 7)
+  fit <- matmul_model(X, y)$model
+  other_data <- matmul_model(X + 1, y)$model
+  free_state <- matrix(rnorm(12), 4, 3)
+
+  expect_success(expect_same_log_prob(fit, fit, free_state))
+  expect_failure(
+    expect_same_log_prob(fit, other_data, free_state),
+    "same log density and gradient"
   )
-  for (case in cases) {
-    for (side in c("left", "right")) {
-      models <- matmul_model_pair(case$X, side, case$k)
-      fs <- matrix(rnorm(4 * ncol(case$X) * case$k), 4)
-      expect_same_log_prob(models$fit, models$ref, fs)
-    }
-  }
 })
 
 test_that("calculate() of %*% with data matches the R product", {
@@ -301,16 +317,21 @@ test_that("calculate() of %*% with data matches the R product", {
   X <- as_data(X_value)
   w <- normal(0, 1, dim = c(3, 1))
 
+  expected_product <- drop(X_value %*% w0)
+
   one <- calculate(X %*% w, values = list(w = w0))
-  expect_equal(drop(one[[1]]), drop(X_value %*% w0), tolerance = 1e-10)
+  one_product <- drop(one[[1]])
+  expect_equal(one_product, expected_product, tolerance = 1e-10)
 
   three <- calculate(X %*% w, values = list(w = w0), nsim = 3)
-  for (i in 1:3) {
-    expect_equal(three[[1]][i, , ], drop(X_value %*% w0), tolerance = 1e-10)
-  }
+  three_products <- draws_as_rows(three[[1]])
+  expected_products <- matrix(expected_product, 3, 7, byrow = TRUE)
+  expect_equal(three_products, expected_products, tolerance = 1e-10)
 
   swapped <- calculate(X %*% w, values = list(X = X2, w = w0))
-  expect_equal(drop(swapped[[1]]), drop(X2 %*% w0), tolerance = 1e-10)
+  swapped_product <- drop(swapped[[1]])
+  expected_swapped_product <- drop(X2 %*% w0)
+  expect_equal(swapped_product, expected_swapped_product, tolerance = 1e-10)
 })
 
 test_that("calculate() of %*% with a single-column data swaps the data", {
@@ -322,7 +343,9 @@ test_that("calculate() of %*% with a single-column data swaps the data", {
   w <- normal(0, 1, dim = c(1, 1))
 
   swapped <- calculate(X %*% w, values = list(X = X2, w = w0))
-  expect_equal(drop(swapped[[1]]), drop(X2 %*% w0), tolerance = 1e-10)
+  swapped_product <- drop(swapped[[1]])
+  expected_product <- drop(X2 %*% w0)
+  expect_equal(swapped_product, expected_product, tolerance = 1e-10)
 })
 
 test_that("calculate() of %*% with data takes each draw of an mcmc() run", {
@@ -340,18 +363,8 @@ test_that("calculate() of %*% with data takes each draw of an mcmc() run", {
   expect_identical(dim(as.matrix(draws)), c(20L, 3L))
 
   products <- calculate(fixture$X %*% fixture$w, values = draws)
-  for (chain in 1:2) {
-    chain_products <- as.matrix(products[[chain]])
-    chain_draws <- as.matrix(draws[[chain]])
-    expect_identical(dim(chain_products), c(10L, 7L))
-    for (i in 1:10) {
-      expect_equal(
-        unname(chain_products[i, ]),
-        drop(X_value %*% chain_draws[i, ]),
-        tolerance = 1e-10
-      )
-    }
-  }
+  expect_chain_products(products, draws, X_value, chain = 1)
+  expect_chain_products(products, draws, X_value, chain = 2)
 })
 
 drawn_data <- function() {
@@ -365,16 +378,10 @@ test_that("calculate() of %*% with drawn data that isn't a target draws the data
   skip_if_not(check_tf_version())
 
   drawn <- drawn_data()
-  X <- drawn$X
-  w <- drawn$w
   w0 <- matrix(rnorm(3), 3, 1)
 
-  for (nsim in c(3, 1)) {
-    p <- calculate(X %*% w, values = list(w = w0), nsim = nsim)
-    for (i in seq_len(nsim)) {
-      expect_gt(max(abs(p[[1]][i, , ] - drop(drawn$X_value %*% w0))), 1e-6)
-    }
-  }
+  expect_drawn_data_products(drawn, w0, nsim = 3)
+  expect_drawn_data_products(drawn, w0, nsim = 1)
 })
 
 test_that("calculate() of %*% with drawn data and drawn parameters uses both draws", {
@@ -392,12 +399,10 @@ test_that("calculate() of %*% with drawn data and drawn parameters uses both dra
   expect_identical(names(p), c("X %*% w", "w"))
   expect_identical(dim(p[[1]]), c(3L, 7L, 1L))
   expect_identical(dim(p$w), c(3L, 3L, 1L))
-  for (i in 1:3) {
-    expect_gt(
-      max(abs(p[[1]][i, , ] - drop(drawn$X_value %*% p$w[i, , ]))),
-      1e-6
-    )
-  }
+
+  products <- draws_as_rows(p[[1]])
+  fixed_data_products <- draws_as_rows(p$w) %*% t(drawn$X_value)
+  expect_draws_differ_from(products, fixed_data_products)
 })
 
 test_that("simulate() works on %*% with data", {
@@ -422,10 +427,7 @@ test_that("data_values<-() on %*% with mutable data matches a rebuilt model with
   fs <- matrix(rnorm(12), 4, 3)
 
   fixture <- matmul_model(X, y, wrap = as_data_mutable)
-  log_prob_and_grad(
-    \(s) fixture$model$dag$tf_log_prob_function(s)$adjusted,
-    fs
-  )
+  log_prob_and_grad(\(s) adjusted_log_prob(fixture$model, s), fs)
   traces_before <- trace_count(fixture$model$dag$tf_log_prob_function)
 
   data_values(fixture$model, fixture$X) <- X2
@@ -444,17 +446,8 @@ test_that("as_tf_function() with %*% on a dummy input handles batch sizes 1 and 
   A <- matrix(rnorm(21), 7, 3)
   f <- as_tf_function(\(a) t(a) %*% a, a = as_data(A))
 
-  for (n_batch in c(1, 3)) {
-    inputs <- array(rnorm(n_batch * 21), c(n_batch, 7, 3))
-    out <- as.array(f(tf$constant(inputs, dtype = tf_float())))
-    for (i in seq_len(n_batch)) {
-      expect_equal(
-        out[i, , ],
-        t(inputs[i, , ]) %*% inputs[i, , ],
-        tolerance = 1e-10
-      )
-    }
-  }
+  expect_batch_crossprods(f, n_batch = 1)
+  expect_batch_crossprods(f, n_batch = 3)
 })
 
 test_that("one data node in two %*% products matches the operation path", {

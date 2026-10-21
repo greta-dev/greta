@@ -74,7 +74,7 @@ Suggests:
     rmutil,
     rsvg,
     spelling,
-    testthat (>= 3.1.0),
+    testthat (>= 3.3.0),
     tibble,
     tidyr,
     truncdist,
