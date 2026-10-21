@@ -1,10 +1,3 @@
-# the offline-readiness lines depend on machine state (the uv cache and
-# UV_OFFLINE), so drop them from sitrep snapshots; report_offline_readiness()
-# has its own deterministic tests in test-python-backend.R
-redact_offline_readiness <- function(x) {
-  x[!grepl("offline-ready|will need internet|installation vignette", x)]
-}
-
 test_that("check_tf_version errors when have_python, _tf, or _tfp is FALSE", {
   local_mocked_bindings(
     py_module_available = function(...) FALSE,
@@ -105,14 +98,12 @@ test_that("greta_sitrep warns when have_python, _tf, or _tfp is FALSE", {
   local_mocked_bindings(
     have_python = function(...) TRUE,
     have_tf = function(...) TRUE,
-    have_tfp = function(...) TRUE
+    have_tfp = function(...) TRUE,
+    report_offline_readiness = function(...) invisible()
   )
 
   local_python_plan()
-  expect_snapshot(
-    greta_sitrep(),
-    transform = redact_offline_readiness
-  )
+  expect_snapshot(greta_sitrep())
 })
 
 test_that("greta_sitrep warns when different versions of python, tf, tfp", {
@@ -121,32 +112,24 @@ test_that("greta_sitrep warns when different versions of python, tf, tfp", {
   skip_on_cran()
 
   local_mocked_bindings(
-    py_version = function(...) "3.6"
+    py_version = function(...) "3.6",
+    report_offline_readiness = function(...) invisible()
   )
 
   local_python_plan()
-  expect_snapshot(
-    greta_sitrep(),
-    transform = redact_offline_readiness
-  )
+  expect_snapshot(greta_sitrep())
 
   local_mocked_bindings(
     version_tf = function(...) "2.0.0"
   )
 
-  expect_snapshot(
-    greta_sitrep(),
-    transform = redact_offline_readiness
-  )
+  expect_snapshot(greta_sitrep())
 
   local_mocked_bindings(
     version_tfp = function(...) "0.9.0"
   )
 
-  expect_snapshot(
-    greta_sitrep(),
-    transform = redact_offline_readiness
-  )
+  expect_snapshot(greta_sitrep())
 })
 
 test_that("greta_sitrep reports a missing conda env as unused when managed", {
@@ -155,14 +138,12 @@ test_that("greta_sitrep reports a missing conda env as unused when managed", {
   skip_on_cran()
 
   local_mocked_bindings(
-    have_greta_conda_env = function(...) FALSE
+    have_greta_conda_env = function(...) FALSE,
+    report_offline_readiness = function(...) invisible()
   )
 
   local_python_plan()
-  expect_snapshot(
-    greta_sitrep(),
-    transform = redact_offline_readiness
-  )
+  expect_snapshot(greta_sitrep())
 })
 
 test_that("conda env status keeps the availability check off-managed", {
@@ -181,6 +162,9 @@ test_that("greta_sitrep works with quiet, minimal, and detailed options", {
   skip_if_not(check_tf_version())
   skip_on_ci()
   skip_on_cran()
+  local_mocked_bindings(
+    report_offline_readiness = function(...) invisible()
+  )
 
   # the resolved Python backend depends on machine state (RETICULATE_PYTHON, a
   # stored greta preference, or a detected conda env), so mask those lines to
@@ -188,8 +172,7 @@ test_that("greta_sitrep works with quiet, minimal, and detailed options", {
   redact_backend <- function(x) {
     x <- gsub("selected via: .*", "selected via: <source>", x)
     x <- gsub('backend: ".*"', 'backend: "<backend>"', x)
-    x <- gsub("python: .*", "python: <python>", x)
-    redact_offline_readiness(x)
+    gsub("python: .*", "python: <python>", x)
   }
 
   expect_snapshot(

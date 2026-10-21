@@ -65,9 +65,12 @@ Probability automatically on first use. No setup is needed - this happens
 
 For the managed (uv) environment, greta automatically enables uv's offline
 mode once the environment is installed, so it no longer reaches out to
-PyPI. Set \code{UV_OFFLINE=0} yourself to force online resolution (for example,
-to refresh the environment), or \code{UV_OFFLINE=1} to force offline mode -
-greta never overrides a value you have already set.
+PyPI. It does not when Python packages other than greta's are also required
+when greta loads, since uv's cache may not hold them: reticulate adds
+\code{ipykernel} in Positron, and packages loaded before greta can add their own
+with \code{\link[reticulate:py_require]{reticulate::py_require()}}. Set \code{UV_OFFLINE=0} yourself to force online
+resolution (for example, to refresh the environment), or \code{UV_OFFLINE=1} to
+force offline mode - greta never overrides a value you have already set.
 
 To check which Python greta is currently using, and which it will use
 after a restart, call \code{\link[=greta_sitrep]{greta_sitrep()}}.

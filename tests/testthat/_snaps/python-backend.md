@@ -76,7 +76,7 @@
 # report_offline_readiness() reports managed backend states
 
     Code
-      report_offline_readiness(plan, empty, uv_offline = "")
+      report_offline_readiness(plan, empty, "", none)
     Message
       x will need internet on next start: uv cache not yet populated
       i See the installation vignette: `vignette(greta::installation)`.
@@ -84,7 +84,7 @@
 ---
 
     Code
-      report_offline_readiness(plan, empty, uv_offline = "1")
+      report_offline_readiness(plan, empty, "1", none)
     Message
       x `UV_OFFLINE`=1 is set but the uv cache is not yet populated, so the next
       start may fail to resolve dependencies
@@ -93,22 +93,51 @@
 ---
 
     Code
-      report_offline_readiness(plan, full, uv_offline = "")
+      report_offline_readiness(plan, full, "", none)
     Message
       v offline-ready: uv cache present, offline mode will engage
 
 ---
 
     Code
-      report_offline_readiness(plan, full, uv_offline = "1")
+      report_offline_readiness(plan, full, "1", none)
     Message
       v offline-ready: `UV_OFFLINE`=1 is set and the uv cache is populated
 
 ---
 
     Code
-      report_offline_readiness(plan, full, uv_offline = "0")
+      report_offline_readiness(plan, full, "0", none)
     Message
       x will need internet on next start: `UV_OFFLINE`=0 forces online resolution
+      i See the installation vignette: `vignette(greta::installation)`.
+
+# report_offline_readiness() names packages other than greta's
+
+    Code
+      report_offline_readiness(plan, full, "", "ipykernel")
+    Message
+      x will need internet on next start: Python packages other than greta's are also
+      required (ipykernel) and may not be in the uv cache, so offline mode does not
+      engage
+      i See the installation vignette: `vignette(greta::installation)`.
+
+---
+
+    Code
+      report_offline_readiness(plan, full, "1", "ipykernel")
+    Message
+      ! `UV_OFFLINE`=1 is set and the uv cache is populated, but Python packages
+      other than greta's are also required (ipykernel); an offline start fails unless
+      the cache holds them
+      i See the installation vignette: `vignette(greta::installation)`.
+
+# report_offline_readiness() says stored versions keep offline off
+
+    Code
+      report_offline_readiness(plan, full, "", none, stored)
+    Message
+      x will need internet on next start: offline mode does not engage with versions
+      chosen by `greta_set_deps()`
       i See the installation vignette: `vignette(greta::installation)`.
 

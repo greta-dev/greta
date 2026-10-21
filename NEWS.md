@@ -95,7 +95,7 @@
 ### Installation and dependencies
 
 * greta now resolves its Python environment more flexibly instead of always forcing reticulate's managed (uv) environment: it respects a user-set `RETICULATE_PYTHON`, a stored greta preference, or an existing `greta-env-tf2` conda environment, and otherwise uses the managed (uv) environment (#801).
-* The managed (uv) backend now works without an internet connection, by enabling uv's offline mode (via environment variable `UV_OFFLINE`) once reticulate's uv cache is installed. You can set `UV_OFFLINE=0` (or `=1`) yourself to force online or offline resolution, respectively (#814).
+* The managed (uv) backend now works without an internet connection, by enabling uv's offline mode (via environment variable `UV_OFFLINE`) once reticulate's uv cache is installed. It stays online if other Python packages are required when greta loads (such as `ipykernel` in Positron), since the cache may not hold them. You can set `UV_OFFLINE=0` (or `=1`) yourself to force online or offline resolution, respectively (#814).
 * Fixed `library(greta)` failing with an error when greta's stored Python preference file exists but is empty (#809).
 * `greta_deps_spec()` now only checks that the requested TensorFlow version is one greta supports (TensorFlow 2.16 and later are not supported, as they ship Keras 3); compatible TensorFlow Probability and Python versions are left to uv or conda to resolve rather than being validated against a fixed compatibility table (#675).
 * `greta_list_py_modules()` shows the Python packages installed in a specific TF2 environment (#801, #809).
