@@ -116,56 +116,61 @@ NULL
   )
 }
 
-# overload %*% as an S3 generic
-# would rather get S4 version working properly, but uuurgh S4.
-
-#' @export
-`%*%.default` <- function(x, y) {
-  # nolint
-  .Primitive("%*%")(x, y)
-}
-
+#' @name %*%
 #' @rdname overloaded
-#' @export
-`%*%` <- function(x, y) {
-  # nolint
+#' @usage x \%*\% y
+#' @export %*%
+NULL
 
-  # if y is a greta array, coerce x before dispatch
-  if (is.greta_array(y) & !is.greta_array(x)) {
-    as_data(x) %*% y
-    # if y is not a greta array and x is, coerce y before dispatch
-  } else if (!is.greta_array(y) & is.greta_array(x)) {
-    x %*% as_data(y)
-  } else {
-    UseMethod("%*%", x)
-  }
-}
+# base R's own %*%, exported so that packages importing %*% from greta (such
+# as greta.gp) still find it
+`%*%` <- base::`%*%`
 
-#' @export
+# R's matrixOps group generic dispatches here when either operand is a greta
+# array, so the other may be an R matrix or vector. The method is registered
+# against base's %*% because greta's own %*% binding above, there for packages
+# such as greta.gp that import %*% from greta, would make a plain S3method()
+# file it in greta's S3 table, where base R's %*% called from outside greta
+# does not look
+#' @rawNamespace S3method(base::"%*%", greta_array)
+#' @exportS3Method NULL
 `%*%.greta_array` <- function(x, y) {
   # nolint
+  x <- as.greta_array(x)
+  y <- as.greta_array(y)
 
-  check_both_2d(x, y)
-  check_compatible_dimensions(x, y)
+  check_both_2d(x, y, call = matmul_error_call())
+  check_compatible_dimensions(x, y, call = matmul_error_call())
 
-  x_is_data <- is.data_node(get_node(x))
-  y_is_data <- is.data_node(get_node(y))
-  one_side_is_data <- xor(x_is_data, y_is_data)
-  data_side <- if (x_is_data) "left" else "right"
+  data_side <- data_operand_side(x, y)
+  if (is.null(data_side)) {
+    return(op(
+      "matrix multiply",
+      x,
+      y,
+      dim = c(nrow(x), ncol(y)),
+      tf_operation = "tf$matmul"
+    ))
+  }
 
   op(
     "matrix multiply",
     x,
     y,
     dim = c(nrow(x), ncol(y)),
-    unbatched_data = one_side_is_data,
-    operation_args = if (one_side_is_data) {
-      list(data_side = data_side)
-    } else {
-      list()
-    },
-    tf_operation = if (one_side_is_data) "tf_matmul_data" else "tf$matmul"
+    unbatched_data = TRUE,
+    operation_args = list(data_side = data_side),
+    tf_operation = "tf_matmul_data"
   )
+}
+
+# the call that reached %*%.greta_array, as x %*% y: R's dispatch calls the
+# method by its own name. Passed as a check's `call`, it is built only when the
+# check fails
+matmul_error_call <- function() {
+  error_call <- rlang::caller_call()
+  error_call[[1]] <- as.name("%*%")
+  error_call
 }
 
 # logical operators

@@ -134,6 +134,46 @@ test_that("%*% works when one is a non-greta array", {
   expect_snapshot(calculate(res_3, nsim = 1))
 })
 
+# test code runs in greta's namespace, where base R's %*% finds greta's methods
+# whether or not they are registered. A function enclosed by baseenv() sees only
+# base R, as code compiled before greta was attached does
+test_that("base R's %*% works on greta arrays on either side", {
+  skip_if_not(check_tf_version())
+
+  base_matrix_multiply <- function(x, y) x %*% y
+  environment(base_matrix_multiply) <- baseenv()
+
+  a <- randn(5, 4)
+  b <- randn(4, 3)
+
+  greta_out1 <- base_matrix_multiply(as_data(a), b)
+  greta_out2 <- base_matrix_multiply(a, as_data(b))
+
+  expect_s3_class(greta_out1, "greta_array")
+  expect_s3_class(greta_out2, "greta_array")
+
+  r_out <- a %*% b
+  compare_op(r_out, grab(greta_out1))
+  compare_op(r_out, grab(greta_out2))
+  check_op(base_matrix_multiply, a, b)
+})
+
+test_that("greta's %*% is base R's own", {
+  expect_identical(greta::`%*%`, base::`%*%`)
+})
+
+test_that("data_operand_side() names the operand that is data", {
+  skip_if_not(check_tf_version())
+
+  data <- as_data(matrix(1, 2, 2))
+  variable <- normal(0, 1, dim = c(2, 2))
+
+  expect_identical(data_operand_side(data, variable), "left")
+  expect_identical(data_operand_side(variable, data), "right")
+  expect_null(data_operand_side(data, data))
+  expect_null(data_operand_side(variable, variable))
+})
+
 test_that("%*% with data multiplies the data's single copy, not a copy per chain", {
   skip_if_not(check_tf_version())
 

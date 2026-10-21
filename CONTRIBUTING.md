@@ -32,7 +32,8 @@ devtools::test()
 - Use the base pipe `|>`, not `%>%`
 - Use `\() ...` only for single-line anonymous functions; otherwise
   `function() {...}`
-- greta supports R 4.1, so no `_$x` placeholder syntax
+- greta requires R 4.3, so the native pipe's `_` placeholder can extract, as
+  in `_$x`
 - Put comments on their own line, above the code they describe, not trailing
 - Tests for `R/thing.R` go in `tests/testthat/test-thing.R`
 - Every user-facing change gets a bullet in `NEWS.md`, on one line, mentioning

@@ -28,7 +28,7 @@
 
 ### Dependencies
 
-* greta requires R version >= 4.2.0, up from 4.1.0, for the native pipe `|>` (#810).
+* greta requires R version >= 4.3.0, up from 4.1.0: R 4.2.0 for the native pipe's `_` placeholder, and R 4.3.0 so that `%*%` dispatches to greta arrays through R's own `matrixOps` group generic. `%*%` with a greta array now gives a greta array even from code that doesn't see greta, such as a function in another package or one compiled before greta was attached. greta's `%*%` is base R's own, unchanged, so attaching greta no longer masks it (#810, #854, #858).
 * greta installs by default (#633):
   * TensorFlow 2.21.0 (from 2.15.1)
   * TensorFlow Probability 0.25.0 (from 0.23.0)
