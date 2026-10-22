@@ -305,8 +305,16 @@ test_that("requirements_beyond_greta() leaves out greta's packages and numpy", {
   greta_only <- list(packages = c("numpy", greta_packages))
   positron <- list(packages = c("numpy", "ipykernel", greta_packages))
 
-  greta_only_extras <- requirements_beyond_greta(greta_packages, greta_only)
-  positron_extras <- requirements_beyond_greta(greta_packages, positron)
+  greta_only_extras <- requirements_beyond_greta(
+    stored_deps = NULL,
+    declared_packages = greta_packages,
+    requirements = greta_only
+  )
+  positron_extras <- requirements_beyond_greta(
+    stored_deps = NULL,
+    declared_packages = greta_packages,
+    requirements = positron
+  )
 
   expect_identical(greta_only_extras, character())
   expect_identical(positron_extras, "ipykernel")
@@ -318,12 +326,35 @@ test_that("requirements_beyond_greta() counts stored versions as greta's", {
     tfp_version = greta_deps_default$tfp,
     python_version = "3.11"
   )
-  local_mocked_bindings(get_greta_stored_deps = function() deps)
   stored_packages <- greta_py_require_args("2.19.0", greta_deps_default$tfp)
   manifest <- list(packages = c("numpy", stored_packages$packages))
 
   expect_identical(
-    requirements_beyond_greta(requirements = manifest),
+    requirements_beyond_greta(
+      stored_deps = deps,
+      declared_packages = NULL,
+      requirements = manifest
+    ),
+    character()
+  )
+})
+
+test_that("reticulate reports greta's requirements back as declared", {
+  greta_packages <- greta_py_require_args()$packages
+  manifest <- callr::r(
+    function(packages) {
+      reticulate::py_require(packages)
+      reticulate::py_require()
+    },
+    args = list(greta_packages)
+  )
+
+  expect_identical(
+    requirements_beyond_greta(
+      stored_deps = NULL,
+      declared_packages = greta_packages,
+      requirements = manifest
+    ),
     character()
   )
 })
@@ -351,7 +382,8 @@ local_py_require_manifest <- function(
 
 # a managed load on a populated uv cache: the offline environment variables,
 # the versions stored with greta_set_deps() (none by default) in a temporary
-# config directory, and reticulate's own requirements, `reticulate_packages`
+# config directory, and reticulate's own requirements, `reticulate_packages`.
+# The packages greta records as declared are restored afterwards.
 local_managed_load <- function(
   reticulate_packages,
   stored_deps = NULL,
@@ -369,6 +401,11 @@ local_managed_load <- function(
   if (!is.null(stored_deps)) {
     suppressMessages(greta_set_deps(stored_deps))
   }
+  declared_before <- greta_stash$declared_py_packages
+  withr::defer(
+    greta_stash$declared_py_packages <- declared_before,
+    envir = env
+  )
   local_mocked_bindings(
     greta_uv_cache_status = function(...) {
       list(kind = "managed", populated = TRUE)
@@ -777,54 +814,159 @@ test_that("report_offline_readiness() warns when a non-managed python is gone", 
 })
 
 test_that("report_offline_readiness() reports managed backend states", {
-  withr::local_envvar(
-    R_USER_CONFIG_DIR = withr::local_tempdir(),
-    GRETA_UV_OFFLINE = NA
-  )
   plan <- new_python_plan("managed", "default")
   empty <- list(kind = "managed", populated = FALSE)
   full <- list(kind = "managed", populated = TRUE)
   none <- character()
 
-  expect_snapshot(report_offline_readiness(plan, empty, "", none))
-  expect_snapshot(report_offline_readiness(plan, empty, "1", none))
-  expect_snapshot(report_offline_readiness(plan, full, "", none))
-  expect_snapshot(report_offline_readiness(plan, full, "1", none))
-  expect_snapshot(report_offline_readiness(plan, full, "0", none))
+  expect_snapshot(report_offline_readiness(
+    plan,
+    empty,
+    uv_offline = "",
+    marker = "",
+    extra_packages = none,
+    stored_deps = NULL
+  ))
+  expect_snapshot(report_offline_readiness(
+    plan,
+    empty,
+    uv_offline = "1",
+    marker = "",
+    extra_packages = none,
+    stored_deps = NULL
+  ))
+  expect_snapshot(report_offline_readiness(
+    plan,
+    full,
+    uv_offline = "",
+    marker = "",
+    extra_packages = none,
+    stored_deps = NULL
+  ))
+  expect_snapshot(report_offline_readiness(
+    plan,
+    full,
+    uv_offline = "1",
+    marker = "",
+    extra_packages = none,
+    stored_deps = NULL
+  ))
+  expect_snapshot(report_offline_readiness(
+    plan,
+    full,
+    uv_offline = "0",
+    marker = "",
+    extra_packages = none,
+    stored_deps = NULL
+  ))
 })
 
 test_that("report_offline_readiness() names packages other than greta's", {
-  withr::local_envvar(
-    R_USER_CONFIG_DIR = withr::local_tempdir(),
-    GRETA_UV_OFFLINE = NA
-  )
   plan <- new_python_plan("managed", "default")
   full <- list(kind = "managed", populated = TRUE)
 
-  expect_snapshot(report_offline_readiness(plan, full, "", "ipykernel"))
-  expect_snapshot(report_offline_readiness(plan, full, "1", "ipykernel"))
+  expect_snapshot(report_offline_readiness(
+    plan,
+    full,
+    uv_offline = "",
+    marker = "",
+    extra_packages = "ipykernel",
+    stored_deps = NULL
+  ))
+  expect_snapshot(report_offline_readiness(
+    plan,
+    full,
+    uv_offline = "1",
+    marker = "",
+    extra_packages = "ipykernel",
+    stored_deps = NULL
+  ))
+})
+
+test_that("report_offline_readiness() finds the packages other than greta's", {
+  local_managed_load(c("numpy", "ipykernel"))
+  plan <- new_python_plan("managed", "default")
+  apply_greta_python_plan(plan)
+
+  expect_snapshot(report_offline_readiness(plan))
 })
 
 test_that("report_offline_readiness() reports greta's own offline mode as automatic", {
-  withr::local_envvar(
-    R_USER_CONFIG_DIR = withr::local_tempdir(),
-    GRETA_UV_OFFLINE = "auto"
-  )
   plan <- new_python_plan("managed", "default")
   full <- list(kind = "managed", populated = TRUE)
 
-  expect_snapshot(report_offline_readiness(plan, full, "1", character()))
+  expect_snapshot(report_offline_readiness(
+    plan,
+    full,
+    uv_offline = "1",
+    marker = "auto",
+    extra_packages = character(),
+    stored_deps = NULL
+  ))
 })
 
 test_that("report_offline_readiness() says stored versions keep offline off", {
   plan <- new_python_plan("managed", "default")
   full <- list(kind = "managed", populated = TRUE)
-  none <- character()
   stored <- greta_deps_spec(
     tf_version = "2.19.0",
     tfp_version = greta_deps_default$tfp,
     python_version = "3.11"
   )
 
-  expect_snapshot(report_offline_readiness(plan, full, "", none, stored))
+  expect_snapshot(report_offline_readiness(
+    plan,
+    full,
+    uv_offline = "",
+    marker = "",
+    extra_packages = character(),
+    stored_deps = stored
+  ))
+})
+
+test_that("report_offline_readiness() warns when UV_OFFLINE = 1 is set with stored versions", {
+  plan <- new_python_plan("managed", "default")
+  full <- list(kind = "managed", populated = TRUE)
+  stored <- greta_deps_spec(
+    tf_version = "2.19.0",
+    tfp_version = greta_deps_default$tfp,
+    python_version = "3.11"
+  )
+
+  expect_snapshot(report_offline_readiness(
+    plan,
+    full,
+    uv_offline = "1",
+    marker = "",
+    extra_packages = character(),
+    stored_deps = stored
+  ))
+})
+
+test_that("report_offline_readiness() counts greta's pins as its own after its stored versions are removed", {
+  deps <- greta_deps_spec(
+    tf_version = "2.19.0",
+    tfp_version = greta_deps_default$tfp,
+    python_version = "3.11"
+  )
+  local_managed_load("numpy", stored_deps = deps)
+  plan <- new_python_plan("managed", "default")
+  apply_greta_python_plan(plan)
+  clear_greta_stored_deps()
+
+  expect_snapshot(report_offline_readiness(plan))
+})
+
+test_that("report_offline_readiness() counts greta's pins as its own after versions are stored", {
+  deps <- greta_deps_spec(
+    tf_version = "2.19.0",
+    tfp_version = greta_deps_default$tfp,
+    python_version = "3.11"
+  )
+  local_managed_load("numpy", uv_offline = "1")
+  plan <- new_python_plan("managed", "default")
+  apply_greta_python_plan(plan)
+  suppressMessages(greta_set_deps(deps))
+
+  expect_snapshot(report_offline_readiness(plan))
 })

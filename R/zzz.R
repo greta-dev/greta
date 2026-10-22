@@ -39,7 +39,7 @@ tf <- tfp <- NULL
   stash <- init_greta_stash()
   stash$reticulate_python_at_load <- Sys.getenv("RETICULATE_PYTHON")
   plan <- greta_python_plan()
-  apply_greta_python_plan(plan)
+  apply_greta_python_plan(plan, stash)
   stash$python_backend <- plan
 
   ns <- asNamespace(pkgname)

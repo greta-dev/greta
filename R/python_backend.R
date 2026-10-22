@@ -173,8 +173,12 @@ managed_py_require_args <- function(stored_deps = get_greta_stored_deps()) {
 }
 
 # Execute a backend plan: point RETICULATE_PYTHON at the chosen Python, and for
-# the managed backend declare greta's requirements so uv can install them.
-apply_greta_python_plan <- function(plan) {
+# the managed backend declare greta's requirements so uv can install them. The
+# packages declared stay in reticulate's requirements for the session, even if
+# the versions stored with greta_set_deps() change, so they are kept in
+# `stash`. .onLoad() passes the stash it is building, which is not yet attached
+# to the namespace.
+apply_greta_python_plan <- function(plan, stash = greta_stash) {
   switch(
     plan$backend,
     managed = {
@@ -185,8 +189,12 @@ apply_greta_python_plan <- function(plan) {
         packages = py_req$packages,
         python_version = py_req$python_version
       )
+      stash$declared_py_packages <- py_req$packages
       maybe_enable_uv_offline(
-        extra_packages = requirements_beyond_greta(py_req$packages),
+        extra_packages = requirements_beyond_greta(
+          stored_deps = stored_deps,
+          declared_packages = py_req$packages
+        ),
         versions_stored = !is.null(stored_deps)
       )
     },
@@ -327,12 +335,20 @@ greta_uv_cache_status <- function(
 # The Python packages required beyond greta's own and reticulate's default
 # numpy: those reticulate adds itself (ipykernel, in Positron) and those other
 # packages declare with py_require(). The uv cache holds greta's packages once
-# they are installed, but may not hold these.
+# they are installed, but may not hold these. greta's own are both the packages
+# it declared when it loaded and those it would declare on the next start,
+# which differ once greta_set_deps() or greta_remove("deps") has run.
 requirements_beyond_greta <- function(
-  greta_packages = managed_py_require_args()$packages,
+  stored_deps = get_greta_stored_deps(),
+  declared_packages = greta_stash$declared_py_packages,
   requirements = reticulate::py_require()
 ) {
-  setdiff(as.character(requirements$packages), c(greta_packages, "numpy"))
+  greta_packages <- c(
+    declared_packages,
+    managed_py_require_args(stored_deps)$packages,
+    "numpy"
+  )
+  setdiff(as.character(requirements$packages), greta_packages)
 }
 
 # For the managed backend, auto-enable uv's offline mode when the uv cache is
@@ -348,9 +364,9 @@ requirements_beyond_greta <- function(
 # session that loaded greta (reprex, callr, future workers) inherit both, and
 # may need different packages when they load greta.
 maybe_enable_uv_offline <- function(
-  cache_status = greta_uv_cache_status(),
   extra_packages,
-  versions_stored
+  versions_stored,
+  cache_status = greta_uv_cache_status()
 ) {
   set_by_user <- !is.na(Sys.getenv("UV_OFFLINE", unset = NA)) &&
     !uv_offline_set_by_greta()
@@ -495,17 +511,19 @@ report_python_backend <- function(
 # Report whether greta can start without internet access, for greta_sitrep().
 # Only the managed (uv) backend ever downloads anything: the user/conda/path
 # backends point at an environment already on disk. For the managed backend,
-# readiness depends on UV_OFFLINE, on whether the uv cache is populated (the
-# same greta_uv_cache_status() check as maybe_enable_uv_offline()), on whether
-# Python packages other than greta's are required, and, as at load, on whether
-# the user stored versions with greta_set_deps().
+# readiness depends on UV_OFFLINE and its marker, on whether the uv cache is
+# populated (the same greta_uv_cache_status() check as
+# maybe_enable_uv_offline()), on whether Python packages other than greta's are
+# required, and, as at load, on whether the user stored versions with
+# greta_set_deps().
 report_offline_readiness <- function(
   plan = greta_stash$python_backend %||% greta_python_plan(),
   cache_status = if (identical(plan$backend, "managed")) {
     greta_uv_cache_status()
   },
   uv_offline = Sys.getenv("UV_OFFLINE", unset = ""),
-  extra_packages = requirements_beyond_greta(),
+  marker = Sys.getenv("GRETA_UV_OFFLINE", unset = ""),
+  extra_packages = requirements_beyond_greta(stored_deps),
   stored_deps = get_greta_stored_deps()
 ) {
   if (!identical(plan$backend, "managed")) {
@@ -522,23 +540,24 @@ report_offline_readiness <- function(
         removed?); restart R to re-resolve it",
         wrap = TRUE
       )
-      cli::cli_inform(c(
-        "i" = "See the installation vignette: {.vignette greta::installation}."
-      ))
+      inform_installation_vignette()
     }
     return(invisible(plan))
   }
   cache_populated <- isTRUE(cache_status$populated)
   others_required <- length(extra_packages) > 0
+  versions_stored <- !is.null(stored_deps)
   # greta's own UV_OFFLINE is reported as the automatic choice it is
   forced_offline <- identical(uv_offline, "1") &&
-    !uv_offline_set_by_greta(uv_offline)
+    !uv_offline_set_by_greta(uv_offline, marker)
   forced_online <- identical(uv_offline, "0")
   forced_offline_with_others <- forced_offline &&
     cache_populated &&
     others_required
+  forced_offline_with_stored <- forced_offline &&
+    cache_populated &&
+    versions_stored
   forced_offline_ready <- forced_offline && cache_populated
-  versions_stored <- !is.null(stored_deps)
   populated_with_others <- cache_populated && others_required
   if (forced_offline_with_others) {
     cli::cli_alert_warning(
@@ -548,9 +567,15 @@ report_offline_readiness <- function(
       holds them",
       wrap = TRUE
     )
-    cli::cli_inform(c(
-      "i" = "See the installation vignette: {.vignette greta::installation}."
-    ))
+    inform_installation_vignette()
+  } else if (forced_offline_with_stored) {
+    cli::cli_alert_warning(
+      "{.envvar UV_OFFLINE}=1 is set and the uv cache is populated, but \\
+      versions are stored with {.fun greta_set_deps}; an offline start fails \\
+      unless the cache holds them",
+      wrap = TRUE
+    )
+    inform_installation_vignette()
   } else if (forced_offline_ready) {
     cli::cli_alert_success(
       "offline-ready: {.envvar UV_OFFLINE}=1 is set and the uv cache is \\
@@ -563,27 +588,21 @@ report_offline_readiness <- function(
       so the next start may fail to resolve dependencies",
       wrap = TRUE
     )
-    cli::cli_inform(c(
-      "i" = "See the installation vignette: {.vignette greta::installation}."
-    ))
+    inform_installation_vignette()
   } else if (forced_online) {
     cli::cli_alert_danger(
       "will need internet on next start: {.envvar UV_OFFLINE}=0 forces \\
       online resolution",
       wrap = TRUE
     )
-    cli::cli_inform(c(
-      "i" = "See the installation vignette: {.vignette greta::installation}."
-    ))
+    inform_installation_vignette()
   } else if (versions_stored) {
     cli::cli_alert_danger(
       "will need internet on next start: offline mode does not engage with \\
       versions chosen by {.fun greta_set_deps}",
       wrap = TRUE
     )
-    cli::cli_inform(c(
-      "i" = "See the installation vignette: {.vignette greta::installation}."
-    ))
+    inform_installation_vignette()
   } else if (populated_with_others) {
     cli::cli_alert_danger(
       "will need internet on next start: Python packages other than greta's \\
@@ -591,9 +610,7 @@ report_offline_readiness <- function(
       cache, so offline mode does not engage",
       wrap = TRUE
     )
-    cli::cli_inform(c(
-      "i" = "See the installation vignette: {.vignette greta::installation}."
-    ))
+    inform_installation_vignette()
   } else if (cache_populated) {
     cli::cli_alert_success(
       "offline-ready: uv cache present, offline mode will engage",
@@ -604,11 +621,16 @@ report_offline_readiness <- function(
       "will need internet on next start: uv cache not yet populated",
       wrap = TRUE
     )
-    cli::cli_inform(c(
-      "i" = "See the installation vignette: {.vignette greta::installation}."
-    ))
+    inform_installation_vignette()
   }
   invisible(plan)
+}
+
+# the pointer report_offline_readiness() gives after a line that needs action
+inform_installation_vignette <- function() {
+  cli::cli_inform(c(
+    "i" = "See the installation vignette: {.vignette greta::installation}."
+  ))
 }
 
 # The plan greta would resolve on a fresh restart. Identical to a load-time
