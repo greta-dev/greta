@@ -71,6 +71,7 @@
 ## Deprecated and defunct
 
 * The `greta_deps_tf_tfp` dataset is deprecated and will be removed. It is a fixed snapshot that stops at TensorFlow 2.15.1, so it gives the wrong answer about which versions work; greta instead tests a range of TensorFlow versions weekly on Linux, macOS and Windows (#633).
+* `model()`'s `compile` argument is deprecated and warns when supplied: it has had no effect since greta 0.5.0, which stopped applying XLA JIT compilation, and it will be removed in a later release (#857).
 
 ## Internal changes
 
