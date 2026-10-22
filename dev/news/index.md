@@ -126,8 +126,16 @@
 
 #### Dependencies
 
-- greta requires R version \>= 4.2.0, up from 4.1.0, for the native pipe
-  `|>` ([\#810](https://github.com/greta-dev/greta/issues/810)).
+- greta requires R version \>= 4.3.0, up from 4.1.0: R 4.2.0 for the
+  native pipe’s `_` placeholder, and R 4.3.0 so that `%*%` dispatches to
+  greta arrays through R’s own `matrixOps` group generic. `%*%` with a
+  greta array now gives a greta array even from code that doesn’t see
+  greta, such as a function in another package or one compiled before
+  greta was attached. greta’s `%*%` is base R’s own, unchanged, so
+  attaching greta no longer masks it
+  ([\#810](https://github.com/greta-dev/greta/issues/810),
+  [\#854](https://github.com/greta-dev/greta/issues/854),
+  [\#858](https://github.com/greta-dev/greta/issues/858)).
 - greta installs by default
   ([\#633](https://github.com/greta-dev/greta/issues/633)):
   - TensorFlow 2.21.0 (from 2.15.1)
@@ -246,6 +254,16 @@
 
 ### Minor improvements and bug fixes
 
+- `%*%` now multiplies a data matrix used directly in the product (an R
+  matrix, or a greta array from
+  [`as_data()`](https://greta-dev.github.io/greta/dev/reference/as_data.md)
+  or
+  [`as_data_mutable()`](https://greta-dev.github.io/greta/dev/reference/as_data_mutable.md))
+  once, instead of once per chain, so models such as `X %*% beta` run
+  faster in
+  [`mcmc()`](https://greta-dev.github.io/greta/dev/reference/inference.md)
+  with several chains
+  ([\#858](https://github.com/greta-dev/greta/issues/858)).
 - `[<-` on a greta array fills a matrix or array replacement column by
   column, as R does
   ([\#844](https://github.com/greta-dev/greta/issues/844)).

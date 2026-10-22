@@ -142,6 +142,8 @@ The argument is only included for compatibility with the base functions
 that call it.</p>
 <p>To find the original help file for these overloaded functions, search for
 the function, e.g., <code>?cov2cor</code> and select the non-greta function.</p>
+<p><code>%*%</code> is not overloaded: greta exports base R's own <code>%*%</code> unchanged, which
+dispatches to greta arrays through R's <code>matrixOps</code> group generic.</p>
     </div>
 
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

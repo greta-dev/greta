@@ -10,9 +10,9 @@ library(greta)
 #>     binomial, cov2cor, poisson
 #> The following objects are masked from 'package:base':
 #> 
-#>     %*%, %o%, apply, backsolve, beta, chol2inv, colMeans, colSums,
-#>     diag, eigen, forwardsolve, gamma, identity, outer, rowMeans,
-#>     rowSums, sweep, tapply
+#>     %o%, apply, backsolve, beta, chol2inv, colMeans, colSums, diag,
+#>     eigen, forwardsolve, gamma, identity, outer, rowMeans, rowSums,
+#>     sweep, tapply
 ```
 
 The greta R package requires Google’s
