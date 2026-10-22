@@ -464,6 +464,16 @@ mock_mcmc <- function(n_samples = 1010) {
   iterate_progress_bar(pb, n_samples, rejects = 10, chains = 1)
 }
 
+# a model of r whose solve() errors on the singular matrix whenever round(r) is
+# 1 or -1, so mcmc() hits numerical errors. r is made by the caller, where
+# initials(r = ) looks for it
+singular_at_one_model <- function(r) {
+  singular_at_one <- diag(2) + (1 - diag(2)) * round(r)
+  y <- as_data(0.5)
+  distribution(y) <- normal(sum(solve(singular_at_one)), 1)
+  model(r)
+}
+
 # random lkj draws, code from the rethinking package (can't load the package
 # because of stan*Travis*compiler issues)
 rlkjcorr <- function(n, eta = 1, dimension = 2) {
