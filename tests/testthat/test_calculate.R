@@ -451,10 +451,9 @@ test_that("calculate errors if a distribution cannot be sampled from", {
 test_that("calculate() draws NaN for invalid poisson and negative_binomial", {
   skip_if_not(check_tf_version())
 
-  # greta-dev/greta#617: TensorFlow's Poisson sampler on the CPU never returns
-  # for a NaN rate, so the draws are made in a session that is killed if it
-  # hangs. The timeout also covers starting R and loading greta, which can take
-  # minutes on a busy machine
+  # greta-dev/greta#617: the hang can't be interrupted, so the draws are made in
+  # a session that is killed if it hangs. The timeout also covers starting R and
+  # loading greta, which can take minutes on a busy machine
   sims <- in_fresh_greta(
     function() {
       y <- poisson(c(1e4, 0, -1))
