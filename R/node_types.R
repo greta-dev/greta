@@ -1,3 +1,17 @@
+# the name under which a data node's single, unbatched tensor is kept
+unbatched_tf_name <- function(tf_name) {
+  sprintf("%s_unbatched", tf_name)
+}
+
+# a data parent's single copy, if it stored one; otherwise its batched tensor
+operand_tensor <- function(node, tf_name, tfe) {
+  unbatched_name <- unbatched_tf_name(tf_name)
+  has_single_copy <- is.data_node(node) &&
+    exists(unbatched_name, envir = tfe, inherits = FALSE)
+  operand_name <- if (has_single_copy) unbatched_name else tf_name
+  get(operand_name, envir = tfe)
+}
+
 data_node <- R6Class(
   "data_node",
   inherit = node,
@@ -58,6 +72,9 @@ data_node <- R6Class(
         # expand up to batch size - so we can run multiple chains
         tiling <- c(tfe$.batch_size, rep(1L, length(self$dim)))
         batched_tensor <- tf$tile(unbatched_tensor, tiling)
+
+        # keep the single copy for operations that can use it unbatched
+        assign(unbatched_tf_name(tf_name), unbatched_tensor, envir = tfe)
       }
 
       assign(tf_name, batched_tensor, envir = tfe)
@@ -75,6 +92,7 @@ operation_node <- R6Class(
     operation_args = NA,
     arguments = list(),
     tf_function_env = NA,
+    unbatched_data = FALSE,
     initialize = function(
       operation,
       ...,
@@ -84,7 +102,8 @@ operation_node <- R6Class(
       value = NULL,
       representations = list(),
       tf_function_env = parent.frame(3),
-      expand_scalars = FALSE
+      expand_scalars = FALSE,
+      unbatched_data = FALSE
     ) {
       # coerce all arguments to nodes, and remember the operation
       dots <- lapply(list(...), as.greta_array)
@@ -115,6 +134,7 @@ operation_node <- R6Class(
       self$representations <- representations
       self$make_antirepresentations(representations)
       self$tf_function_env <- tf_function_env
+      self$unbatched_data <- unbatched_data
 
       # assign empty value of the right dimension, or the values passed via the
       # operation
@@ -146,8 +166,13 @@ operation_node <- R6Class(
 
       if (mode == "forward") {
         # fetch the tensors from the environment
-        arg_tf_names <- lapply(self$list_parents(dag), dag$tf_name)
-        tf_args <- lapply(arg_tf_names, get, envir = tfe)
+        parents <- self$list_parents(dag)
+        arg_tf_names <- lapply(parents, dag$tf_name)
+        tf_args <- if (self$unbatched_data) {
+          Map(operand_tensor, parents, arg_tf_names, MoreArgs = list(tfe = tfe))
+        } else {
+          lapply(arg_tf_names, get, envir = tfe)
+        }
 
         # fetch additional (non-tensor) arguments, if any
         multiple_operation_args <- length(self$operation_args) > 0

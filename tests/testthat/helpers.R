@@ -1202,3 +1202,124 @@ find_thinning <- function(draws, max_thin = 100, autocorr_threshold = 0.01) {
 trace_count <- function(traced) {
   as.integer(traced$experimental_get_tracing_count())
 }
+
+# a model of y ~ normal(X %*% w, 1), or normal(t(w) %*% t(X), 1) for
+# side = "right", with X wrapped by `wrap`. Pass `\(d) as_data(d) * 1` to put an
+# operation between the data and %*%, so it takes the tf$matmul path. `w` has
+# `k` columns, and `y` is drawn when it is NULL.
+matmul_model <- function(
+  X,
+  y = NULL,
+  side = c("left", "right"),
+  k = 1,
+  wrap = as_data
+) {
+  side <- match.arg(side)
+  w <- normal(0, 1, dim = c(ncol(X), k))
+
+  if (side == "left") {
+    data <- wrap(X)
+    product <- data %*% w
+    y_dim <- c(nrow(X), k)
+  } else {
+    data <- wrap(t(X))
+    product <- t(w) %*% data
+    y_dim <- c(k, nrow(X))
+  }
+
+  y <- y %||% array(rnorm(prod(y_dim)), y_dim)
+  distribution(y) <- normal(product, 1)
+  list(model = model(w), X = data, w = w)
+}
+
+# a model of a y drawn here, with X on `side` of %*% on the tf$matmul path, and
+# the X, y, side and k it was built from, so that
+# expect_matmul_matches_operation_path() can build the same model on a data path
+matmul_operation_path <- function(X, side = c("left", "right"), k = 1) {
+  side <- match.arg(side)
+  y_dim <- if (side == "left") c(nrow(X), k) else c(k, nrow(X))
+  y <- array(rnorm(prod(y_dim)), y_dim)
+  fixture <- matmul_model(X, y, side, k, wrap = \(d) as_data(d) * 1)
+  list(model = fixture$model, X = X, y = y, side = side, k = k)
+}
+
+log_prob_and_grad <- function(log_prob, free_state) {
+  free_state <- tf$constant(free_state, dtype = tf_float())
+  with(tf$GradientTape() %as% tape, {
+    tape$watch(free_state)
+    value <- log_prob(free_state)
+  })
+  list(
+    value = as.array(value),
+    grad = as.array(tape$gradient(value, free_state))
+  )
+}
+
+# a model's adjusted log density, through the traced function mcmc() uses
+adjusted_log_prob <- function(model, free_state) {
+  model$dag$tf_log_prob_function(free_state)$adjusted
+}
+
+# a model's adjusted log density, through the one-row traced function opt() uses
+one_row_adjusted_log_prob <- function(model, free_state) {
+  model$dag$one_row_log_prob(free_state)$adjusted
+}
+
+# the graph of the traced log density of y ~ normal(X %*% w, 1), with a 7 x 3
+# matrix X wrapped by `wrap`
+matmul_log_prob_graph <- function(wrap) {
+  fixture <- matmul_model(matrix(rnorm(21), 7, 3), wrap = wrap)
+  fixture$model$dag$tf_log_prob_function$get_concrete_function()$graph
+}
+
+# the operations of a TF graph, split by type, such as "Einsum" or "Tile"
+graph_ops_by_type <- function(graph) {
+  ops <- graph$get_operations()
+  op_types <- vapply(ops, \(op) op$type, character(1))
+  split(ops, op_types)
+}
+
+# the shape of a tensor as integers, NA for each unknown dimension
+tensor_shape <- function(tensor) {
+  vapply(tensor$shape$as_list(), \(d) as.integer(d %||% NA), integer(1))
+}
+
+# whether any input of a TF operation has the given shape
+has_input_shape <- function(op, shape) {
+  input_shapes <- lapply(op$inputs, tensor_shape)
+  any(vapply(input_shapes, identical, logical(1), as.integer(shape)))
+}
+
+# whether no operation in the graph reads a TF operation's output
+is_unused_op <- function(op) {
+  length(op$outputs[[1]]$consumers()) == 0
+}
+
+# whether an einsum among a graph's operations, from graph_ops_by_type(), reads
+# a tensor of the given shape
+einsum_reads_shape <- function(ops_by_type, shape) {
+  einsums <- ops_by_type[["Einsum"]]
+  any(vapply(einsums, has_input_shape, logical(1), shape))
+}
+
+# whether every tile of a tensor of the given shape among a graph's operations,
+# from graph_ops_by_type(), goes unused
+tiles_of_shape_unused <- function(ops_by_type, shape) {
+  tiles <- ops_by_type[["Tile"]]
+  shape_tiles <- Filter(\(op) has_input_shape(op, shape), tiles)
+  all(vapply(shape_tiles, is_unused_op, logical(1)))
+}
+
+# draws of a column vector from calculate(), or one chain of mcmc() draws, as a
+# matrix with one row per draw
+draws_as_rows <- function(draws) {
+  matrix(draws, nrow = dim(draws)[1])
+}
+
+# t(a) %*% a for each matrix in a batch, the batch dimension first
+batch_crossprods <- function(inputs) {
+  n_batch <- dim(inputs)[1]
+  n_col <- dim(inputs)[3]
+  crossprods <- apply(inputs, 1, \(a) t(a) %*% a)
+  aperm(array(crossprods, c(n_col, n_col, n_batch)), c(3, 1, 2))
+}

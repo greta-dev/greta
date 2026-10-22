@@ -526,6 +526,24 @@ tf_rbind <- function(...) {
   tf$concat(elem_list, axis = 1L)
 }
 
+# einsum shares data's single copy across the other operand's batch; data that
+# arrives batched goes to tf$matmul
+tf_matmul_data <- function(x, y, data_side) {
+  data <- switch(data_side, left = x, right = y)
+  data_is_single_copy <- isTRUE(dim(data)[[1]] == 1L)
+
+  if (!data_is_single_copy) {
+    return(tf$matmul(tf_as_float(x), tf_as_float(y)))
+  }
+
+  data_matrix <- tf$squeeze(tf_as_float(data), axis = 0L)
+  switch(
+    data_side,
+    left = tf$einsum("nm,bmk->bnk", data_matrix, y),
+    right = tf$einsum("bkm,mn->bkn", x, data_matrix)
+  )
+}
+
 tf_abind <- function(..., axis) {
   elem_list <- list(...)
   tf$concat(elem_list, axis = axis)
@@ -754,6 +772,7 @@ tf_functions_module <- function() {
     tf_flatten,
     tf_replace,
     tf_cbind,
+    tf_matmul_data,
     tf_rbind,
     tf_only_eigenvalues,
     tf_extract_eigenvectors,

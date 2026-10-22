@@ -116,45 +116,54 @@ NULL
   )
 }
 
-# overload %*% as an S3 generic
-# would rather get S4 version working properly, but uuurgh S4.
-
-#' @export
-`%*%.default` <- function(x, y) {
-  # nolint
-  .Primitive("%*%")(x, y)
-}
-
+#' @name %*%
 #' @rdname overloaded
-#' @export
-`%*%` <- function(x, y) {
-  # nolint
+#' @usage x \%*\% y
+#' @export %*%
+NULL
 
-  # if y is a greta array, coerce x before dispatch
-  if (is.greta_array(y) & !is.greta_array(x)) {
-    as_data(x) %*% y
-    # if y is not a greta array and x is, coerce y before dispatch
-  } else if (!is.greta_array(y) & is.greta_array(x)) {
-    x %*% as_data(y)
-  } else {
-    UseMethod("%*%", x)
-  }
-}
+# re-exported for packages that import %*% from greta, such as greta.gp
+`%*%` <- base::`%*%`
 
-#' @export
+# registered on base's %*%: a plain S3method() would file it under greta's own
+# %*% above, where base R doesn't look
+#' @rawNamespace S3method(base::"%*%", greta_array)
+#' @exportS3Method NULL
 `%*%.greta_array` <- function(x, y) {
   # nolint
+  x <- as.greta_array(x)
+  y <- as.greta_array(y)
 
-  check_both_2d(x, y)
-  check_compatible_dimensions(x, y)
+  check_both_2d(x, y, call = matmul_error_call())
+  check_compatible_dimensions(x, y, call = matmul_error_call())
+
+  data_side <- data_operand_side(x, y)
+  if (is.null(data_side)) {
+    return(op(
+      "matrix multiply",
+      x,
+      y,
+      dim = c(nrow(x), ncol(y)),
+      tf_operation = "tf$matmul"
+    ))
+  }
 
   op(
     "matrix multiply",
     x,
     y,
     dim = c(nrow(x), ncol(y)),
-    tf_operation = "tf$matmul"
+    unbatched_data = TRUE,
+    operation_args = list(data_side = data_side),
+    tf_operation = "tf_matmul_data"
   )
+}
+
+# x %*% y as the call errors name, rather than the method's own name
+matmul_error_call <- function() {
+  error_call <- rlang::caller_call()
+  error_call[[1]] <- as.name("%*%")
+  error_call
 }
 
 # logical operators

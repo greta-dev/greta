@@ -31,7 +31,7 @@ License: Apache License 2.0
 URL: https://greta-dev.github.io/greta/, https://github.com/greta-dev/greta
 BugReports: https://github.com/greta-dev/greta/issues
 Depends:
-    R (>= 4.2.0)
+    R (>= 4.3.0)
 Imports:
     abind,
     callr,
@@ -74,7 +74,7 @@ Suggests:
     rmutil,
     rsvg,
     spelling,
-    testthat (>= 3.1.0),
+    testthat (>= 3.3.0),
     tibble,
     tidyr,
     truncdist,

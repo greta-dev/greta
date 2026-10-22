@@ -28,7 +28,7 @@
 
 ### Dependencies
 
-* greta requires R version >= 4.2.0, up from 4.1.0, for the native pipe `|>` (#810).
+* greta requires R version >= 4.3.0, up from 4.1.0: R 4.2.0 for the native pipe's `_` placeholder, and R 4.3.0 so that `%*%` dispatches to greta arrays through R's own `matrixOps` group generic. `%*%` with a greta array now gives a greta array even from code that doesn't see greta, such as a function in another package or one compiled before greta was attached. greta's `%*%` is base R's own, unchanged, so attaching greta no longer masks it (#810, #854, #858).
 * greta installs by default (#633):
   * TensorFlow 2.21.0 (from 2.15.1)
   * TensorFlow Probability 0.25.0 (from 0.23.0)
@@ -62,6 +62,7 @@
 
 ## Minor improvements and bug fixes
 
+* `%*%` now multiplies a data matrix used directly in the product (an R matrix, or a greta array from `as_data()` or `as_data_mutable()`) once, instead of once per chain, so models such as `X %*% beta` run faster in `mcmc()` with several chains (#858).
 * `[<-` on a greta array fills a matrix or array replacement column by column, as R does (#844).
 * `mcmc()` and `extra_samples()` keep `n_samples %/% thin` draws, regardless of values of `pb_update` and `one_by_one`. A burst shorter than `thin` used to error, as in a final partial burst, `one_by_one = TRUE` with `thin` above 1, or `extra_samples()` with `pb_update` at or below `thin`. They run all `n_samples` iterations even when `thin` does not divide it, `one_by_one = TRUE` rejects only the proposal that caused a numerical error, and a `thin` larger than `n_samples` is an informative error (#241, #318, #567, #609).
 * `mcmc()`'s progress bar reaches its total when `pb_update` does not divide the number of iterations, and fills in step with the iterations run; a bar could read 1010/1010 while still empty (#318).

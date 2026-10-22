@@ -21,6 +21,9 @@
 #'   To find the original help file for these overloaded functions, search for
 #'   the function, e.g., `?cov2cor` and select the non-greta function.
 #'
+#'   `%*%` is not overloaded: greta exports base R's own `%*%` unchanged, which
+#'   dispatches to greta arrays through R's `matrixOps` group generic.
+#'
 #' @return An object of the same type as the base R equivalent (typically a
 #'   `greta_array`).
 NULL

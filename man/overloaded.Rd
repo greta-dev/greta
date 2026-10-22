@@ -94,4 +94,7 @@ that call it.
 
 To find the original help file for these overloaded functions, search for
 the function, e.g., \code{?cov2cor} and select the non-greta function.
+
+\code{\%*\%} is not overloaded: greta exports base R's own \code{\%*\%} unchanged, which
+dispatches to greta arrays through R's \code{matrixOps} group generic.
 }

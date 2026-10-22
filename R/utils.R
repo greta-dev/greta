@@ -935,6 +935,17 @@ n_dim <- function(x) length(dim(x))
 
 is_2d <- function(x) n_dim(x) == 2
 
+# which operand of a binary operation on greta arrays is data: "left", "right",
+# or NULL when neither or both are
+data_operand_side <- function(x, y) {
+  x_is_data <- is.data_node(get_node(x))
+  y_is_data <- is.data_node(get_node(y))
+  if (x_is_data == y_is_data) {
+    return(NULL)
+  }
+  if (x_is_data) "left" else "right"
+}
+
 is.node <- function(x, ...) {
   inherits(x, "node")
 }
