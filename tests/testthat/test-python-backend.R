@@ -325,15 +325,13 @@ test_that("requirements_beyond_greta() returns the packages other than greta's a
   )
 })
 
-test_that("requirements_beyond_greta() counts greta's packages at any version as greta's", {
+test_that("requirements_beyond_greta() counts greta's pins at any version as greta's", {
+  older_pins <- greta_py_require_args(
+    tf_version = "2.15.1",
+    tfp_version = "0.23.0"
+  )$packages
   manifest <- list(
-    packages = c(
-      "tensorflow==2.19.*",
-      "tensorflow_probability==0.24.*",
-      "tensorflow_probability[tf]>=0.23",
-      "ipykernel",
-      "pandas>=2"
-    )
+    packages = c(older_pins, "tensorflow==2.19.*", "ipykernel", "pandas>=2")
   )
 
   expect_identical(
@@ -342,19 +340,18 @@ test_that("requirements_beyond_greta() counts greta's packages at any version as
   )
 })
 
-test_that("requirements_beyond_greta() counts greta's packages however their names are spelt", {
+test_that("requirements_beyond_greta() returns other requirements on greta's packages as other packages'", {
+  others <- c(
+    "numpy<2",
+    "numpy>=2.3",
+    "tensorflow[and-cuda]",
+    "tensorflow_probability==0.25.*"
+  )
   manifest <- list(
-    packages = c(
-      "TensorFlow",
-      "tensorflow-probability[tf]==0.25.*",
-      "TensorFlow_Probability"
-    )
+    packages = c("numpy", greta_py_require_args()$packages, others)
   )
 
-  expect_identical(
-    requirements_beyond_greta(requirements = manifest),
-    character()
-  )
+  expect_identical(requirements_beyond_greta(requirements = manifest), others)
 })
 
 test_that("reticulate reports greta's requirements back as declared", {

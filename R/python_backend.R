@@ -324,28 +324,28 @@ greta_uv_cache_status <- function(
   list(kind = "system", populated = populated)
 }
 
-# The name of the Python package a requirement asks for, normalised as PyPI
-# does: without extras, version specifiers or environment markers, in lower
-# case, and with each run of "-", "_" and "." as one "-"
-python_package_name <- function(requirement) {
-  name <- sub("^\\s*([A-Za-z0-9._-]+).*$", "\\1", requirement)
-  gsub("[-_.]+", "-", tolower(name))
+# A requirement pinned to one release series, such as "tensorflow==2.20.*", with
+# the series taken out, so that greta's pins compare equal at any version
+without_pinned_series <- function(requirement) {
+  sub("==[0-9][0-9.]*\\.\\*$", "==", requirement)
 }
 
-# The Python packages required beyond greta's own and reticulate's default
+# The Python requirements beyond greta's own pins and reticulate's default
 # numpy: those reticulate adds itself (ipykernel, in Positron) and those other
 # packages declare with py_require(). The uv cache holds greta's packages once
-# they are installed, but may not hold these. Requirements are compared by
-# package name, so greta's own count as greta's at whichever versions are
-# pinned, including after greta_set_deps() or greta_remove("deps") mid-session.
+# they are installed, but may not hold these. greta's pins count as greta's at
+# any version, as after greta_set_deps() or greta_remove("deps") mid-session,
+# but any other requirement on the same packages, such as "numpy<2" or
+# "tensorflow[and-cuda]", is another package's, as the cache may not hold what
+# it resolves to.
 requirements_beyond_greta <- function(
   requirements = reticulate::py_require()
 ) {
-  greta_names <- python_package_name(
-    c(greta_py_require_args()$packages, "numpy")
-  )
   required <- as.character(requirements$packages)
-  required[!python_package_name(required) %in% greta_names]
+  greta_pins <- without_pinned_series(greta_py_require_args()$packages)
+  greta_pin <- without_pinned_series(required) %in% greta_pins
+  reticulate_default <- required == "numpy"
+  required[!(greta_pin | reticulate_default)]
 }
 
 # Whether greta's offline mode engages ("engage"), or the first reason it does
