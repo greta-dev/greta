@@ -13,7 +13,6 @@ dag_class <- R6Class(
     tf_environment = NA,
     tf_float = NA,
     n_cores = 0L,
-    compile = NA,
     trace_names = NULL,
 
     # one tf$Variable per mutable data node, keyed by unique_name. Not held in
@@ -21,11 +20,7 @@ dag_class <- R6Class(
     data_variables = list(),
 
     # create a dag from some target nodes
-    initialize = function(
-      target_greta_arrays,
-      tf_float = "float32",
-      compile = FALSE
-    ) {
+    initialize = function(target_greta_arrays, tf_float = "float32") {
       # build the dag
       self$build_dag(target_greta_arrays)
 
@@ -36,7 +31,6 @@ dag_class <- R6Class(
 
       # store the performance control info
       self$tf_float <- tf_float
-      self$compile <- compile
       self$define_tf_trace_values_batch()
       self$define_tf_log_prob_function()
     },

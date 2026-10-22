@@ -49,7 +49,20 @@ NULL
 #'
 #' plot(m)
 #' }
-model <- function(..., precision = c("double", "single"), compile = TRUE) {
+model <- function(
+  ...,
+  precision = c("double", "single"),
+  compile = lifecycle::deprecated()
+) {
+  if (lifecycle::is_present(compile)) {
+    lifecycle::deprecate_warn(
+      when = "0.7.0",
+      what = "model(compile)",
+      details = "It has had no effect since greta 0.5.0, which stopped \\
+      applying XLA JIT compilation to models."
+    )
+  }
+
   check_tf_version("error")
 
   # get the floating point precision
@@ -82,13 +95,9 @@ model <- function(..., precision = c("double", "single"), compile = TRUE) {
   target_greta_arrays <- check_greta_arrays(target_greta_arrays, "model")
 
   # get the dag containing the target nodes
-  # TF1/2 check
-  # I don't think we need to use the `compile` flag in TF2 anymore
-  # Well, it will be passed onto the tf_function creation step
   dag <- dag_class$new(
     target_greta_arrays,
-    tf_float = tf_float,
-    compile = compile
+    tf_float = tf_float
   )
 
   # the user might pass greta arrays with groups of nodes that are unconnected
