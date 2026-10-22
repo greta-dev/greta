@@ -91,6 +91,7 @@
     Code
       greta_sitrep()
     Message
+      i greta 0.0.0 from a test
       i checking if python available
       v python (v3.12) available
       
@@ -110,6 +111,7 @@
     Code
       greta_sitrep()
     Message
+      i greta 0.0.0 from a test
       i checking if python available
       v python (v3.6) available
       
@@ -129,6 +131,7 @@
     Code
       greta_sitrep()
     Message
+      i greta 0.0.0 from a test
       i checking if python available
       v python (v3.6) available
       
@@ -148,6 +151,7 @@
     Code
       greta_sitrep()
     Message
+      i greta 0.0.0 from a test
       i checking if python available
       v python (v3.6) available
       
@@ -167,6 +171,7 @@
     Code
       greta_sitrep()
     Message
+      i greta 0.0.0 from a test
       i checking if python available
       v python (v3.12) available
       
@@ -207,6 +212,7 @@
     Code
       greta_sitrep(verbosity = "minimal")
     Message
+      i greta 0.0.0 from a test
       i checking if python available
       v python (v3.12) available
       

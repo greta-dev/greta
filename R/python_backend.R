@@ -157,6 +157,21 @@ greta_python_plan <- function(
   new_python_plan("managed", "default")
 }
 
+# greta's py_require() arguments for the managed backend: the versions the user
+# stored with greta_set_deps(), or greta's defaults when none are stored. The
+# default pins derive from greta_deps_default via greta_py_require_args();
+# agreement with greta_deps_spec()'s defaults is test-enforced.
+managed_py_require_args <- function(stored_deps = get_greta_stored_deps()) {
+  if (is.null(stored_deps)) {
+    return(greta_py_require_args())
+  }
+  greta_py_require_args(
+    tf_version = stored_deps$tf_version,
+    tfp_version = stored_deps$tfp_version,
+    python_version = stored_deps$python_version
+  )
+}
+
 # Execute a backend plan: point RETICULATE_PYTHON at the chosen Python, and for
 # the managed backend declare greta's requirements so uv can install them.
 apply_greta_python_plan <- function(plan) {
@@ -164,28 +179,16 @@ apply_greta_python_plan <- function(plan) {
     plan$backend,
     managed = {
       Sys.setenv("RETICULATE_PYTHON" = "managed")
-      # pins derive from greta_deps_default via greta_py_require_args(),
-      # unless the user stored a preference with greta_set_deps();
-      # agreement with greta_deps_spec()'s defaults is test-enforced
       stored_deps <- get_greta_stored_deps()
-      py_req <- if (is.null(stored_deps)) {
-        greta_py_require_args()
-      } else {
-        greta_py_require_args(
-          tf_version = stored_deps$tf_version,
-          tfp_version = stored_deps$tfp_version,
-          python_version = stored_deps$python_version
-        )
-      }
+      py_req <- managed_py_require_args(stored_deps)
       reticulate::py_require(
         packages = py_req$packages,
         python_version = py_req$python_version
       )
-      # the frozen-pins argument for offline mode (#814) only holds for the
-      # default pins; user-chosen versions may need one online resolve
-      if (is.null(stored_deps)) {
-        maybe_enable_uv_offline()
-      }
+      maybe_enable_uv_offline(
+        extra_packages = requirements_beyond_greta(),
+        versions_stored = !is.null(stored_deps)
+      )
     },
     # "user" and "conda" both point at a specific Python
     Sys.setenv("RETICULATE_PYTHON" = plan$python)
@@ -321,22 +324,117 @@ greta_uv_cache_status <- function(
   list(kind = "system", populated = populated)
 }
 
+# A requirement pinned to one release series, such as "tensorflow==2.20.*", with
+# the series taken out, so that greta's pins compare equal at any version
+without_pinned_series <- function(requirement) {
+  sub("==[0-9][0-9.]*\\.\\*$", "==", requirement)
+}
+
+# The Python requirements beyond greta's own pins and reticulate's default
+# numpy: those reticulate adds itself (ipykernel, in Positron) and those other
+# packages declare with py_require(). The uv cache holds greta's packages once
+# they are installed, but may not hold these. greta's pins count as greta's at
+# any version, as after greta_set_deps() or greta_remove("deps") mid-session,
+# but any other requirement on the same packages, such as "numpy<2" or
+# "tensorflow[and-cuda]", is another package's, as the cache may not hold what
+# it resolves to.
+requirements_beyond_greta <- function(
+  requirements = reticulate::py_require()
+) {
+  required <- as.character(requirements$packages)
+  greta_pins <- without_pinned_series(greta_py_require_args()$packages)
+  greta_pin <- without_pinned_series(required) %in% greta_pins
+  reticulate_default <- required == "numpy"
+  required[!(greta_pin | reticulate_default)]
+}
+
+# The reasons greta's offline mode does not engage: an empty uv cache
+# ("cache_empty"); Python packages other than greta's, which the cache may not
+# hold ("others_required"); and versions stored with greta_set_deps(), which may
+# need one online resolve ("versions_stored"). Offline mode engages when there
+# are none. maybe_enable_uv_offline() acts on them, and
+# report_offline_readiness() reports them.
+uv_offline_blockers <- function(
+  cache_populated,
+  extra_packages,
+  versions_stored
+) {
+  blocking <- c(
+    cache_empty = !cache_populated,
+    others_required = length(extra_packages) > 0,
+    versions_stored = versions_stored
+  )
+  blockers <- names(blocking)[blocking]
+  blockers
+}
+
 # For the managed backend, auto-enable uv's offline mode when the uv cache is
-# already populated (#814). greta pins the managed backend to a single minor
-# version of TensorFlow and TensorFlow Probability, so an installed environment
-# already satisfies the spec: uv never needs to reach PyPI again, and greta can
-# start on an offline / air-gapped machine.
-maybe_enable_uv_offline <- function(cache_status = greta_uv_cache_status()) {
-  # respect the user: if UV_OFFLINE is already set to anything, leave it alone
-  existing <- Sys.getenv("UV_OFFLINE", unset = NA)
-  if (!is.na(existing)) {
+# already populated and uv_offline_blockers() finds nothing else in the way
+# (#814). greta pins the managed backend to a single minor version of
+# TensorFlow and TensorFlow Probability, so an installed environment already
+# satisfies greta's spec: uv never needs to reach PyPI again, and greta can
+# start on an offline / air-gapped machine. recheck_uv_offline() looks again
+# just before Python starts. A UV_OFFLINE the user set before greta loads, to
+# anything, is left alone. One that greta set carries the marker
+# GRETA_UV_OFFLINE=auto, and is decided afresh: R processes started from a
+# session that loaded greta (reprex, callr, future workers) inherit both, and
+# may need different packages when they load greta.
+maybe_enable_uv_offline <- function(
+  extra_packages,
+  versions_stored,
+  cache_status = greta_uv_cache_status()
+) {
+  set_by_user <- !is.na(Sys.getenv("UV_OFFLINE", unset = NA)) &&
+    !uv_offline_set_by_greta()
+  if (set_by_user) {
     return(invisible(FALSE))
   }
-  if (isTRUE(cache_status$populated)) {
-    Sys.setenv(UV_OFFLINE = "1")
-    return(invisible(TRUE))
+  blockers <- uv_offline_blockers(
+    cache_populated = isTRUE(cache_status$populated),
+    extra_packages = extra_packages,
+    versions_stored = versions_stored
+  )
+  enable_offline <- length(blockers) == 0
+  if (enable_offline) {
+    set_greta_uv_offline()
+  } else {
+    unset_greta_uv_offline()
   }
-  invisible(FALSE)
+  invisible(enable_offline)
+}
+
+# greta's own offline mode: UV_OFFLINE=1, marked as greta's choice by
+# GRETA_UV_OFFLINE=auto
+set_greta_uv_offline <- function() {
+  Sys.setenv(UV_OFFLINE = "1", GRETA_UV_OFFLINE = "auto")
+}
+
+unset_greta_uv_offline <- function() {
+  Sys.unsetenv(c("UV_OFFLINE", "GRETA_UV_OFFLINE"))
+}
+
+# whether UV_OFFLINE=1 is greta's own choice, marked by GRETA_UV_OFFLINE=auto,
+# rather than the user's
+uv_offline_set_by_greta <- function(
+  uv_offline = Sys.getenv("UV_OFFLINE", unset = ""),
+  marker = Sys.getenv("GRETA_UV_OFFLINE", unset = "")
+) {
+  identical(uv_offline, "1") && identical(marker, "auto")
+}
+
+# Turn greta's own offline mode off again, just before greta first starts
+# Python, if packages other than greta's have been required since it loaded: by
+# a package attached after greta, or by the user, with py_require(). uv would
+# otherwise have to find them in its cache, and fail as #860 does when they are
+# not there. This only ever turns offline mode off, so it needs no cache check,
+# and it leaves a UV_OFFLINE the user set alone.
+recheck_uv_offline <- function(extra_packages = requirements_beyond_greta()) {
+  others_required_since_load <- uv_offline_set_by_greta() &&
+    length(extra_packages) > 0
+  if (others_required_since_load) {
+    unset_greta_uv_offline()
+  }
+  invisible(others_required_since_load)
 }
 
 # --- session invalidation on removal -------------------------------------------
@@ -457,14 +555,17 @@ report_python_backend <- function(
 # Report whether greta can start without internet access, for greta_sitrep().
 # Only the managed (uv) backend ever downloads anything: the user/conda/path
 # backends point at an environment already on disk. For the managed backend,
-# readiness depends on UV_OFFLINE and on whether the uv cache is populated
-# (the same greta_uv_cache_status() check as maybe_enable_uv_offline()).
+# it reports uv_offline_blockers(), which decide whether greta engages offline
+# mode when it loads, and what they mean for a UV_OFFLINE=1 or 0 the user set.
 report_offline_readiness <- function(
   plan = greta_stash$python_backend %||% greta_python_plan(),
   cache_status = if (identical(plan$backend, "managed")) {
     greta_uv_cache_status()
   },
-  uv_offline = Sys.getenv("UV_OFFLINE", unset = "")
+  uv_offline = Sys.getenv("UV_OFFLINE", unset = ""),
+  marker = Sys.getenv("GRETA_UV_OFFLINE", unset = ""),
+  extra_packages = requirements_beyond_greta(),
+  stored_deps = get_greta_stored_deps()
 ) {
   if (!identical(plan$backend, "managed")) {
     python_on_disk <- !is.null(plan$python) && file.exists(plan$python)
@@ -480,52 +581,84 @@ report_offline_readiness <- function(
         removed?); restart R to re-resolve it",
         wrap = TRUE
       )
-      cli::cli_inform(c(
-        "i" = "See the installation vignette: {.vignette greta::installation}."
-      ))
+      inform_installation_vignette()
     }
     return(invisible(plan))
   }
-  cache_populated <- isTRUE(cache_status$populated)
-  if (identical(uv_offline, "1") && cache_populated) {
+  blockers <- uv_offline_blockers(
+    cache_populated = isTRUE(cache_status$populated),
+    extra_packages = extra_packages,
+    versions_stored = !is.null(stored_deps)
+  )
+  engages <- length(blockers) == 0
+  cache_empty <- "cache_empty" %in% blockers
+  # greta's own UV_OFFLINE is reported as the automatic choice it is
+  forced_offline <- identical(uv_offline, "1") &&
+    !uv_offline_set_by_greta(uv_offline, marker)
+  forced_online <- identical(uv_offline, "0")
+  reason_text <- c(
+    cache_empty = "the uv cache is not yet populated",
+    others_required = "Python packages other than greta's are also required \\
+      ({.pkg {extra_packages}})",
+    versions_stored = "versions are stored with {.fun greta_set_deps}"
+  )
+  report_env <- environment()
+  reasons <- vapply(
+    reason_text[blockers],
+    function(reason) {
+      cli::format_inline(reason, .envir = report_env, keep_whitespace = FALSE)
+    },
+    character(1)
+  )
+  offline_blockers <- cli::ansi_collapse(reasons)
+  if (forced_offline && engages) {
     cli::cli_alert_success(
       "offline-ready: {.envvar UV_OFFLINE}=1 is set and the uv cache is \\
       populated",
       wrap = TRUE
     )
-  } else if (identical(uv_offline, "1")) {
+  } else if (forced_offline && cache_empty) {
     cli::cli_alert_danger(
       "{.envvar UV_OFFLINE}=1 is set but the uv cache is not yet populated, \\
       so the next start may fail to resolve dependencies",
       wrap = TRUE
     )
-    cli::cli_inform(c(
-      "i" = "See the installation vignette: {.vignette greta::installation}."
-    ))
-  } else if (identical(uv_offline, "0")) {
+    inform_installation_vignette()
+  } else if (forced_offline) {
+    cli::cli_alert_warning(
+      "{.envvar UV_OFFLINE}=1 is set and the uv cache is populated, but \\
+      {offline_blockers}; an offline start fails unless the cache holds them",
+      wrap = TRUE
+    )
+    inform_installation_vignette()
+  } else if (forced_online) {
     cli::cli_alert_danger(
       "will need internet on next start: {.envvar UV_OFFLINE}=0 forces \\
       online resolution",
       wrap = TRUE
     )
-    cli::cli_inform(c(
-      "i" = "See the installation vignette: {.vignette greta::installation}."
-    ))
-  } else if (cache_populated) {
+    inform_installation_vignette()
+  } else if (engages) {
     cli::cli_alert_success(
       "offline-ready: uv cache present, offline mode will engage",
       wrap = TRUE
     )
   } else {
     cli::cli_alert_danger(
-      "will need internet on next start: uv cache not yet populated",
+      "will need internet on next start: offline mode does not engage, as \\
+      {offline_blockers}",
       wrap = TRUE
     )
-    cli::cli_inform(c(
-      "i" = "See the installation vignette: {.vignette greta::installation}."
-    ))
+    inform_installation_vignette()
   }
   invisible(plan)
+}
+
+# the pointer report_offline_readiness() gives after a line that needs action
+inform_installation_vignette <- function() {
+  cli::cli_inform(c(
+    "i" = "See the installation vignette: {.vignette greta::installation}."
+  ))
 }
 
 # The plan greta would resolve on a fresh restart. Identical to a load-time
@@ -701,9 +834,18 @@ check_greta_set_python_args <- function(
 #'
 #' For the managed (uv) environment, greta automatically enables uv's offline
 #' mode once the environment is installed, so it no longer reaches out to
-#' PyPI. Set `UV_OFFLINE=0` yourself to force online resolution (for example,
-#' to refresh the environment), or `UV_OFFLINE=1` to force offline mode -
-#' greta never overrides a value you have already set.
+#' PyPI. It does not when Python packages other than greta's are also required,
+#' since uv's cache may not hold them: reticulate adds `ipykernel` in Positron,
+#' and other packages can add their own with [reticulate::py_require()]. greta
+#' checks when it loads, and again just before it starts Python itself, turning
+#' its offline mode back off if any have been added since. Nor does it when you
+#' have stored versions with [greta_set_deps()]. Set `UV_OFFLINE=0` yourself to
+#' force online resolution (for example, to refresh the environment), or
+#' `UV_OFFLINE=1` to force offline mode - greta never overrides a value you set
+#' before loading it. When greta enables offline mode itself, it also sets
+#' `GRETA_UV_OFFLINE=auto`, so an R process started from that session that
+#' loads greta (such as a reprex, a callr process or a future worker) decides
+#' afresh rather than taking greta's choice for yours.
 #'
 #' To check which Python greta is currently using, and which it will use
 #' after a restart, call [greta_sitrep()].

@@ -5,8 +5,10 @@
 #'
 #' @param verbosity character. How verbose the output of the situation report.
 #'   Possible options: "minimal" (default), "detailed", and "quiet". "Minimal"
-#'   provides just information in python version, tensorflow version,
-#'   tensorflow probability, and whether greta conda environment is available.
+#'   provides greta's version and where it came from (such as CRAN, a GitHub
+#'   commit, or a git checkout), then just information in python version,
+#'   tensorflow version, tensorflow probability, and whether greta conda
+#'   environment is available.
 #'   "Quiet" presents no information, but prepares greta to be used. "Detailed"
 #'   gives information on the version and path for R, greta, python,
 #'   tensorflow, tensorflow probability, the greta conda environment, and a
@@ -26,6 +28,12 @@ greta_sitrep <- function(verbosity = c("minimal", "detailed", "quiet")) {
     error_arg = "verbosity"
   )
 
+  # check_tf_version() checks greta's offline mode only before a Python start
+  # it makes itself, and every verbosity here starts Python before reaching it
+  # (the detailed one through py_config()), so greta_sitrep() makes its own
+  # check first
+  recheck_uv_offline()
+
   switch(
     verbosity,
     minimal = minimal_sitrep(),
@@ -36,6 +44,7 @@ greta_sitrep <- function(verbosity = c("minimal", "detailed", "quiet")) {
 
 
 minimal_sitrep <- function() {
+  cli::cli_alert_info("{.pkg greta} {greta_version_source()}")
   check_if_python_available()
   check_if_tf_available()
   check_if_tfp_available()
@@ -43,6 +52,130 @@ minimal_sitrep <- function() {
   report_python_backend()
   report_offline_readiness()
   check_greta_ready_to_use()
+}
+
+# greta's version and where it came from, for greta_sitrep(): the package
+# repository it was installed from, such as CRAN or r-universe; a remote, such
+# as GitHub, and its commit; the commit of the git checkout devtools::load_all()
+# loaded it from; or a local install, which records no commit
+greta_version_source <- function(
+  description = utils::packageDescription("greta"),
+  path = getNamespaceInfo("greta", "path"),
+  git_head = git_head_commit
+) {
+  remote_type <- description$RemoteType %||% ""
+  # pak records a repository install's version as its RemoteSha, so only a
+  # RemoteSha shaped like a commit is one
+  records_commit <- grepl("^[0-9a-f]{7,40}$", description$RemoteSha %||% "")
+  repository_remote_type <- remote_type %in% c("standard", "cran")
+  repository_without_commit <- !is.null(description$Repository) &&
+    !nzchar(remote_type) &&
+    !records_commit
+  # each kind of install rules out those above it, so exactly one holds: pak
+  # records a CRAN install with a RemoteType too, but it's a repository install
+  from_repository <- repository_remote_type || repository_without_commit
+  from_remote <- !from_repository && (nzchar(remote_type) || records_commit)
+  installed <- from_repository || from_remote
+  from_checkout <- !installed && file.exists(file.path(path, ".git"))
+  from_local_install <- !installed && !from_checkout
+  repository <- description$Repository %||%
+    description$RemoteRepos %||%
+    "a package repository"
+
+  install_kinds <- c(
+    repository = from_repository,
+    remote = from_remote,
+    checkout = from_checkout,
+    local = from_local_install
+  )
+  install_kind <- names(install_kinds)[install_kinds]
+  origin <- switch(
+    install_kind,
+    repository = sprintf("from %s", repository),
+    remote = remote_source(description, records_commit),
+    checkout = checkout_source(path, git_head(path)),
+    local = "from a local install, which records no commit"
+  )
+  version_source <- sprintf("%s %s", description$Version, origin)
+  version_source
+}
+
+# where a remote install came from, named as sessioninfo names it: the remote's
+# type with its user and repository, or else its URL, with the commit when one
+# is recorded
+remote_source <- function(description, records_commit) {
+  remote_type <- description$RemoteType %||% ""
+  remote_name <- if (identical(remote_type, "github")) "GitHub" else remote_type
+  # `[[`, since `$` would take a pak install's RemoteRepos for RemoteRepo
+  user <- description[["RemoteUsername"]]
+  repo <- description[["RemoteRepo"]]
+  has_user_repo <- !is.null(user) && !is.null(repo)
+  user_repo <- if (has_user_repo) {
+    trimws(sprintf("%s %s/%s", remote_name, user, repo))
+  }
+  locations <- c(
+    user_repo,
+    description$RemoteUrl,
+    description$Repository,
+    remote_name,
+    "a remote"
+  )
+  location <- locations[nzchar(locations)][[1]]
+  commit <- if (records_commit) {
+    sprintf(" at %s", substr(description$RemoteSha, 1, 7))
+  } else {
+    ""
+  }
+  remote <- sprintf("from %s%s", location, commit)
+  remote
+}
+
+checkout_source <- function(path, head) {
+  checkout <- sprintf("from the git checkout at %s", path)
+  if (is.null(head)) {
+    return(checkout)
+  }
+  changes <- if (isTRUE(head$dirty)) ", with uncommitted changes" else ""
+  checkout_commit <- sprintf("%s, commit %s%s", checkout, head$sha, changes)
+  checkout_commit
+}
+
+# the short commit a git checkout is at, and whether the package's sources have
+# uncommitted changes, counting new files that load_all() would source: NA
+# when git status fails, and NULL when git isn't available or there is no
+# commit
+git_head_commit <- function(path) {
+  git <- Sys.which("git")
+  if (!nzchar(git)) {
+    return(NULL)
+  }
+  run_git <- function(...) {
+    output <- tryCatch(
+      suppressWarnings(system2(
+        git,
+        c("-C", shQuote(path), ...),
+        stdout = TRUE,
+        stderr = FALSE
+      )),
+      error = \(e) NULL
+    )
+    git_failed <- is.null(output) || !is.null(attr(output, "status"))
+    if (git_failed) NULL else output
+  }
+  sha <- run_git("rev-parse", "--short=7", "HEAD")
+  if (length(sha) != 1) {
+    return(NULL)
+  }
+  package_sources <- c("DESCRIPTION", "NAMESPACE", "R", "src", "inst")
+  changes <- run_git(
+    "status",
+    "--porcelain",
+    "--untracked-files=normal",
+    "--",
+    package_sources
+  )
+  dirty <- if (is.null(changes)) NA else length(changes) > 0
+  list(sha = sha, dirty = dirty)
 }
 
 detailed_sitrep <- function() {
@@ -53,7 +186,7 @@ detailed_sitrep <- function() {
   cli::cli_ul("path: {.path {R.home()}}")
 
   cli::cli_h1("{.pkg greta}")
-  cli::cli_ul("version: {.val {packageVersion('greta')}}")
+  cli::cli_ul("version: {greta_version_source()}")
   cli::cli_ul("path: {.path {find.package('greta')}}")
 
   cli::cli_h1("{.pkg greta} Python backend")
