@@ -448,6 +448,25 @@ test_that("calculate errors if a distribution cannot be sampled from", {
   expect_snapshot(error = TRUE, sims <- calculate(y, nsim = 1))
 })
 
+test_that("calculate() draws NaN for invalid poisson and negative_binomial", {
+  skip_if_not(check_tf_version())
+
+  # greta-dev/greta#617: TensorFlow's Poisson sampler on the CPU never returns
+  # for a NaN rate, so the draws are made in a session that is killed if it
+  # hangs
+  sims <- in_fresh_greta(
+    function() {
+      y <- poisson(c(0, -1))
+      z <- negative_binomial(c(2, -1, 2), c(1, 0.5, 1.5))
+      calculate(y, z, nsim = 1)
+    },
+    timeout = 120
+  )
+
+  expect_identical(sims$y[1, , 1], c(0, NaN))
+  expect_identical(sims$z[1, , 1], c(0, NaN, NaN))
+})
+
 test_that("calculate errors nicely if nsim is invalid", {
   skip_if_not(check_tf_version())
 
