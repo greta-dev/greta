@@ -54,9 +54,10 @@ check_tf_version <- function(
 
   alert <- match.arg(alert)
 
-  # cli cuts a status line to the width of the console, so it is kept short
-  # enough to survive a narrow one (greta-dev/greta#670)
   if (!greta_stash$python_has_been_initialised) {
+    recheck_uv_offline()
+    # cli cuts a status line to the width of the console, so it is kept short
+    # enough to survive a narrow one (greta-dev/greta#670)
     cli_process_start(msg = "Initialising Python")
   }
 

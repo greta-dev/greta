@@ -26,6 +26,10 @@ greta_sitrep <- function(verbosity = c("minimal", "detailed", "quiet")) {
     error_arg = "verbosity"
   )
 
+  # every verbosity starts Python (the detailed one through py_config(), before
+  # have_python()), so greta's offline mode is checked again first
+  recheck_uv_offline()
+
   switch(
     verbosity,
     minimal = minimal_sitrep(),

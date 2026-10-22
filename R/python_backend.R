@@ -358,8 +358,9 @@ requirements_beyond_greta <- function(
 # can start on an offline / air-gapped machine. That holds only for greta's
 # default pins (versions stored with greta_set_deps() may need one online
 # resolve), and only while greta's packages are all that is required when greta
-# loads; with any others, uv resolves online. A UV_OFFLINE the user set before
-# greta loads, to anything, is left alone. One that greta set carries the marker
+# loads; with any others, uv resolves online. recheck_uv_offline() looks again
+# just before Python starts. A UV_OFFLINE the user set before greta loads, to
+# anything, is left alone. One that greta set carries the marker
 # GRETA_UV_OFFLINE=auto, and is decided afresh: R processes started from a
 # session that loaded greta (reprex, callr, future workers) inherit both, and
 # may need different packages when they load greta.
@@ -391,6 +392,21 @@ uv_offline_set_by_greta <- function(
   marker = Sys.getenv("GRETA_UV_OFFLINE", unset = "")
 ) {
   identical(uv_offline, "1") && identical(marker, "auto")
+}
+
+# Turn greta's own offline mode off again, just before greta first starts
+# Python, if packages other than greta's have been required since it loaded: by
+# a package attached after greta, or by the user, with py_require(). uv would
+# otherwise have to find them in its cache, and fail as #860 does when they are
+# not there. This only ever turns offline mode off, so it needs no cache check,
+# and it leaves a UV_OFFLINE the user set alone.
+recheck_uv_offline <- function(extra_packages = requirements_beyond_greta()) {
+  others_required_since_load <- uv_offline_set_by_greta() &&
+    length(extra_packages) > 0
+  if (others_required_since_load) {
+    Sys.unsetenv(c("UV_OFFLINE", "GRETA_UV_OFFLINE"))
+  }
+  invisible(others_required_since_load)
 }
 
 # --- session invalidation on removal -------------------------------------------

@@ -476,6 +476,37 @@ test_that("apply_greta_python_plan() unsets greta's inherited offline mode when 
   expect_identical(Sys.getenv("GRETA_UV_OFFLINE", unset = NA), NA_character_)
 })
 
+test_that("recheck_uv_offline() turns greta's offline mode off when others are required after load", {
+  local_managed_load("numpy")
+  apply_greta_python_plan(new_python_plan("managed", "default"))
+  reticulate::py_require("pandas")
+
+  recheck_uv_offline()
+
+  expect_identical(Sys.getenv("UV_OFFLINE", unset = NA), NA_character_)
+  expect_identical(Sys.getenv("GRETA_UV_OFFLINE", unset = NA), NA_character_)
+})
+
+test_that("recheck_uv_offline() keeps greta's offline mode when only greta's are required", {
+  local_managed_load("numpy")
+  apply_greta_python_plan(new_python_plan("managed", "default"))
+
+  recheck_uv_offline()
+
+  expect_identical(Sys.getenv("UV_OFFLINE"), "1")
+  expect_identical(Sys.getenv("GRETA_UV_OFFLINE"), "auto")
+})
+
+test_that("recheck_uv_offline() leaves a UV_OFFLINE = 1 the user set", {
+  local_managed_load("numpy", uv_offline = "1")
+  apply_greta_python_plan(new_python_plan("managed", "default"))
+  reticulate::py_require("pandas")
+
+  recheck_uv_offline()
+
+  expect_identical(Sys.getenv("UV_OFFLINE"), "1")
+})
+
 test_that("uv cache status: managed layout needs python and cache dirs", {
   uv_cache <- file.path(withr::local_tempdir(), "uv")
   status <- greta_uv_cache_status(
