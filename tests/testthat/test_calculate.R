@@ -453,18 +453,24 @@ test_that("calculate() draws NaN for invalid poisson and negative_binomial", {
 
   # greta-dev/greta#617: TensorFlow's Poisson sampler on the CPU never returns
   # for a NaN rate, so the draws are made in a session that is killed if it
-  # hangs
+  # hangs. The timeout also covers starting R and loading greta, which can take
+  # minutes on a busy machine
   sims <- in_fresh_greta(
     function() {
-      y <- poisson(c(0, -1))
-      z <- negative_binomial(c(2, -1, 2), c(1, 0.5, 1.5))
-      calculate(y, z, nsim = 1)
+      y <- poisson(c(1e4, 0, -1))
+      z <- negative_binomial(c(1e4, 2, 0, -1, 2), c(0.5, 1, 0, 0.5, 1.5))
+      infinite_size <- exp(as_data(c(1000, 1000)))
+      w <- negative_binomial(infinite_size, c(0.5, 1))
+      calculate(y, z, w, nsim = 1)
     },
-    timeout = 120
+    timeout = 600
   )
 
-  expect_identical(sims$y[1, , 1], c(0, NaN))
-  expect_identical(sims$z[1, , 1], c(0, NaN, NaN))
+  expect_gt(sims$y[1, 1, 1], 1000)
+  expect_identical(sims$y[1, 2:3, 1], c(0, NaN))
+  expect_gt(sims$z[1, 1, 1], 1000)
+  expect_identical(sims$z[1, 2:5, 1], c(0, NaN, NaN, NaN))
+  expect_identical(sims$w[1, , 1], c(Inf, NaN))
 })
 
 test_that("calculate errors nicely if nsim is invalid", {

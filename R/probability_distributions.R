@@ -330,28 +330,25 @@ negative_binomial_distribution <- R6Class(
 
     # nolint start
     tf_distrib = function(parameters, dag) {
-      negative_binomial <- function(size, prob) {
-        tfp$distributions$NegativeBinomial(
-          total_count = size,
-          probs = fl(1) - prob
-        )
-      }
-
       size <- parameters$size
-      prob <- parameters$prob
-      distribution <- negative_binomial(size, prob)
+      probs <- fl(1) - parameters$prob
+      distribution <- tfp$distributions$NegativeBinomial(
+        total_count = size,
+        probs = probs
+      )
 
       sample <- function(seed) {
-        # TFP samples a negative binomial as a Poisson with a gamma distributed
-        # rate, which is NaN for a NaN or negative size, a prob outside [0, 1],
-        # or an infinite size with a prob of 1
-        size_is_valid <- tf$math$is_finite(size) & size >= fl(0)
-        prob_is_valid <- prob >= fl(0) & prob <= fl(1)
+        # TFP draws a Poisson whose rate is a gamma draw times
+        # probs / (1 - probs). That rate can be NaN for a NaN or negative size,
+        # probs outside [0, 1), or an infinite size with probs of 0
+        size_is_valid <- size >= fl(0)
+        probs_is_valid <- probs >= fl(0) & probs < fl(1)
+        rate_is_inf_times_zero <- tf$math$is_inf(size) & probs == fl(0)
         tf_sample_where_valid(
-          constructor = negative_binomial,
-          parameters = list(size = size, prob = prob),
-          placeholders = list(size = fl(1), prob = fl(0.5)),
-          valid = size_is_valid & prob_is_valid,
+          constructor = tfp$distributions$NegativeBinomial,
+          parameters = list(total_count = size, probs = probs),
+          placeholders = list(total_count = fl(1), probs = fl(0.5)),
+          valid = size_is_valid & probs_is_valid & !rate_is_inf_times_zero,
           seed = seed
         )
       }
