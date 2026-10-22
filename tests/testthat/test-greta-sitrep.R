@@ -60,16 +60,79 @@ test_that("greta_version_source() says where greta was installed from", {
   )
 })
 
+test_that("greta_version_source() names the repository pak or install.packages() installed greta from", {
+  not_a_checkout <- withr::local_tempdir()
+  git_unused <- function(path) stop("git should not be needed")
+  pak_universe <- list(
+    Version = "0.6.0.9000",
+    Repository = "https://greta-dev.r-universe.dev",
+    RemoteType = "standard",
+    RemoteSha = "0.6.0.9000",
+    RemoteUrl = "https://github.com/greta-dev/greta"
+  )
+  pak_p3m <- list(
+    Version = "0.6.0",
+    Repository = "RSPM",
+    RemoteType = "standard",
+    RemoteSha = "0.6.0"
+  )
+  install_packages_p3m <- list(Version = "0.6.0", Repository = "RSPM")
+
+  pak_universe_source <- greta_version_source(
+    pak_universe,
+    not_a_checkout,
+    git_unused
+  )
+  pak_p3m_source <- greta_version_source(pak_p3m, not_a_checkout, git_unused)
+  install_packages_p3m_source <- greta_version_source(
+    install_packages_p3m,
+    not_a_checkout,
+    git_unused
+  )
+
+  expect_identical(
+    pak_universe_source,
+    "0.6.0.9000 from https://greta-dev.r-universe.dev"
+  )
+  expect_identical(pak_p3m_source, "0.6.0 from RSPM")
+  expect_identical(install_packages_p3m_source, "0.6.0 from RSPM")
+})
+
+test_that("greta_version_source() names a remote by its type when it has no URL", {
+  not_a_checkout <- withr::local_tempdir()
+  git_unused <- function(path) stop("git should not be needed")
+  gitlab <- list(
+    Version = "0.6.0.9000",
+    RemoteType = "gitlab",
+    RemoteUsername = "greta-dev",
+    RemoteRepo = "greta",
+    RemoteSha = "1bdc2dab0123456789abcdef"
+  )
+
+  gitlab_source <- greta_version_source(gitlab, not_a_checkout, git_unused)
+
+  expect_identical(
+    gitlab_source,
+    "0.6.0.9000 from gitlab greta-dev/greta at 1bdc2da"
+  )
+})
+
 test_that("greta_version_source() gives the commit of a git checkout", {
   checkout <- withr::local_tempdir()
   file.create(file.path(checkout, ".git"))
   local_install <- list(Version = "0.6.0.9000")
   clean <- function(path) list(sha = "1bdc2da", dirty = FALSE)
   edited <- function(path) list(sha = "1bdc2da", dirty = TRUE)
+  status_unknown <- function(path) list(sha = "1bdc2da", dirty = NA)
   no_git <- function(path) NULL
 
   clean_source <- greta_version_source(local_install, checkout, clean)
   edited_source <- greta_version_source(local_install, checkout, edited)
+  unknown_source <- greta_version_source(
+    local_install,
+    checkout,
+    status_unknown
+  )
   no_git_source <- greta_version_source(local_install, checkout, no_git)
 
   checkout_prefix <- paste("0.6.0.9000 from the git checkout at", checkout)
@@ -78,32 +141,69 @@ test_that("greta_version_source() gives the commit of a git checkout", {
     edited_source,
     paste0(checkout_prefix, ", commit 1bdc2da, with uncommitted changes")
   )
+  expect_identical(unknown_source, paste0(checkout_prefix, ", commit 1bdc2da"))
   expect_identical(no_git_source, checkout_prefix)
 })
 
-test_that("git_head_commit() reads a checkout's commit and uncommitted changes", {
+# a git repository with one commit of a package's DESCRIPTION, an R file, and
+# a file outside the package's sources, removed when the caller exits
+local_git_checkout <- function(env = parent.frame()) {
+  repo <- withr::local_tempdir(.local_envir = env)
+  dir.create(file.path(repo, "R"))
+  writeLines("Package: test", file.path(repo, "DESCRIPTION"))
+  writeLines("a <- 1", file.path(repo, "R", "a.R"))
+  writeLines("notes", file.path(repo, "notes.txt"))
+  git_in(repo, "init", "-q")
+  git_in(repo, "add", ".")
+  git_in(repo, "commit", "-q", "-m", "first")
+  repo
+}
+
+git_in <- function(repo, ...) {
+  system2(
+    "git",
+    c(
+      "-C",
+      shQuote(repo),
+      "-c",
+      "user.name=t",
+      "-c",
+      "user.email=t@t",
+      "-c",
+      "commit.gpgsign=false",
+      ...
+    ),
+    stdout = TRUE,
+    stderr = TRUE
+  )
+}
+
+test_that("git_head_commit() reads a checkout's commit and changes to its package sources", {
   skip_if_not(nzchar(Sys.which("git")))
-  repo <- withr::local_tempdir()
-  git <- function(...) {
-    system2(
-      "git",
-      c("-C", shQuote(repo), "-c", "user.name=t", "-c", "user.email=t@t", ...),
-      stdout = TRUE,
-      stderr = TRUE
-    )
-  }
-  git("init", "-q")
-  writeLines("a", file.path(repo, "file.txt"))
-  git("add", "file.txt")
-  git("commit", "-q", "-m", "first")
-  expected_sha <- git("rev-parse", "--short=7", "HEAD")
+  repo <- local_git_checkout()
+  expected_sha <- git_in(repo, "rev-parse", "--short=7", "HEAD")
 
   clean_head <- git_head_commit(repo)
-  writeLines("b", file.path(repo, "file.txt"))
-  edited_head <- git_head_commit(repo)
+  writeLines("b <- 2", file.path(repo, "R", "b.R"))
+  new_r_file_head <- git_head_commit(repo)
+  unlink(file.path(repo, "R", "b.R"))
+  writeLines("more notes", file.path(repo, "notes.txt"))
+  outside_edit_head <- git_head_commit(repo)
 
   expect_identical(clean_head, list(sha = expected_sha, dirty = FALSE))
-  expect_identical(edited_head, list(sha = expected_sha, dirty = TRUE))
+  expect_identical(new_r_file_head, list(sha = expected_sha, dirty = TRUE))
+  expect_identical(outside_edit_head, list(sha = expected_sha, dirty = FALSE))
+})
+
+test_that("git_head_commit() makes no claim about changes when git status fails", {
+  skip_if_not(nzchar(Sys.which("git")))
+  repo <- local_git_checkout()
+  expected_sha <- git_in(repo, "rev-parse", "--short=7", "HEAD")
+  writeLines("not an index", file.path(repo, ".git", "index"))
+
+  corrupt_index_head <- git_head_commit(repo)
+
+  expect_identical(corrupt_index_head, list(sha = expected_sha, dirty = NA))
 })
 
 test_that("check_tf_version errors when have_python, _tf, or _tfp is FALSE", {

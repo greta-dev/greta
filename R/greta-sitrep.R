@@ -51,75 +51,113 @@ minimal_sitrep <- function() {
   check_greta_ready_to_use()
 }
 
-# greta's version and where it came from, for greta_sitrep(): CRAN, a
-# repository and commit for a GitHub or r-universe install, the commit of the
-# git checkout devtools::load_all() loaded it from, or a local install, which
-# records no commit
+# greta's version and where it came from, for greta_sitrep(): the package
+# repository it was installed from, such as CRAN or r-universe; a remote, such
+# as GitHub, and its commit; the commit of the git checkout devtools::load_all()
+# loaded it from; or a local install, which records no commit
 greta_version_source <- function(
   description = utils::packageDescription("greta"),
   path = getNamespaceInfo("greta", "path"),
   git_head = git_head_commit
 ) {
-  version <- description$Version
-  remote_sha <- description$RemoteSha %||% ""
-  from_cran <- identical(description$Repository, "CRAN") &&
-    !nzchar(description$RemoteUrl %||% "")
-  from_github <- identical(description$RemoteType, "github")
-  from_remote <- nzchar(remote_sha) && !from_cran
+  remote_type <- description$RemoteType %||% ""
+  # pak records a repository install's version as its RemoteSha, so only a
+  # RemoteSha shaped like a commit is one
+  records_commit <- grepl("^[0-9a-f]{7,40}$", description$RemoteSha %||% "")
+  repository_remote_type <- remote_type %in% c("standard", "cran")
+  repository_without_commit <- !is.null(description$Repository) &&
+    !nzchar(remote_type) &&
+    !records_commit
+  from_repository <- repository_remote_type || repository_without_commit
+  from_remote <- nzchar(remote_type) || records_commit
   from_checkout <- file.exists(file.path(path, ".git"))
 
-  origin <- if (from_cran) {
-    "from CRAN"
-  } else if (from_github) {
-    sprintf(
-      "from GitHub %s/%s at %s",
-      description$RemoteUsername,
-      description$RemoteRepo,
-      substr(remote_sha, 1, 7)
-    )
+  origin <- if (from_repository) {
+    repository <- description$Repository %||%
+      description$RemoteRepos %||%
+      "a package repository"
+    paste("from", repository)
   } else if (from_remote) {
-    sprintf(
-      "from %s at %s",
-      description$RemoteUrl %||% description$Repository,
-      substr(remote_sha, 1, 7)
-    )
+    remote_source(description, records_commit)
   } else if (from_checkout) {
     checkout_source(path, git_head(path))
   } else {
     "from a local install, which records no commit"
   }
-  paste(version, origin)
+  paste(description$Version, origin)
+}
+
+# where a remote install came from, named as sessioninfo names it: the remote's
+# type with its user and repository, or else its URL, with the commit when one
+# is recorded
+remote_source <- function(description, records_commit) {
+  remote_type <- description$RemoteType %||% ""
+  remote_name <- if (identical(remote_type, "github")) "GitHub" else remote_type
+  # `[[`, since `$` would take a pak install's RemoteRepos for RemoteRepo
+  user <- description[["RemoteUsername"]]
+  repo <- description[["RemoteRepo"]]
+  has_user_repo <- !is.null(user) && !is.null(repo)
+  user_repo <- if (has_user_repo) {
+    trimws(paste(remote_name, paste0(user, "/", repo)))
+  }
+  locations <- c(
+    user_repo,
+    description$RemoteUrl,
+    description$Repository,
+    remote_name,
+    "a remote"
+  )
+  location <- locations[nzchar(locations)][[1]]
+  commit <- if (records_commit) {
+    paste(" at", substr(description$RemoteSha, 1, 7))
+  }
+  paste0("from ", location, commit)
 }
 
 checkout_source <- function(path, head) {
   if (is.null(head)) {
     return(sprintf("from the git checkout at %s", path))
   }
-  changes <- if (head$dirty) ", with uncommitted changes" else ""
+  changes <- if (isTRUE(head$dirty)) ", with uncommitted changes" else ""
   sprintf("from the git checkout at %s, commit %s%s", path, head$sha, changes)
 }
 
-# the short commit a git checkout is at, and whether tracked files have
-# uncommitted changes; NULL when git isn't available or the call fails
+# the short commit a git checkout is at, and whether the package's sources have
+# uncommitted changes, counting new files that load_all() would source: NA
+# when git status fails, and NULL when git isn't available or there is no
+# commit
 git_head_commit <- function(path) {
   git <- Sys.which("git")
   if (!nzchar(git)) {
     return(NULL)
   }
   run_git <- function(...) {
-    suppressWarnings(system2(
-      git,
-      c("-C", shQuote(path), ...),
-      stdout = TRUE,
-      stderr = FALSE
-    ))
+    output <- tryCatch(
+      suppressWarnings(system2(
+        git,
+        c("-C", shQuote(path), ...),
+        stdout = TRUE,
+        stderr = FALSE
+      )),
+      error = \(e) NULL
+    )
+    git_failed <- is.null(output) || !is.null(attr(output, "status"))
+    if (git_failed) NULL else output
   }
-  sha <- tryCatch(run_git("rev-parse", "--short=7", "HEAD"), error = \(e) NULL)
-  if (length(sha) != 1 || !is.null(attr(sha, "status"))) {
+  sha <- run_git("rev-parse", "--short=7", "HEAD")
+  if (length(sha) != 1) {
     return(NULL)
   }
-  changes <- run_git("status", "--porcelain", "--untracked-files=no")
-  list(sha = sha, dirty = length(changes) > 0)
+  package_sources <- c("DESCRIPTION", "NAMESPACE", "R", "src", "inst")
+  changes <- run_git(
+    "status",
+    "--porcelain",
+    "--untracked-files=normal",
+    "--",
+    package_sources
+  )
+  dirty <- if (is.null(changes)) NA else length(changes) > 0
+  list(sha = sha, dirty = dirty)
 }
 
 detailed_sitrep <- function() {
