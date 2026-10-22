@@ -505,7 +505,8 @@ sampler <- R6Class(
 
     # In a call of more than one iteration, the sampler cannot tell which
     # proposal failed, and the chain would not be valid if it carried on, so
-    # it stops and says how to run one iteration per call
+    # it stops and says how to run one iteration per call. The error names no
+    # call, since the methods it is raised from mean nothing to the user
     abort_numerical_error = function(error) {
       greta_stash$tf_num_error <- error
       cli::cli_abort(
@@ -524,8 +525,8 @@ sampler <- R6Class(
     # convert traced free state to the traced values, accounting for
     # chain dimension
     trace_values = function(trace_batch_size) {
-      # on.exit() calls this after an error too; tracing no rows would hide
-      # that error
+      # dag$trace_values() fails on a trace with no rows, and on.exit() calls
+      # this after an error too, where failing would replace that error
       no_draws <- nrow(self$traced_free_state[[1]]) == 0
       if (no_draws) {
         return()
