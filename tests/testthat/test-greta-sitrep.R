@@ -206,6 +206,26 @@ test_that("git_head_commit() makes no claim about changes when git status fails"
   expect_identical(corrupt_index_head, list(sha = expected_sha, dirty = NA))
 })
 
+test_that("greta_sitrep() turns greta's offline mode off before starting Python when others are required after load", {
+  local_managed_load("numpy")
+  apply_greta_python_plan(new_python_plan("managed", "default"))
+  reticulate::py_require("pandas")
+  local_mocked_bindings(
+    have_python = function(...) FALSE,
+    have_tf = function(...) FALSE,
+    have_tfp = function(...) FALSE,
+    quiet_sitrep = function() invisible()
+  )
+  old_init <- greta_stash$python_has_been_initialised
+  withr::defer(greta_stash$python_has_been_initialised <- old_init)
+  greta_stash$python_has_been_initialised <- FALSE
+
+  greta_sitrep("quiet")
+
+  expect_identical(Sys.getenv("UV_OFFLINE", unset = NA), NA_character_)
+  expect_identical(Sys.getenv("GRETA_UV_OFFLINE", unset = NA), NA_character_)
+})
+
 test_that("check_tf_version errors when have_python, _tf, or _tfp is FALSE", {
   local_mocked_bindings(
     py_module_available = function(...) FALSE,

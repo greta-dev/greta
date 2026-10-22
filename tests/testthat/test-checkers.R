@@ -75,3 +75,22 @@ test_that("check_tf_version() omits the restart hint when nothing was removed", 
 
   expect_snapshot(check_tf_version("message"))
 })
+
+test_that("check_tf_version() turns greta's offline mode off before starting Python when others are required after load", {
+  local_managed_load("numpy")
+  apply_greta_python_plan(new_python_plan("managed", "default"))
+  reticulate::py_require("pandas")
+  local_mocked_bindings(
+    have_python = function(...) FALSE,
+    have_tf = function(...) FALSE,
+    have_tfp = function(...) FALSE
+  )
+  old_init <- greta_stash$python_has_been_initialised
+  withr::defer(greta_stash$python_has_been_initialised <- old_init)
+  greta_stash$python_has_been_initialised <- FALSE
+
+  suppressMessages(check_tf_version("none"))
+
+  expect_identical(Sys.getenv("UV_OFFLINE", unset = NA), NA_character_)
+  expect_identical(Sys.getenv("GRETA_UV_OFFLINE", unset = NA), NA_character_)
+})

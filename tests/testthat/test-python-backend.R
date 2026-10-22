@@ -370,56 +370,6 @@ test_that("reticulate reports greta's requirements back as declared", {
   )
 })
 
-# reticulate's py_require(): with no arguments it returns the manifest, which
-# starts as reticulate's own `reticulate_packages` and gains each package
-# declared, as reticulate's does
-local_py_require_manifest <- function(
-  reticulate_packages,
-  env = parent.frame()
-) {
-  manifest <- reticulate_packages
-  local_mocked_bindings(
-    py_require = function(packages, python_version, ...) {
-      if (missing(packages)) {
-        return(list(packages = manifest))
-      }
-      manifest <<- unique(c(manifest, packages))
-      invisible()
-    },
-    .package = "reticulate",
-    .env = env
-  )
-}
-
-# a managed load on a populated uv cache: the offline environment variables,
-# the versions stored with greta_set_deps() (none by default) in a temporary
-# config directory, and reticulate's own requirements, `reticulate_packages`
-local_managed_load <- function(
-  reticulate_packages,
-  stored_deps = NULL,
-  uv_offline = NA,
-  marker = NA,
-  env = parent.frame()
-) {
-  withr::local_envvar(
-    UV_OFFLINE = uv_offline,
-    GRETA_UV_OFFLINE = marker,
-    RETICULATE_PYTHON = NA,
-    R_USER_CONFIG_DIR = withr::local_tempdir(.local_envir = env),
-    .local_envir = env
-  )
-  if (!is.null(stored_deps)) {
-    suppressMessages(greta_set_deps(stored_deps))
-  }
-  local_mocked_bindings(
-    greta_uv_cache_status = function(...) {
-      list(kind = "managed", populated = TRUE)
-    },
-    .env = env
-  )
-  local_py_require_manifest(reticulate_packages, env = env)
-}
-
 test_that("apply_greta_python_plan() stays online when ipykernel is required", {
   local_managed_load(c("numpy", "ipykernel"))
 
