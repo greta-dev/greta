@@ -1,3 +1,13 @@
+# the offline-readiness lines depend on the uv cache and on which Python
+# packages are required, so sitrep snapshots leave them out;
+# report_offline_readiness() is tested in test-python-backend.R
+local_no_offline_readiness <- function(env = parent.frame()) {
+  local_mocked_bindings(
+    report_offline_readiness = function(...) invisible(),
+    .env = env
+  )
+}
+
 test_that("check_tf_version errors when have_python, _tf, or _tfp is FALSE", {
   local_mocked_bindings(
     py_module_available = function(...) FALSE,
@@ -95,14 +105,13 @@ test_that("greta_sitrep warns when have_python, _tf, or _tfp is FALSE", {
     greta_sitrep()
   )
 
-  # offline lines depend on uv cache and Positron; tested in test-python-backend.R
   local_mocked_bindings(
     have_python = function(...) TRUE,
     have_tf = function(...) TRUE,
-    have_tfp = function(...) TRUE,
-    report_offline_readiness = function(...) invisible()
+    have_tfp = function(...) TRUE
   )
 
+  local_no_offline_readiness()
   local_python_plan()
   expect_snapshot(greta_sitrep())
 })
@@ -113,10 +122,10 @@ test_that("greta_sitrep warns when different versions of python, tf, tfp", {
   skip_on_cran()
 
   local_mocked_bindings(
-    py_version = function(...) "3.6",
-    report_offline_readiness = function(...) invisible()
+    py_version = function(...) "3.6"
   )
 
+  local_no_offline_readiness()
   local_python_plan()
   expect_snapshot(greta_sitrep())
 
@@ -139,10 +148,10 @@ test_that("greta_sitrep reports a missing conda env as unused when managed", {
   skip_on_cran()
 
   local_mocked_bindings(
-    have_greta_conda_env = function(...) FALSE,
-    report_offline_readiness = function(...) invisible()
+    have_greta_conda_env = function(...) FALSE
   )
 
+  local_no_offline_readiness()
   local_python_plan()
   expect_snapshot(greta_sitrep())
 })
@@ -163,9 +172,7 @@ test_that("greta_sitrep works with quiet, minimal, and detailed options", {
   skip_if_not(check_tf_version())
   skip_on_ci()
   skip_on_cran()
-  local_mocked_bindings(
-    report_offline_readiness = function(...) invisible()
-  )
+  local_no_offline_readiness()
 
   # the resolved Python backend depends on machine state (RETICULATE_PYTHON, a
   # stored greta preference, or a detected conda env), so mask those lines to

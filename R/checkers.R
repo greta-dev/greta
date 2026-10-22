@@ -55,6 +55,8 @@ check_tf_version <- function(
   alert <- match.arg(alert)
 
   if (!greta_stash$python_has_been_initialised) {
+    # the last check of greta's offline mode before Python starts;
+    # greta_sitrep() makes its own, as it starts Python before it reaches here
     recheck_uv_offline()
     # cli cuts a status line to the width of the console, so it is kept short
     # enough to survive a narrow one (greta-dev/greta#670)
