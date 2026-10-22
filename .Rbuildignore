@@ -60,3 +60,6 @@ LICENSE
 _cache/$
 ^pkgdown$
 ^CONTRIBUTING\.md$
+^_dev$
+^AGENTS\.md$
+^CLAUDE\.md$
