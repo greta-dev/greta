@@ -95,6 +95,7 @@ test_that("greta_sitrep warns when have_python, _tf, or _tfp is FALSE", {
     greta_sitrep()
   )
 
+  # offline lines depend on uv cache and Positron; tested in test-python-backend.R
   local_mocked_bindings(
     have_python = function(...) TRUE,
     have_tf = function(...) TRUE,

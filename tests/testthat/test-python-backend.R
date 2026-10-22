@@ -260,8 +260,7 @@ test_that("maybe_enable_uv_offline() stays online with stored versions", {
   expect_identical(Sys.getenv("UV_OFFLINE", unset = NA), NA_character_)
 })
 
-test_that("maybe_enable_uv_offline() respects a pre-existing UV_OFFLINE", {
-  # a stale marker beside a value other than "1" leaves the value the user's
+test_that("maybe_enable_uv_offline() respects a user's UV_OFFLINE = 0 beside a stale marker", {
   withr::local_envvar(UV_OFFLINE = "0", GRETA_UV_OFFLINE = "auto")
   status <- list(kind = "managed", populated = TRUE)
   expect_false(
@@ -329,14 +328,20 @@ test_that("requirements_beyond_greta() counts stored versions as greta's", {
   )
 })
 
-# reticulate's py_require(): with no arguments it returns a manifest holding
-# `manifest_packages`; declaring requirements does nothing
-local_py_require_manifest <- function(manifest_packages, env = parent.frame()) {
+# reticulate's py_require(): with no arguments it returns the manifest, which
+# starts as reticulate's own `reticulate_packages` and gains each package
+# declared, as reticulate's does
+local_py_require_manifest <- function(
+  reticulate_packages,
+  env = parent.frame()
+) {
+  manifest <- reticulate_packages
   local_mocked_bindings(
     py_require = function(packages, python_version, ...) {
       if (missing(packages)) {
-        return(list(packages = manifest_packages))
+        return(list(packages = manifest))
       }
+      manifest <<- unique(c(manifest, packages))
       invisible()
     },
     .package = "reticulate",
@@ -345,10 +350,10 @@ local_py_require_manifest <- function(manifest_packages, env = parent.frame()) {
 }
 
 # a managed load on a populated uv cache: the offline environment variables,
-# the versions stored with greta_set_deps() (none by default), and reticulate's
-# requirements, `manifest_packages`
+# the versions stored with greta_set_deps() (none by default) in a temporary
+# config directory, and reticulate's own requirements, `reticulate_packages`
 local_managed_load <- function(
-  manifest_packages,
+  reticulate_packages,
   stored_deps = NULL,
   uv_offline = NA,
   marker = NA,
@@ -358,42 +363,44 @@ local_managed_load <- function(
     UV_OFFLINE = uv_offline,
     GRETA_UV_OFFLINE = marker,
     RETICULATE_PYTHON = NA,
+    R_USER_CONFIG_DIR = withr::local_tempdir(.local_envir = env),
     .local_envir = env
   )
+  if (!is.null(stored_deps)) {
+    suppressMessages(greta_set_deps(stored_deps))
+  }
   local_mocked_bindings(
     greta_uv_cache_status = function(...) {
       list(kind = "managed", populated = TRUE)
     },
-    get_greta_stored_deps = function() stored_deps,
     .env = env
   )
-  local_py_require_manifest(manifest_packages, env = env)
+  local_py_require_manifest(reticulate_packages, env = env)
 }
 
 test_that("apply_greta_python_plan() stays online when ipykernel is required", {
-  greta_packages <- greta_py_require_args()$packages
-  local_managed_load(c("numpy", "ipykernel", greta_packages))
+  local_managed_load(c("numpy", "ipykernel"))
 
   apply_greta_python_plan(new_python_plan("managed", "default"))
 
   expect_identical(Sys.getenv("UV_OFFLINE", unset = NA), NA_character_)
+  expect_identical(Sys.getenv("GRETA_UV_OFFLINE", unset = NA), NA_character_)
 })
 
 test_that("apply_greta_python_plan() goes offline when only greta's are required", {
-  greta_packages <- greta_py_require_args()$packages
-  local_managed_load(c("numpy", greta_packages))
+  local_managed_load("numpy")
 
   apply_greta_python_plan(new_python_plan("managed", "default"))
 
   expect_identical(Sys.getenv("UV_OFFLINE"), "1")
+  expect_identical(Sys.getenv("GRETA_UV_OFFLINE"), "auto")
 })
 
 test_that("apply_greta_python_plan() stays online when it inherits greta's offline mode", {
   # the environment of a process started from a session where greta enabled
   # offline mode, as a reprex is
-  greta_packages <- greta_py_require_args()$packages
   local_managed_load(
-    c("numpy", "ipykernel", greta_packages),
+    c("numpy", "ipykernel"),
     uv_offline = "1",
     marker = "auto"
   )
@@ -401,6 +408,16 @@ test_that("apply_greta_python_plan() stays online when it inherits greta's offli
   apply_greta_python_plan(new_python_plan("managed", "default"))
 
   expect_identical(Sys.getenv("UV_OFFLINE", unset = NA), NA_character_)
+  expect_identical(Sys.getenv("GRETA_UV_OFFLINE", unset = NA), NA_character_)
+})
+
+test_that("apply_greta_python_plan() keeps greta's inherited offline mode when only greta's are required", {
+  local_managed_load("numpy", uv_offline = "1", marker = "auto")
+
+  apply_greta_python_plan(new_python_plan("managed", "default"))
+
+  expect_identical(Sys.getenv("UV_OFFLINE"), "1")
+  expect_identical(Sys.getenv("GRETA_UV_OFFLINE"), "auto")
 })
 
 test_that("apply_greta_python_plan() unsets greta's inherited offline mode when versions are stored", {
@@ -409,9 +426,8 @@ test_that("apply_greta_python_plan() unsets greta's inherited offline mode when 
     tfp_version = greta_deps_default$tfp,
     python_version = "3.11"
   )
-  stored_packages <- greta_py_require_args("2.19.0", greta_deps_default$tfp)
   local_managed_load(
-    c("numpy", stored_packages$packages),
+    "numpy",
     stored_deps = deps,
     uv_offline = "1",
     marker = "auto"
@@ -420,6 +436,7 @@ test_that("apply_greta_python_plan() unsets greta's inherited offline mode when 
   apply_greta_python_plan(new_python_plan("managed", "default"))
 
   expect_identical(Sys.getenv("UV_OFFLINE", unset = NA), NA_character_)
+  expect_identical(Sys.getenv("GRETA_UV_OFFLINE", unset = NA), NA_character_)
 })
 
 test_that("uv cache status: managed layout needs python and cache dirs", {
