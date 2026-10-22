@@ -359,13 +359,16 @@ uv_offline_verdict <- function(
   extra_packages,
   versions_stored
 ) {
-  # the reasons offline mode would not engage, in the order they're reported
-  blockers <- c(
+  # the verdict is the first of these that holds, in the order they're
+  # reported, so offline mode engages only when nothing stands in its way;
+  # which.max() gives the first TRUE
+  verdicts <- c(
     cache_empty = !cache_populated,
     others_required = length(extra_packages) > 0,
-    versions_stored = versions_stored
+    versions_stored = versions_stored,
+    engage = TRUE
   )
-  verdict <- c(names(blockers)[blockers], "engage")[[1]]
+  verdict <- names(which.max(verdicts))
   verdict
 }
 

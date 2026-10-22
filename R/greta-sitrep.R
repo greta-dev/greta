@@ -78,14 +78,15 @@ greta_version_source <- function(
     description$RemoteRepos %||%
     "a package repository"
 
-  # the first kind of install that matches, in this order
+  # the first kind of install that matches, in this order; which.max() gives
+  # the first TRUE
   install_kinds <- c(
     repository = from_repository,
     remote = from_remote,
     checkout = from_checkout,
     local = TRUE
   )
-  install_kind <- names(install_kinds)[install_kinds][[1]]
+  install_kind <- names(which.max(install_kinds))
   origin <- switch(
     install_kind,
     repository = sprintf("from %s", repository),
