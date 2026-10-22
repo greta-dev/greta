@@ -635,10 +635,10 @@ test_that("mcmc() traces a model's sampler loop once, across calls", {
 
 test_that("a model mcmc() has sampled is freed once it is dropped", {
   skip_if_not(check_tf_version())
-  sample <- \(m) {
+  fit_mcmc <- function(m) {
     mcmc(m, warmup = 10, n_samples = 10, chains = 2, verbose = FALSE)
   }
-  expect_true(dag_freed_after(sample))
+  expect_true(dag_freed_after(fit_mcmc))
 })
 
 test_that("fitting fresh models in a loop does not keep Python objects alive", {
@@ -658,7 +658,7 @@ test_that("fitting fresh models in a loop does not keep Python objects alive", {
     count_objects <- function() {
       # twice, as collecting Python's garbage frees R objects that hold more
       # Python objects
-      for (round in 1:2) {
+      for (pass in 1:2) {
         gc()
         python_gc$collect()
       }

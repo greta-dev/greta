@@ -53,7 +53,9 @@ fl <- function(x) {
 # whose object keeps the traced function would keep both, and the model,
 # alive for the rest of the session (greta-dev/greta#279). The Python function
 # wraps one that finds f through a weak reference keyed on the R handle to the
-# traced function instead, so f lives as long as that handle.
+# traced function instead, so f lives as long as that handle. Keep the handle
+# this returns and call through it: a handle reticulate makes afresh from the
+# same Python function does not keep f alive.
 tf_function_weakly <- function(f, ...) {
   reference <- new.env(parent = emptyenv())
   traced <- tensorflow::tf_function(
@@ -64,7 +66,8 @@ tf_function_weakly <- function(f, ...) {
     ...
   )
   # tfautograph's on.exit() errors on a second on.exit() call in f, whatever
-  # its `add`, so a traced function registers at most one
+  # its `add`, so f registers at most one, and the wrapper, which is not
+  # autographed, registers the bijector cache's clearing
   autographed_f <- tfautograph::autograph(f)
   reference$f <- rlang::new_weakref(environment(traced), value = autographed_f)
   traced
@@ -77,7 +80,9 @@ call_weakly_held <- function(reference, arguments) {
   # left as a promise, reference would hold on to the frame of
   # tf_function_weakly(), and f with it, until the first call
   force(reference)
-  argument_names <- names(arguments)
+  # character() rather than the NULL names() gives a function with no
+  # arguments, which mget() rejects
+  argument_names <- as.character(names(arguments))
   call_f <- function() {
     f <- rlang::wref_value(reference$f)
     # greta calls a traced function only through the handle that keeps f alive
@@ -87,8 +92,9 @@ call_weakly_held <- function(reference, arguments) {
         .internal = TRUE
       )
     }
-    # TensorFlow calls this only to trace f, so the cache is cleared once each
-    # graph is built
+    # TensorFlow calls this only to trace f, so the cache is cleared each time
+    # f has been traced; for f traced inside another traced function, that is
+    # partway through the outer trace
     on.exit(clear_bijector_cache(), add = TRUE)
     do.call(f, mget(argument_names, envir = environment()))
   }

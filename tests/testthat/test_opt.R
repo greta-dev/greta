@@ -257,6 +257,24 @@ test_that("a model whose opt() loop is kept on it is freed once it is dropped", 
   expect_true(dag_freed_after(optimise))
 })
 
+test_that("opt() leaves no graph behind once its model is dropped", {
+  skip_if_not(check_tf_version())
+  optimise_and_drop <- function() {
+    x <- normal(0, 1, dim = 2)
+    opt(model(x))
+    NULL
+  }
+
+  optimise_and_drop()
+  before <- count_live_instances(tf$Graph)
+  for (i in 1:3) {
+    optimise_and_drop()
+  }
+  # graphs left by earlier tests can still be freed in the meantime, so the
+  # count may fall
+  expect_lte(count_live_instances(tf$Graph), before)
+})
+
 test_that("opt accepts initial values for TFP optimisers", {
   skip_if_not(check_tf_version())
 
