@@ -505,8 +505,7 @@ sampler <- R6Class(
 
     # In a call of more than one iteration, the sampler cannot tell which
     # proposal failed, and the chain would not be valid if it carried on, so
-    # it stops and says how to run one iteration per call. The error names no
-    # call, since the methods it is raised from mean nothing to the user
+    # it stops and says how to run one iteration per call
     abort_numerical_error = function(error) {
       greta_stash$tf_num_error <- error
       cli::cli_abort(
@@ -518,6 +517,7 @@ sampler <- R6Class(
           "The error encountered can be recovered and viewed with:",
           "{.code greta_notes_tf_num_error()}"
         ),
+        # the methods this is raised from mean nothing to the user
         call = NULL
       )
     },
