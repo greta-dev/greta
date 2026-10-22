@@ -359,16 +359,14 @@ uv_offline_verdict <- function(
   extra_packages,
   versions_stored
 ) {
-  if (!cache_populated) {
-    return("cache_empty")
-  }
-  if (length(extra_packages) > 0) {
-    return("others_required")
-  }
-  if (versions_stored) {
-    return("versions_stored")
-  }
-  "engage"
+  # the reasons offline mode would not engage, in the order they're reported
+  blockers <- c(
+    cache_empty = !cache_populated,
+    others_required = length(extra_packages) > 0,
+    versions_stored = versions_stored
+  )
+  verdict <- c(names(blockers)[blockers], "engage")[[1]]
+  verdict
 }
 
 # For the managed backend, auto-enable uv's offline mode when the uv cache is
