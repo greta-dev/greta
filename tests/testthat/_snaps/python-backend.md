@@ -132,6 +132,17 @@
       the cache holds them
       i See the installation vignette: `vignette(greta::installation)`.
 
+# report_offline_readiness() names every reason offline mode does not engage
+
+    Code
+      report_managed_readiness(populated = TRUE, extra_packages = "ipykernel",
+        stored_deps = stored)
+    Message
+      x will need internet on next start: offline mode does not engage, as Python
+      packages other than greta's are also required (ipykernel) and versions are
+      stored with `greta_set_deps()`
+      i See the installation vignette: `vignette(greta::installation)`.
+
 # report_offline_readiness() finds the packages other than greta's
 
     Code

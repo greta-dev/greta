@@ -71,22 +71,24 @@ greta_version_source <- function(
   repository_without_commit <- !is.null(description$Repository) &&
     !nzchar(remote_type) &&
     !records_commit
+  # each kind of install rules out those above it, so exactly one holds: pak
+  # records a CRAN install with a RemoteType too, but it's a repository install
   from_repository <- repository_remote_type || repository_without_commit
-  from_remote <- nzchar(remote_type) || records_commit
-  from_checkout <- file.exists(file.path(path, ".git"))
+  from_remote <- !from_repository && (nzchar(remote_type) || records_commit)
+  installed <- from_repository || from_remote
+  from_checkout <- !installed && file.exists(file.path(path, ".git"))
+  from_local_install <- !installed && !from_checkout
   repository <- description$Repository %||%
     description$RemoteRepos %||%
     "a package repository"
 
-  # the first kind of install that matches, in this order; which.max() gives
-  # the first TRUE
   install_kinds <- c(
     repository = from_repository,
     remote = from_remote,
     checkout = from_checkout,
-    local = TRUE
+    local = from_local_install
   )
-  install_kind <- names(which.max(install_kinds))
+  install_kind <- names(install_kinds)[install_kinds]
   origin <- switch(
     install_kind,
     repository = sprintf("from %s", repository),

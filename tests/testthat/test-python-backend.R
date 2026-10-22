@@ -300,17 +300,25 @@ test_that("maybe_enable_uv_offline() respects a UV_OFFLINE = 1 the user set", {
   expect_identical(Sys.getenv("UV_OFFLINE"), "1")
 })
 
-test_that("uv_offline_verdict() gives the first reason offline mode does not engage", {
-  expect_identical(uv_offline_verdict(FALSE, "ipykernel", TRUE), "cache_empty")
-  expect_identical(
-    uv_offline_verdict(TRUE, "ipykernel", TRUE),
-    "others_required"
+test_that("uv_offline_blockers() gives every reason offline mode does not engage", {
+  none <- uv_offline_blockers(TRUE, character(), versions_stored = FALSE)
+  all_three <- uv_offline_blockers(FALSE, "ipykernel", versions_stored = TRUE)
+  empty_cache <- uv_offline_blockers(
+    FALSE,
+    character(),
+    versions_stored = FALSE
   )
+  positron <- uv_offline_blockers(TRUE, "ipykernel", versions_stored = FALSE)
+  stored <- uv_offline_blockers(TRUE, character(), versions_stored = TRUE)
+
+  expect_identical(none, character())
   expect_identical(
-    uv_offline_verdict(TRUE, character(), TRUE),
-    "versions_stored"
+    all_three,
+    c("cache_empty", "others_required", "versions_stored")
   )
-  expect_identical(uv_offline_verdict(TRUE, character(), FALSE), "engage")
+  expect_identical(empty_cache, "cache_empty")
+  expect_identical(positron, "others_required")
+  expect_identical(stored, "versions_stored")
 })
 
 test_that("requirements_beyond_greta() returns the packages other than greta's and numpy", {
@@ -836,6 +844,21 @@ test_that("report_offline_readiness() names packages other than greta's", {
       populated = TRUE,
       uv_offline = "1",
       extra_packages = "ipykernel"
+    )
+  )
+})
+
+test_that("report_offline_readiness() names every reason offline mode does not engage", {
+  stored <- greta_deps_spec(
+    tf_version = "2.19.0",
+    tfp_version = greta_deps_default$tfp,
+    python_version = "3.11"
+  )
+  expect_snapshot(
+    report_managed_readiness(
+      populated = TRUE,
+      extra_packages = "ipykernel",
+      stored_deps = stored
     )
   )
 })
