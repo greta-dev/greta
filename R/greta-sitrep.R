@@ -5,8 +5,10 @@
 #'
 #' @param verbosity character. How verbose the output of the situation report.
 #'   Possible options: "minimal" (default), "detailed", and "quiet". "Minimal"
-#'   provides just information in python version, tensorflow version,
-#'   tensorflow probability, and whether greta conda environment is available.
+#'   provides greta's version and where it came from (such as CRAN, a GitHub
+#'   commit, or a git checkout), then just information in python version,
+#'   tensorflow version, tensorflow probability, and whether greta conda
+#'   environment is available.
 #'   "Quiet" presents no information, but prepares greta to be used. "Detailed"
 #'   gives information on the version and path for R, greta, python,
 #'   tensorflow, tensorflow probability, the greta conda environment, and a
@@ -26,9 +28,10 @@ greta_sitrep <- function(verbosity = c("minimal", "detailed", "quiet")) {
     error_arg = "verbosity"
   )
 
-  # every verbosity starts Python before it reaches check_tf_version(), which
-  # checks greta's offline mode on every other path (the detailed one through
-  # py_config()), so greta_sitrep() makes its own check first
+  # check_tf_version() checks greta's offline mode only before a Python start
+  # it makes itself, and every verbosity here starts Python before reaching it
+  # (the detailed one through py_config()), so greta_sitrep() makes its own
+  # check first
   recheck_uv_offline()
 
   switch(

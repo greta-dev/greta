@@ -9,8 +9,10 @@ greta_sitrep(verbosity = c("minimal", "detailed", "quiet"))
 \arguments{
 \item{verbosity}{character. How verbose the output of the situation report.
 Possible options: "minimal" (default), "detailed", and "quiet". "Minimal"
-provides just information in python version, tensorflow version,
-tensorflow probability, and whether greta conda environment is available.
+provides greta's version and where it came from (such as CRAN, a GitHub
+commit, or a git checkout), then just information in python version,
+tensorflow version, tensorflow probability, and whether greta conda
+environment is available.
 "Quiet" presents no information, but prepares greta to be used. "Detailed"
 gives information on the version and path for R, greta, python,
 tensorflow, tensorflow probability, the greta conda environment, and a

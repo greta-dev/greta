@@ -837,8 +837,8 @@ check_greta_set_python_args <- function(
 #' PyPI. It does not when Python packages other than greta's are also required,
 #' since uv's cache may not hold them: reticulate adds `ipykernel` in Positron,
 #' and other packages can add their own with [reticulate::py_require()]. greta
-#' checks when it loads, and again just before it starts Python, turning its
-#' offline mode back off if any have been added since. Nor does it when you
+#' checks when it loads, and again just before it starts Python itself, turning
+#' its offline mode back off if any have been added since. Nor does it when you
 #' have stored versions with [greta_set_deps()]. Set `UV_OFFLINE=0` yourself to
 #' force online resolution (for example, to refresh the environment), or
 #' `UV_OFFLINE=1` to force offline mode - greta never overrides a value you set

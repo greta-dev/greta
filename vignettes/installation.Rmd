@@ -75,6 +75,7 @@ greta_sitrep()
 On a machine that's ready to go, you'll see something like this:
 
 ```
+#> ℹ greta 0.6.0.9000 from https://greta-dev.r-universe.dev
 #> ℹ checking if python available
 #> ✔ python (v3.12) available
 #>
@@ -182,10 +183,12 @@ greta only does this when its own packages are all that Python needs, since
 the cache may not hold anything else. Offline mode doesn't engage
 automatically:
 
-- when other Python packages are required when greta loads. In Positron,
-  reticulate also requires `ipykernel`, and any package can require its own
-  with `reticulate::py_require()`. If one does so after greta has loaded,
-  greta turns its offline mode back off just before it starts Python.
+- when other Python packages are required when greta loads, or other
+  versions of the ones greta uses, such as `numpy<2` or
+  `tensorflow[and-cuda]`. In Positron, reticulate also requires `ipykernel`,
+  and any package can require its own with `reticulate::py_require()`. If
+  one does so after greta has loaded, greta turns its offline mode back off
+  just before greta itself starts Python.
 - when you have stored any versions with `greta_set_deps()`, even greta's
   defaults (see [Pin dependency versions](#pin-dependency-versions)).
 
@@ -562,6 +565,10 @@ Work through these in order. Most problems are one of the first two.
      network, then set `UV_OFFLINE=1` in `~/.Renviron` and restart R. greta
      won't turn offline mode on by itself while packages other than its own
      are required, but the cache now holds them.
+
+  If another package starts Python first, or packages are required after
+  Python has started, set `UV_OFFLINE=0` before loading greta, since greta
+  turns its offline mode back off only before a Python start it makes itself.
 
 **I used `install_greta_deps()` and want to see what happened, or it seems to have failed.** 
 
