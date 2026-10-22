@@ -41,6 +41,7 @@ greta_sitrep <- function(verbosity = c("minimal", "detailed", "quiet")) {
 
 
 minimal_sitrep <- function() {
+  cli::cli_alert_info("{.pkg greta} {greta_version_source()}")
   check_if_python_available()
   check_if_tf_available()
   check_if_tfp_available()
@@ -48,6 +49,77 @@ minimal_sitrep <- function() {
   report_python_backend()
   report_offline_readiness()
   check_greta_ready_to_use()
+}
+
+# greta's version and where it came from, for greta_sitrep(): CRAN, a
+# repository and commit for a GitHub or r-universe install, the commit of the
+# git checkout devtools::load_all() loaded it from, or a local install, which
+# records no commit
+greta_version_source <- function(
+  description = utils::packageDescription("greta"),
+  path = getNamespaceInfo("greta", "path"),
+  git_head = git_head_commit
+) {
+  version <- description$Version
+  remote_sha <- description$RemoteSha %||% ""
+  from_cran <- identical(description$Repository, "CRAN") &&
+    !nzchar(description$RemoteUrl %||% "")
+  from_github <- identical(description$RemoteType, "github")
+  from_remote <- nzchar(remote_sha) && !from_cran
+  from_checkout <- file.exists(file.path(path, ".git"))
+
+  origin <- if (from_cran) {
+    "from CRAN"
+  } else if (from_github) {
+    sprintf(
+      "from GitHub %s/%s at %s",
+      description$RemoteUsername,
+      description$RemoteRepo,
+      substr(remote_sha, 1, 7)
+    )
+  } else if (from_remote) {
+    sprintf(
+      "from %s at %s",
+      description$RemoteUrl %||% description$Repository,
+      substr(remote_sha, 1, 7)
+    )
+  } else if (from_checkout) {
+    checkout_source(path, git_head(path))
+  } else {
+    "from a local install, which records no commit"
+  }
+  paste(version, origin)
+}
+
+checkout_source <- function(path, head) {
+  if (is.null(head)) {
+    return(sprintf("from the git checkout at %s", path))
+  }
+  changes <- if (head$dirty) ", with uncommitted changes" else ""
+  sprintf("from the git checkout at %s, commit %s%s", path, head$sha, changes)
+}
+
+# the short commit a git checkout is at, and whether tracked files have
+# uncommitted changes; NULL when git isn't available or the call fails
+git_head_commit <- function(path) {
+  git <- Sys.which("git")
+  if (!nzchar(git)) {
+    return(NULL)
+  }
+  run_git <- function(...) {
+    suppressWarnings(system2(
+      git,
+      c("-C", shQuote(path), ...),
+      stdout = TRUE,
+      stderr = FALSE
+    ))
+  }
+  sha <- tryCatch(run_git("rev-parse", "--short=7", "HEAD"), error = \(e) NULL)
+  if (length(sha) != 1 || !is.null(attr(sha, "status"))) {
+    return(NULL)
+  }
+  changes <- run_git("status", "--porcelain", "--untracked-files=no")
+  list(sha = sha, dirty = length(changes) > 0)
 }
 
 detailed_sitrep <- function() {
@@ -58,7 +130,7 @@ detailed_sitrep <- function() {
   cli::cli_ul("path: {.path {R.home()}}")
 
   cli::cli_h1("{.pkg greta}")
-  cli::cli_ul("version: {.val {packageVersion('greta')}}")
+  cli::cli_ul("version: {greta_version_source()}")
   cli::cli_ul("path: {.path {find.package('greta')}}")
 
   cli::cli_h1("{.pkg greta} Python backend")
