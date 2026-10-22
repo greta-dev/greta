@@ -74,20 +74,27 @@ greta_version_source <- function(
   from_repository <- repository_remote_type || repository_without_commit
   from_remote <- nzchar(remote_type) || records_commit
   from_checkout <- file.exists(file.path(path, ".git"))
+  repository <- description$Repository %||%
+    description$RemoteRepos %||%
+    "a package repository"
 
-  origin <- if (from_repository) {
-    repository <- description$Repository %||%
-      description$RemoteRepos %||%
-      "a package repository"
-    paste("from", repository)
-  } else if (from_remote) {
-    remote_source(description, records_commit)
-  } else if (from_checkout) {
-    checkout_source(path, git_head(path))
-  } else {
-    "from a local install, which records no commit"
-  }
-  paste(description$Version, origin)
+  # the first kind of install that matches, in this order
+  install_kinds <- c(
+    repository = from_repository,
+    remote = from_remote,
+    checkout = from_checkout,
+    local = TRUE
+  )
+  install_kind <- names(install_kinds)[install_kinds][[1]]
+  origin <- switch(
+    install_kind,
+    repository = sprintf("from %s", repository),
+    remote = remote_source(description, records_commit),
+    checkout = checkout_source(path, git_head(path)),
+    local = "from a local install, which records no commit"
+  )
+  version_source <- sprintf("%s %s", description$Version, origin)
+  version_source
 }
 
 # where a remote install came from, named as sessioninfo names it: the remote's
@@ -101,7 +108,7 @@ remote_source <- function(description, records_commit) {
   repo <- description[["RemoteRepo"]]
   has_user_repo <- !is.null(user) && !is.null(repo)
   user_repo <- if (has_user_repo) {
-    trimws(paste(remote_name, paste0(user, "/", repo)))
+    trimws(sprintf("%s %s/%s", remote_name, user, repo))
   }
   locations <- c(
     user_repo,
@@ -112,17 +119,22 @@ remote_source <- function(description, records_commit) {
   )
   location <- locations[nzchar(locations)][[1]]
   commit <- if (records_commit) {
-    paste(" at", substr(description$RemoteSha, 1, 7))
+    sprintf(" at %s", substr(description$RemoteSha, 1, 7))
+  } else {
+    ""
   }
-  paste0("from ", location, commit)
+  remote <- sprintf("from %s%s", location, commit)
+  remote
 }
 
 checkout_source <- function(path, head) {
+  checkout <- sprintf("from the git checkout at %s", path)
   if (is.null(head)) {
-    return(sprintf("from the git checkout at %s", path))
+    return(checkout)
   }
   changes <- if (isTRUE(head$dirty)) ", with uncommitted changes" else ""
-  sprintf("from the git checkout at %s, commit %s%s", path, head$sha, changes)
+  checkout_commit <- sprintf("%s, commit %s%s", checkout, head$sha, changes)
+  checkout_commit
 }
 
 # the short commit a git checkout is at, and whether the package's sources have
