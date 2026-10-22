@@ -1324,13 +1324,14 @@ batch_crossprods <- function(inputs) {
   aperm(array(crossprods, c(n_col, n_col, n_batch)), c(3, 1, 2))
 }
 
-# R's garbage collector, then Python's, then R's again: freeing an R object
-# can free a Python object, and that can free R objects only R's next run
-# collects
+# R's garbage collector then Python's, twice: freeing an R object can free a
+# Python object, and freeing that can free R objects
 collect_garbage <- function() {
-  gc()
-  reticulate::import("gc")$collect()
-  gc()
+  python_gc <- reticulate::import("gc")
+  for (pass in 1:2) {
+    gc()
+    python_gc$collect()
+  }
 }
 
 # how many instances of a Python class are alive once both R's and Python's
@@ -1341,7 +1342,6 @@ count_live_instances <- function(python_class) {
     "
 def count_instances(python_class):
     import gc
-    gc.collect()
     return sum(isinstance(o, python_class) for o in gc.get_objects())
 ",
     local = TRUE
@@ -1349,18 +1349,33 @@ def count_instances(python_class):
   python$count_instances(python_class)
 }
 
+# how many more instances of a Python class are alive after three more calls
+# of run() than after its first; objects earlier tests left can be freed in the
+# meantime, so this can be negative
+live_instance_growth <- function(python_class, run) {
+  run()
+  before <- count_live_instances(python_class)
+  for (i in 1:3) {
+    run()
+  }
+  count_live_instances(python_class) - before
+}
+
+# fit() on a model of a new greta array, which is dropped afterwards
+fit_fresh_model <- function(fit) {
+  x <- normal(0, 1, dim = 2)
+  fit(model(x))
+  invisible()
+}
+
 # whether a model's dag is freed once fit() has used it and the model is
 # dropped
 dag_freed_after <- function(fit) {
   freed <- FALSE
-  fit_and_drop <- function() {
-    x <- normal(0, 1, dim = 2)
-    m <- model(x)
-    reg.finalizer(m$dag, function(dag) freed <<- TRUE)
+  fit_fresh_model(function(m) {
+    reg.finalizer(m$dag, \(dag) freed <<- TRUE)
     fit(m)
-    NULL
-  }
-  fit_and_drop()
+  })
   collect_garbage()
   freed
 }

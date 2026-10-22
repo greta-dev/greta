@@ -24,10 +24,7 @@ test_that("tf_function_weakly() keeps f for as long as its handle, no longer", {
   traced <- local({
     held_by_f <- new.env()
     reg.finalizer(held_by_f, \(env) freed <<- TRUE)
-    twice <- function(x) {
-      force(held_by_f)
-      x * 2
-    }
+    twice <- \(x) x * 2
     held_by_f$traced <- tf_function_weakly(twice)
   })
 

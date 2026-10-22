@@ -55,19 +55,19 @@ fl <- function(x) {
 # wraps one that finds f through a weak reference keyed on the R handle to the
 # traced function instead, so f lives as long as that handle. Keep the handle
 # this returns and call through it: a handle reticulate makes afresh from the
-# same Python function does not keep f alive.
+# same Python function does not keep f alive. Each trace also clears TFP's
+# bijector cache, which would otherwise keep the graph (clear_bijector_cache()).
 tf_function_weakly <- function(f, ...) {
   reference <- new.env(parent = emptyenv())
   traced <- tensorflow::tf_function(
     f = call_weakly_held(reference, formals(f)),
-    # autograph rewrites only the body of the function it is given, which here
-    # would be the wrapper, so f is autographed itself below
     autograph = FALSE,
     ...
   )
-  # tfautograph's on.exit() errors on a second on.exit() call in f, whatever
-  # its `add`, so f registers at most one, and the wrapper, which is not
-  # autographed, registers the bijector cache's clearing
+  # f is autographed itself, not the wrapper: autograph rewrites only the body
+  # of the function it is given, and tfautograph's on.exit() errors on a second
+  # on.exit() call, whatever its `add`, so f registers at most one and the
+  # wrapper, left alone, registers the bijector cache's clearing
   autographed_f <- tfautograph::autograph(f)
   reference$f <- rlang::new_weakref(environment(traced), value = autographed_f)
   traced

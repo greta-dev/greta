@@ -174,14 +174,8 @@ test_that("calculate() with greta_mcmc_list objects leaves no graph behind", {
   m <- model(z)
   draws <- mcmc(m, warmup = 10, n_samples = 10, chains = 1, verbose = FALSE)
 
-  calculate(z * 2, values = draws)
-  before <- count_live_instances(tf$Graph)
-  for (i in 1:3) {
-    calculate(z * 2, values = draws)
-  }
-  # graphs left by earlier tests can still be freed in the meantime, so the
-  # count may fall
-  expect_lte(count_live_instances(tf$Graph), before)
+  calculate_doubled <- \() calculate(z * 2, values = draws)
+  expect_lte(live_instance_growth(tf$Graph, calculate_doubled), 0)
 })
 
 test_that("stochastic calculate works with greta_mcmc_list objects", {
