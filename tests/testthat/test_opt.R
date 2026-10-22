@@ -227,20 +227,8 @@ test_that("opt() traces again for a setting past 15 digits or another device", {
 
 test_that("an opt() loop traced for one call does not outlive it", {
   skip_if_not(check_tf_version())
-  python <- reticulate::py_run_string(
-    "
-def count_traced_functions():
-    import gc
-    import tensorflow as tf
-    gc.collect()
-    traced = tf.types.experimental.GenericFunction
-    return sum(isinstance(o, traced) for o in gc.get_objects())
-",
-    local = TRUE
-  )
   count_traced_functions <- function() {
-    gc()
-    python$count_traced_functions()
+    count_live_instances(tf$types$experimental$GenericFunction)
   }
   x <- normal(0, 1, dim = 2)
   m <- model(x)
@@ -261,6 +249,12 @@ def count_traced_functions():
     optimise()
   }
   expect_identical(count_traced_functions(), before)
+})
+
+test_that("a model whose opt() loop is kept on it is freed once it is dropped", {
+  skip_if_not(check_tf_version())
+  optimise <- \(m) opt(m, optimiser = adam(), max_iterations = 5)
+  expect_true(dag_freed_after(optimise))
 })
 
 test_that("opt accepts initial values for TFP optimisers", {

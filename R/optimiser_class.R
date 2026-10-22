@@ -264,9 +264,7 @@ tf_optimiser <- R6Class(
       list(
         free_state = free_state,
         restart = restart,
-        # not assigned to a variable first: a binding in this frame and the
-        # traced function would keep each other alive
-        minimise = tensorflow::tf_function(
+        minimise = tf_function_weakly(
           minimise,
           input_signature = list(
             tf$TensorSpec(shape = list(), dtype = tf$int32),

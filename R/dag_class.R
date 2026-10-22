@@ -106,7 +106,7 @@ dag_class <- R6Class(
     },
 
     define_tf_trace_values_batch = function() {
-      self$tf_trace_values_batch <- tensorflow::tf_function(
+      self$tf_trace_values_batch <- tf_function_weakly(
         f = self$define_trace_values_batch,
         input_signature = self$free_state_signature()
       )
@@ -118,7 +118,7 @@ dag_class <- R6Class(
       # a no-op after set_data_value(), which writes through to the node
       self$define_data_variables()
 
-      self$tf_log_prob_function <- tensorflow::tf_function(
+      self$tf_log_prob_function <- tf_function_weakly(
         f = self$generate_log_prob_function(),
         input_signature = self$free_state_signature()
       )
@@ -157,7 +157,7 @@ dag_class <- R6Class(
     # uses it, so it is built on first use rather than with every model
     one_row_log_prob = function(free_state) {
       if (is.null(self$tf_log_prob_function_one_row)) {
-        self$tf_log_prob_function_one_row <- tensorflow::tf_function(
+        self$tf_log_prob_function_one_row <- tf_function_weakly(
           f = self$generate_log_prob_function(),
           input_signature = self$free_state_signature(n_rows = 1L)
         )

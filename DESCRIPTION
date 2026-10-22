@@ -47,6 +47,7 @@ Imports:
     reticulate (>= 1.43.0),
     rlang,
     tensorflow (>= 2.16.0),
+    tfautograph (>= 0.3.1),
     tools,
     utils,
     whisker,

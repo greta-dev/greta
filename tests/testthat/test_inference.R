@@ -633,6 +633,50 @@ test_that("mcmc() traces a model's sampler loop once, across calls", {
   expect_identical(trace_count(second), 1L)
 })
 
+test_that("a model mcmc() has sampled is freed once it is dropped", {
+  skip_if_not(check_tf_version())
+  sample <- \(m) {
+    mcmc(m, warmup = 10, n_samples = 10, chains = 2, verbose = FALSE)
+  }
+  expect_true(dag_freed_after(sample))
+})
+
+test_that("fitting fresh models in a loop does not keep Python objects alive", {
+  skip_if_not(check_tf_version())
+  skip_on_cran()
+  growth <- in_fresh_greta(function() {
+    x <- matrix(rnorm(300), 100, 3)
+    y <- rbinom(100, 1, 0.5)
+    fit <- function() {
+      w <- normal(0, 1, dim = c(3, 1))
+      distribution(y) <- bernoulli(ilogit(x %*% w))
+      mcmc(model(w), warmup = 10, n_samples = 10, chains = 1, verbose = FALSE)
+    }
+    # Python's objects rather than the process's memory, which the operating
+    # system moves up and down between fits whether or not anything is kept
+    python_gc <- reticulate::import("gc", convert = FALSE)
+    count_objects <- function() {
+      # twice, as collecting Python's garbage frees R objects that hold more
+      # Python objects
+      for (round in 1:2) {
+        gc()
+        python_gc$collect()
+      }
+      reticulate::py_len(python_gc$get_objects())
+    }
+    # the first fits make objects TensorFlow keeps for the session
+    for (i in 1:3) {
+      fit()
+    }
+    before <- count_objects()
+    for (i in 1:2) {
+      fit()
+    }
+    count_objects() - before
+  })
+  expect_lt(growth, 1000)
+})
+
 test_that("samplers sharing a model get the draws they would get alone", {
   skip_if_not(check_tf_version())
   x <- normal(0, 1)

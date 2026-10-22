@@ -1323,3 +1323,44 @@ batch_crossprods <- function(inputs) {
   crossprods <- apply(inputs, 1, \(a) t(a) %*% a)
   aperm(array(crossprods, c(n_col, n_col, n_batch)), c(3, 1, 2))
 }
+
+# R's garbage collector, then Python's, then R's again: freeing an R object
+# can free a Python object, and that can free R objects only R's next run
+# collects
+collect_garbage <- function() {
+  gc()
+  reticulate::import("gc")$collect()
+  gc()
+}
+
+# how many instances of a Python class are alive once both R's and Python's
+# garbage collectors have run
+count_live_instances <- function(python_class) {
+  collect_garbage()
+  python <- reticulate::py_run_string(
+    "
+def count_instances(python_class):
+    import gc
+    gc.collect()
+    return sum(isinstance(o, python_class) for o in gc.get_objects())
+",
+    local = TRUE
+  )
+  python$count_instances(python_class)
+}
+
+# whether a model's dag is freed once fit() has used it and the model is
+# dropped
+dag_freed_after <- function(fit) {
+  freed <- FALSE
+  fit_and_drop <- function() {
+    x <- normal(0, 1, dim = 2)
+    m <- model(x)
+    reg.finalizer(m$dag, function(dag) freed <<- TRUE)
+    fit(m)
+    NULL
+  }
+  fit_and_drop()
+  collect_garbage()
+  freed
+}
