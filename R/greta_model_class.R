@@ -23,16 +23,13 @@ NULL
 #'   decrease the computation time but increase the risk of numerical
 #'   instability during sampling.
 #'
-#' @param compile whether to apply
-#'   [XLA JIT compilation](https://openxla.org/xla) to
-#'   the TensorFlow graph representing the model. This may slow down model
-#'   definition, and speed up model evaluation.
+#' @param compile `r lifecycle::badge("deprecated")` has no effect: greta has
+#'   not applied [XLA JIT compilation](https://openxla.org/xla) to models since
+#'   greta 0.5.0. It will be removed in a later release.
 #'
 #' @details `model()` takes greta arrays as arguments, and defines a
 #'   statistical model by finding all of the other greta arrays on which they
-#'   depend, or which depend on them. Further arguments to `model` can be
-#'   used to configure the TensorFlow graph representing the model, to tweak
-#'   performance.
+#'   depend, or which depend on them.
 #'
 #' @return `model` - a `greta_model` object.
 #'
