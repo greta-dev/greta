@@ -21,7 +21,8 @@ revdep/checks.noindex
 revdep/library.noindex
 
 testlog*.md
-.claude
+.claude/settings.local.json
+.claude/worktrees/
 .positai
 dev
 docs

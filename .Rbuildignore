@@ -62,4 +62,3 @@ _cache/$
 ^CONTRIBUTING\.md$
 ^_dev$
 ^AGENTS\.md$
-^CLAUDE\.md$
