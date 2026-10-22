@@ -132,6 +132,13 @@
       the cache holds them
       i See the installation vignette: `vignette(greta::installation)`.
 
+# report_offline_readiness() reports greta's own offline mode as automatic
+
+    Code
+      report_offline_readiness(plan, full, "1", character())
+    Message
+      v offline-ready: uv cache present, offline mode will engage
+
 # report_offline_readiness() says stored versions keep offline off
 
     Code

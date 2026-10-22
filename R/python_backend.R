@@ -185,13 +185,10 @@ apply_greta_python_plan <- function(plan) {
         packages = py_req$packages,
         python_version = py_req$python_version
       )
-      # the frozen-pins argument for offline mode (#814) only holds for the
-      # default pins; user-chosen versions may need one online resolve
-      if (is.null(stored_deps)) {
-        maybe_enable_uv_offline(
-          extra_packages = requirements_beyond_greta(py_req$packages)
-        )
-      }
+      maybe_enable_uv_offline(
+        extra_packages = requirements_beyond_greta(py_req$packages),
+        versions_stored = !is.null(stored_deps)
+      )
     },
     # "user" and "conda" both point at a specific Python
     Sys.setenv("RETICULATE_PYTHON" = plan$python)
@@ -342,22 +339,42 @@ requirements_beyond_greta <- function(
 # already populated (#814). greta pins the managed backend to a single minor
 # version of TensorFlow and TensorFlow Probability, so an installed environment
 # already satisfies greta's spec: uv never needs to reach PyPI again, and greta
-# can start on an offline / air-gapped machine. That holds only while greta's
-# packages are all that is required when greta loads; with any others, uv
-# resolves online. A UV_OFFLINE the user has already set, to anything, is left
-# alone.
+# can start on an offline / air-gapped machine. That holds only for greta's
+# default pins (versions stored with greta_set_deps() may need one online
+# resolve), and only while greta's packages are all that is required when greta
+# loads; with any others, uv resolves online. A UV_OFFLINE the user set before
+# greta loads, to anything, is left alone. One that greta set carries the marker
+# GRETA_UV_OFFLINE=auto, and is decided afresh: R processes started from a
+# session that loaded greta (reprex, callr, future workers) inherit both, and
+# may need different packages when they load greta.
 maybe_enable_uv_offline <- function(
   cache_status = greta_uv_cache_status(),
-  extra_packages
+  extra_packages,
+  versions_stored
 ) {
-  uv_offline_unset <- is.na(Sys.getenv("UV_OFFLINE", unset = NA))
-  enable_offline <- uv_offline_unset &&
-    isTRUE(cache_status$populated) &&
-    length(extra_packages) == 0
+  set_by_user <- !is.na(Sys.getenv("UV_OFFLINE", unset = NA)) &&
+    !uv_offline_set_by_greta()
+  if (set_by_user) {
+    return(invisible(FALSE))
+  }
+  enable_offline <- isTRUE(cache_status$populated) &&
+    length(extra_packages) == 0 &&
+    !versions_stored
   if (enable_offline) {
-    Sys.setenv(UV_OFFLINE = "1")
+    Sys.setenv(UV_OFFLINE = "1", GRETA_UV_OFFLINE = "auto")
+  } else {
+    Sys.unsetenv(c("UV_OFFLINE", "GRETA_UV_OFFLINE"))
   }
   invisible(enable_offline)
+}
+
+# whether UV_OFFLINE=1 is greta's own choice, marked by GRETA_UV_OFFLINE=auto,
+# rather than the user's
+uv_offline_set_by_greta <- function(
+  uv_offline = Sys.getenv("UV_OFFLINE", unset = ""),
+  marker = Sys.getenv("GRETA_UV_OFFLINE", unset = "")
+) {
+  identical(uv_offline, "1") && identical(marker, "auto")
 }
 
 # --- session invalidation on removal -------------------------------------------
@@ -513,7 +530,9 @@ report_offline_readiness <- function(
   }
   cache_populated <- isTRUE(cache_status$populated)
   others_required <- length(extra_packages) > 0
-  forced_offline <- identical(uv_offline, "1")
+  # greta's own UV_OFFLINE is reported as the automatic choice it is
+  forced_offline <- identical(uv_offline, "1") &&
+    !uv_offline_set_by_greta(uv_offline)
   forced_online <- identical(uv_offline, "0")
   forced_offline_with_others <- forced_offline &&
     cache_populated &&
@@ -770,7 +789,11 @@ check_greta_set_python_args <- function(
 #' `ipykernel` in Positron, and packages loaded before greta can add their own
 #' with [reticulate::py_require()]. Set `UV_OFFLINE=0` yourself to force online
 #' resolution (for example, to refresh the environment), or `UV_OFFLINE=1` to
-#' force offline mode - greta never overrides a value you have already set.
+#' force offline mode - greta never overrides a value you set before loading
+#' it. When greta enables offline mode itself, it also sets
+#' `GRETA_UV_OFFLINE=auto`, so an R process started from that session that
+#' loads greta (such as a reprex, a callr process or a future worker) decides
+#' afresh rather than taking greta's choice for yours.
 #'
 #' To check which Python greta is currently using, and which it will use
 #' after a restart, call [greta_sitrep()].

@@ -208,39 +208,97 @@ test_that("resolve_python_path() errors when nothing is found", {
 })
 
 test_that("maybe_enable_uv_offline() does nothing when the cache is absent", {
-  withr::local_envvar(UV_OFFLINE = NA)
+  withr::local_envvar(UV_OFFLINE = NA, GRETA_UV_OFFLINE = NA)
   status <- list(kind = "managed", populated = FALSE)
   expect_false(
-    maybe_enable_uv_offline(cache_status = status, extra_packages = character())
+    maybe_enable_uv_offline(
+      cache_status = status,
+      extra_packages = character(),
+      versions_stored = FALSE
+    )
   )
   expect_identical(Sys.getenv("UV_OFFLINE", unset = NA), NA_character_)
 })
 
-test_that("maybe_enable_uv_offline() enables offline when the cache is populated", {
-  withr::local_envvar(UV_OFFLINE = NA)
+test_that("maybe_enable_uv_offline() enables and marks offline mode when the cache is populated", {
+  withr::local_envvar(UV_OFFLINE = NA, GRETA_UV_OFFLINE = NA)
   status <- list(kind = "managed", populated = TRUE)
   expect_true(
-    maybe_enable_uv_offline(cache_status = status, extra_packages = character())
+    maybe_enable_uv_offline(
+      cache_status = status,
+      extra_packages = character(),
+      versions_stored = FALSE
+    )
   )
   expect_identical(Sys.getenv("UV_OFFLINE"), "1")
+  expect_identical(Sys.getenv("GRETA_UV_OFFLINE"), "auto")
 })
 
 test_that("maybe_enable_uv_offline() stays online when other packages are required", {
-  withr::local_envvar(UV_OFFLINE = NA)
+  withr::local_envvar(UV_OFFLINE = NA, GRETA_UV_OFFLINE = NA)
   status <- list(kind = "managed", populated = TRUE)
   expect_false(
-    maybe_enable_uv_offline(cache_status = status, extra_packages = "ipykernel")
+    maybe_enable_uv_offline(
+      cache_status = status,
+      extra_packages = "ipykernel",
+      versions_stored = FALSE
+    )
+  )
+  expect_identical(Sys.getenv("UV_OFFLINE", unset = NA), NA_character_)
+})
+
+test_that("maybe_enable_uv_offline() stays online with stored versions", {
+  withr::local_envvar(UV_OFFLINE = NA, GRETA_UV_OFFLINE = NA)
+  status <- list(kind = "managed", populated = TRUE)
+  expect_false(
+    maybe_enable_uv_offline(
+      cache_status = status,
+      extra_packages = character(),
+      versions_stored = TRUE
+    )
   )
   expect_identical(Sys.getenv("UV_OFFLINE", unset = NA), NA_character_)
 })
 
 test_that("maybe_enable_uv_offline() respects a pre-existing UV_OFFLINE", {
-  withr::local_envvar(UV_OFFLINE = "0")
+  # a stale marker beside a value other than "1" leaves the value the user's
+  withr::local_envvar(UV_OFFLINE = "0", GRETA_UV_OFFLINE = "auto")
   status <- list(kind = "managed", populated = TRUE)
   expect_false(
-    maybe_enable_uv_offline(cache_status = status, extra_packages = character())
+    maybe_enable_uv_offline(
+      cache_status = status,
+      extra_packages = character(),
+      versions_stored = FALSE
+    )
   )
   expect_identical(Sys.getenv("UV_OFFLINE"), "0")
+})
+
+test_that("maybe_enable_uv_offline() decides afresh on a UV_OFFLINE greta set", {
+  withr::local_envvar(UV_OFFLINE = "1", GRETA_UV_OFFLINE = "auto")
+  status <- list(kind = "managed", populated = TRUE)
+  expect_false(
+    maybe_enable_uv_offline(
+      cache_status = status,
+      extra_packages = "ipykernel",
+      versions_stored = FALSE
+    )
+  )
+  expect_identical(Sys.getenv("UV_OFFLINE", unset = NA), NA_character_)
+  expect_identical(Sys.getenv("GRETA_UV_OFFLINE", unset = NA), NA_character_)
+})
+
+test_that("maybe_enable_uv_offline() respects a UV_OFFLINE = 1 the user set", {
+  withr::local_envvar(UV_OFFLINE = "1", GRETA_UV_OFFLINE = NA)
+  status <- list(kind = "managed", populated = TRUE)
+  expect_false(
+    maybe_enable_uv_offline(
+      cache_status = status,
+      extra_packages = "ipykernel",
+      versions_stored = FALSE
+    )
+  )
+  expect_identical(Sys.getenv("UV_OFFLINE"), "1")
 })
 
 test_that("requirements_beyond_greta() leaves out greta's packages and numpy", {
@@ -286,16 +344,35 @@ local_py_require_manifest <- function(manifest_packages, env = parent.frame()) {
   )
 }
 
-test_that("apply_greta_python_plan() stays online when ipykernel is required", {
-  withr::local_envvar(UV_OFFLINE = NA, RETICULATE_PYTHON = NA)
+# a managed load on a populated uv cache: the offline environment variables,
+# the versions stored with greta_set_deps() (none by default), and reticulate's
+# requirements, `manifest_packages`
+local_managed_load <- function(
+  manifest_packages,
+  stored_deps = NULL,
+  uv_offline = NA,
+  marker = NA,
+  env = parent.frame()
+) {
+  withr::local_envvar(
+    UV_OFFLINE = uv_offline,
+    GRETA_UV_OFFLINE = marker,
+    RETICULATE_PYTHON = NA,
+    .local_envir = env
+  )
   local_mocked_bindings(
     greta_uv_cache_status = function(...) {
       list(kind = "managed", populated = TRUE)
     },
-    get_greta_stored_deps = function() NULL
+    get_greta_stored_deps = function() stored_deps,
+    .env = env
   )
+  local_py_require_manifest(manifest_packages, env = env)
+}
+
+test_that("apply_greta_python_plan() stays online when ipykernel is required", {
   greta_packages <- greta_py_require_args()$packages
-  local_py_require_manifest(c("numpy", "ipykernel", greta_packages))
+  local_managed_load(c("numpy", "ipykernel", greta_packages))
 
   apply_greta_python_plan(new_python_plan("managed", "default"))
 
@@ -303,19 +380,46 @@ test_that("apply_greta_python_plan() stays online when ipykernel is required", {
 })
 
 test_that("apply_greta_python_plan() goes offline when only greta's are required", {
-  withr::local_envvar(UV_OFFLINE = NA, RETICULATE_PYTHON = NA)
-  local_mocked_bindings(
-    greta_uv_cache_status = function(...) {
-      list(kind = "managed", populated = TRUE)
-    },
-    get_greta_stored_deps = function() NULL
-  )
   greta_packages <- greta_py_require_args()$packages
-  local_py_require_manifest(c("numpy", greta_packages))
+  local_managed_load(c("numpy", greta_packages))
 
   apply_greta_python_plan(new_python_plan("managed", "default"))
 
   expect_identical(Sys.getenv("UV_OFFLINE"), "1")
+})
+
+test_that("apply_greta_python_plan() stays online when it inherits greta's offline mode", {
+  # the environment of a process started from a session where greta enabled
+  # offline mode, as a reprex is
+  greta_packages <- greta_py_require_args()$packages
+  local_managed_load(
+    c("numpy", "ipykernel", greta_packages),
+    uv_offline = "1",
+    marker = "auto"
+  )
+
+  apply_greta_python_plan(new_python_plan("managed", "default"))
+
+  expect_identical(Sys.getenv("UV_OFFLINE", unset = NA), NA_character_)
+})
+
+test_that("apply_greta_python_plan() unsets greta's inherited offline mode when versions are stored", {
+  deps <- greta_deps_spec(
+    tf_version = "2.19.0",
+    tfp_version = greta_deps_default$tfp,
+    python_version = "3.11"
+  )
+  stored_packages <- greta_py_require_args("2.19.0", greta_deps_default$tfp)
+  local_managed_load(
+    c("numpy", stored_packages$packages),
+    stored_deps = deps,
+    uv_offline = "1",
+    marker = "auto"
+  )
+
+  apply_greta_python_plan(new_python_plan("managed", "default"))
+
+  expect_identical(Sys.getenv("UV_OFFLINE", unset = NA), NA_character_)
 })
 
 test_that("uv cache status: managed layout needs python and cache dirs", {
@@ -656,7 +760,10 @@ test_that("report_offline_readiness() warns when a non-managed python is gone", 
 })
 
 test_that("report_offline_readiness() reports managed backend states", {
-  withr::local_envvar(R_USER_CONFIG_DIR = withr::local_tempdir())
+  withr::local_envvar(
+    R_USER_CONFIG_DIR = withr::local_tempdir(),
+    GRETA_UV_OFFLINE = NA
+  )
   plan <- new_python_plan("managed", "default")
   empty <- list(kind = "managed", populated = FALSE)
   full <- list(kind = "managed", populated = TRUE)
@@ -670,12 +777,26 @@ test_that("report_offline_readiness() reports managed backend states", {
 })
 
 test_that("report_offline_readiness() names packages other than greta's", {
-  withr::local_envvar(R_USER_CONFIG_DIR = withr::local_tempdir())
+  withr::local_envvar(
+    R_USER_CONFIG_DIR = withr::local_tempdir(),
+    GRETA_UV_OFFLINE = NA
+  )
   plan <- new_python_plan("managed", "default")
   full <- list(kind = "managed", populated = TRUE)
 
   expect_snapshot(report_offline_readiness(plan, full, "", "ipykernel"))
   expect_snapshot(report_offline_readiness(plan, full, "1", "ipykernel"))
+})
+
+test_that("report_offline_readiness() reports greta's own offline mode as automatic", {
+  withr::local_envvar(
+    R_USER_CONFIG_DIR = withr::local_tempdir(),
+    GRETA_UV_OFFLINE = "auto"
+  )
+  plan <- new_python_plan("managed", "default")
+  full <- list(kind = "managed", populated = TRUE)
+
+  expect_snapshot(report_offline_readiness(plan, full, "1", character()))
 })
 
 test_that("report_offline_readiness() says stored versions keep offline off", {

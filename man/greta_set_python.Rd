@@ -70,7 +70,11 @@ when greta loads, since uv's cache may not hold them: reticulate adds
 \code{ipykernel} in Positron, and packages loaded before greta can add their own
 with \code{\link[reticulate:py_require]{reticulate::py_require()}}. Set \code{UV_OFFLINE=0} yourself to force online
 resolution (for example, to refresh the environment), or \code{UV_OFFLINE=1} to
-force offline mode - greta never overrides a value you have already set.
+force offline mode - greta never overrides a value you set before loading
+it. When greta enables offline mode itself, it also sets
+\code{GRETA_UV_OFFLINE=auto}, so an R process started from that session that
+loads greta (such as a reprex, a callr process or a future worker) decides
+afresh rather than taking greta's choice for yours.
 
 To check which Python greta is currently using, and which it will use
 after a restart, call \code{\link[=greta_sitrep]{greta_sitrep()}}.
