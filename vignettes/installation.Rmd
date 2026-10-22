@@ -214,8 +214,8 @@ When greta turns offline mode on itself, it also sets
 yours. An R process started from that session, such as a reprex, a callr
 process or a future worker, inherits both. If that process loads greta, greta
 decides afresh, since the process may need different Python packages. A
-`UV_OFFLINE` you set yourself carries no marker, so greta leaves it alone
-there too.
+`UV_OFFLINE` you set before loading greta carries no marker, so greta leaves
+it alone there too.
 
 ### Pin dependency versions
 
