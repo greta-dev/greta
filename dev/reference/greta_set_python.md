@@ -78,9 +78,21 @@ greta resolves which Python to use, in this order:
 
 For the managed (uv) environment, greta automatically enables uv's
 offline mode once the environment is installed, so it no longer reaches
-out to PyPI. Set `UV_OFFLINE=0` yourself to force online resolution (for
-example, to refresh the environment), or `UV_OFFLINE=1` to force offline
-mode - greta never overrides a value you have already set.
+out to PyPI. It does not when Python packages other than greta's are
+also required, since uv's cache may not hold them: reticulate adds
+`ipykernel` in Positron, and other packages can add their own with
+[`reticulate::py_require()`](https://rstudio.github.io/reticulate/reference/py_require.html).
+greta checks when it loads, and again just before it starts Python
+itself, turning its offline mode back off if any have been added since.
+Nor does it when you have stored versions with
+[`greta_set_deps()`](https://greta-dev.github.io/greta/dev/reference/greta_set_deps.md).
+Set `UV_OFFLINE=0` yourself to force online resolution (for example, to
+refresh the environment), or `UV_OFFLINE=1` to force offline mode -
+greta never overrides a value you set before loading it. When greta
+enables offline mode itself, it also sets `GRETA_UV_OFFLINE=auto`, so an
+R process started from that session that loads greta (such as a reprex,
+a callr process or a future worker) decides afresh rather than taking
+greta's choice for yours.
 
 To check which Python greta is currently using, and which it will use
 after a restart, call

@@ -142,9 +142,18 @@ Probability automatically on first use. No setup is needed - this happens
 "automagically".</p></li>
 </ol><p>For the managed (uv) environment, greta automatically enables uv's offline
 mode once the environment is installed, so it no longer reaches out to
-PyPI. Set <code>UV_OFFLINE=0</code> yourself to force online resolution (for example,
-to refresh the environment), or <code>UV_OFFLINE=1</code> to force offline mode -
-greta never overrides a value you have already set.</p>
+PyPI. It does not when Python packages other than greta's are also required,
+since uv's cache may not hold them: reticulate adds <code>ipykernel</code> in Positron,
+and other packages can add their own with <code><a href="https://rstudio.github.io/reticulate/reference/py_require.html" class="external-link">reticulate::py_require()</a></code>. greta
+checks when it loads, and again just before it starts Python itself, turning
+its offline mode back off if any have been added since. Nor does it when you
+have stored versions with <code><a href="greta_set_deps.html">greta_set_deps()</a></code>. Set <code>UV_OFFLINE=0</code> yourself to
+force online resolution (for example, to refresh the environment), or
+<code>UV_OFFLINE=1</code> to force offline mode - greta never overrides a value you set
+before loading it. When greta enables offline mode itself, it also sets
+<code>GRETA_UV_OFFLINE=auto</code>, so an R process started from that session that
+loads greta (such as a reprex, a callr process or a future worker) decides
+afresh rather than taking greta's choice for yours.</p>
 <p>To check which Python greta is currently using, and which it will use
 after a restart, call <code><a href="greta_sitrep.html">greta_sitrep()</a></code>.</p>
 <p>If a stored preference appears to be ignored, <code>RETICULATE_PYTHON</code> is

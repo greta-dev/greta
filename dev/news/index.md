@@ -363,9 +363,20 @@ CRAN release: 2026-07-20
   ([\#801](https://github.com/greta-dev/greta/issues/801)).
 - The managed (uv) backend now works without an internet connection, by
   enabling uv’s offline mode (via environment variable `UV_OFFLINE`)
-  once reticulate’s uv cache is installed. You can set `UV_OFFLINE=0`
-  (or `=1`) yourself to force online or offline resolution, respectively
-  ([\#814](https://github.com/greta-dev/greta/issues/814)).
+  once reticulate’s uv cache is installed. It stays online with versions
+  stored by
+  [`greta_set_deps()`](https://greta-dev.github.io/greta/dev/reference/greta_set_deps.md),
+  or when Python packages other than greta’s are required (such as
+  `ipykernel` in Positron, or a package’s own
+  [`reticulate::py_require()`](https://rstudio.github.io/reticulate/reference/py_require.html)
+  call), since the cache may not hold them; greta checks when it loads,
+  and again just before it starts Python itself. You can set
+  `UV_OFFLINE=0` (or `=1`) yourself to force online or offline
+  resolution, respectively; greta marks the value it sets with
+  `GRETA_UV_OFFLINE=auto`, so an R process started from that session
+  that loads greta, such as a reprex, decides afresh
+  ([\#814](https://github.com/greta-dev/greta/issues/814),
+  [\#860](https://github.com/greta-dev/greta/issues/860)).
 - Fixed [`library(greta)`](https://greta-dev.github.io/greta/) failing
   with an error when greta’s stored Python preference file exists but is
   empty ([\#809](https://github.com/greta-dev/greta/issues/809)).
@@ -425,13 +436,18 @@ CRAN release: 2026-07-20
   eases offline and pre-installed setups
   ([\#814](https://github.com/greta-dev/greta/issues/814)).
 - [`greta_sitrep()`](https://greta-dev.github.io/greta/dev/reference/greta_sitrep.md)
-  now reports the resolved Python backend and whether greta can start
-  offline: for the managed (uv) environment, the `UV_OFFLINE` setting
-  and whether reticulate’s uv cache is populated; a missing conda
-  environment is reported neutrally as “not used” on the managed (uv)
-  backend rather than as a failure
+  now reports greta’s version and where it came from (the repository it
+  was installed from, such as CRAN or r-universe; a GitHub commit; the
+  commit of a git checkout loaded with
+  [`devtools::load_all()`](https://devtools.r-lib.org/reference/load_all.html);
+  or a local install, which records no commit), the resolved Python
+  backend, and whether greta can start offline: for the managed (uv)
+  environment, the `UV_OFFLINE` setting and whether reticulate’s uv
+  cache is populated; a missing conda environment is reported neutrally
+  as “not used” on the managed (uv) backend rather than as a failure
   ([\#801](https://github.com/greta-dev/greta/issues/801),
-  [\#817](https://github.com/greta-dev/greta/issues/817)).
+  [\#817](https://github.com/greta-dev/greta/issues/817),
+  [\#860](https://github.com/greta-dev/greta/issues/860)).
 - [`greta_sitrep()`](https://greta-dev.github.io/greta/dev/reference/greta_sitrep.md)
   now requires Python 3.9 or later (previously 3.8), matching the Python
   versions greta supports

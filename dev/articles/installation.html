@@ -150,7 +150,8 @@ first thing to include if you ask for help:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/greta_sitrep.html">greta_sitrep</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p>On a machine that’s ready to go, you’ll see something like this:</p>
-<pre><code><span><span class="co">#&gt; ℹ checking if python available</span></span>
+<pre><code><span><span class="co">#&gt; ℹ greta 0.6.0.9000 from https://greta-dev.r-universe.dev</span></span>
+<span><span class="co">#&gt; ℹ checking if python available</span></span>
 <span><span class="co">#&gt; ✔ python (v3.12) available</span></span>
 <span><span class="co">#&gt;</span></span>
 <span><span class="co">#&gt; ℹ checking if TensorFlow available</span></span>
@@ -254,9 +255,26 @@ while online: run <code><a href="https://greta-dev.github.io/greta/">library(gre
 example <code>normal(0, 1)</code>), and you’re done. On its next start,
 greta detects the populated cache and enables <code>uv</code>’s offline
 mode automatically, so it no longer reaches out to PyPI.</p>
-<p>You can override this yourself by setting the <code>UV_OFFLINE</code>
-environment variable before loading greta; greta never touches a value
-you’ve already set:</p>
+<p>greta only does this when its own packages are all that Python needs,
+since the cache may not hold anything else. Offline mode doesn’t engage
+automatically:</p>
+<ul>
+<li>when other Python packages are required when greta loads, or other
+versions of the ones greta uses, such as <code>numpy&lt;2</code> or
+<code>tensorflow[and-cuda]</code>. In Positron, reticulate also requires
+<code>ipykernel</code>, and any package can require its own with
+<code><a href="https://rstudio.github.io/reticulate/reference/py_require.html" class="external-link">reticulate::py_require()</a></code>. If one does so after greta has
+loaded, greta turns its offline mode back off just before greta itself
+starts Python.</li>
+<li>when you have stored any versions with
+<code><a href="../reference/greta_set_deps.html">greta_set_deps()</a></code>, even greta’s defaults (see <a href="#pin-dependency-versions">Pin dependency versions</a>).</li>
+</ul>
+<p>Once the cache holds everything Python needs (for example, after
+greta has started once in Positron while online), you can turn offline
+mode on yourself, as below.</p>
+<p>You can override greta’s choice by setting the
+<code>UV_OFFLINE</code> environment variable before loading greta; greta
+never changes a value you set before loading it:</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># force offline mode: e.g. before greta detects the cache, or on a machine</span></span>
 <span><span class="co"># where you copied the cache over</span></span>
@@ -267,6 +285,13 @@ you’ve already set:</p>
 <p>To make either choice persistent, set <code>UV_OFFLINE=1</code> (or
 <code>UV_OFFLINE=0</code>) in <code>~/.Renviron</code> instead (no
 <code><a href="https://rdrr.io/r/base/Sys.setenv.html" class="external-link">Sys.setenv()</a></code> needed there).</p>
+<p>When greta turns offline mode on itself, it also sets
+<code>GRETA_UV_OFFLINE=auto</code>, to mark <code>UV_OFFLINE=1</code> as
+its choice rather than yours. An R process started from that session,
+such as a reprex, a callr process or a future worker, inherits both. If
+that process loads greta, greta decides afresh, since the process may
+need different Python packages. A <code>UV_OFFLINE</code> you set before
+loading greta carries no marker, so greta leaves it alone there too.</p>
 </div>
 <div class="section level4">
 <h4 id="pin-dependency-versions">Pin dependency versions<a class="anchor" aria-label="anchor" href="#pin-dependency-versions"></a>
@@ -275,10 +300,12 @@ you’ve already set:</p>
 machine, pin the versions greta expects with
 <code><a href="../reference/greta_set_deps.html">greta_set_deps()</a></code> so the two match (see <a href="#i-need-specific-dependency-versions">I need specific dependency
 versions</a>). The stored versions are used by both the managed (uv)
-environment and <code><a href="../reference/install_greta_deps.html">install_greta_deps()</a></code>. Note that pinning
-<em>non-default</em> versions this way means the managed environment may
-still need one further online resolve even after priming the cache,
-since greta’s offline shortcut is tied to its own default pins.</p>
+environment and <code><a href="../reference/install_greta_deps.html">install_greta_deps()</a></code>. While any versions
+are stored this way, even greta’s defaults, greta doesn’t turn on
+<code>uv</code>’s offline mode itself, since the cache may not hold
+them. Once the managed environment has been installed with the stored
+versions, set <code>UV_OFFLINE=1</code> in <code>~/.Renviron</code> to
+start offline.</p>
 <p>If your connection drops partway through – for example greta errors
 on first use with a message from <code>uv</code> like
 <code>error: Failed to fetch</code> (or, with <code>UV_OFFLINE=1</code>
@@ -598,16 +625,45 @@ set)
 connection. To recover:</p>
 <ol style="list-style-type: decimal">
 <li>If greta’s environment had already been installed on this machine,
-force offline mode with <code>Sys.setenv(UV_OFFLINE = "1")</code> (or in
-<code>~/.Renviron</code>), then restart R: <code>uv</code> then resolves
-from its cache without touching the network.</li>
+set <code>UV_OFFLINE=1</code> in <code>~/.Renviron</code> and restart R:
+<code>uv</code> then resolves from its cache without touching the
+network.</li>
 <li>If it had not, reconnect once and use greta (for example
 <code>normal(0, 1)</code>) to prime the environment; after that greta
-starts offline automatically.</li>
+starts offline automatically, except in the cases listed in <a href="#prime-the-managed-uv-environment-while-online">Prime the managed
+(uv) environment while online</a>.</li>
 <li>If you cannot reconnect, point greta at an already-installed Python
 – see <a href="#i-already-have-python-or-tensorflow-installed">I already
 have Python or TensorFlow installed</a> – and restart R.</li>
 </ol>
+<p><strong>greta says something like
+<code>ipykernel was not found in the cache</code> and
+<code>the network was disabled</code>, for example in
+Positron.</strong></p>
+<ul>
+<li>
+<p><code>uv</code> was in offline mode, and Python needed a package
+that its cache doesn’t hold. In Positron, reticulate requires
+<code>ipykernel</code>, which a cache filled in RStudio or a terminal
+won’t have. To recover:</p>
+<ol style="list-style-type: decimal">
+<li>In a fresh R session, while online, run
+<code>Sys.setenv(UV_OFFLINE = "0")</code> before
+<code><a href="https://greta-dev.github.io/greta/">library(greta)</a></code>, then use greta once (for example
+<code>normal(0, 1)</code>), so <code>uv</code> downloads the missing
+package and caches it.</li>
+<li>If the machine is usually offline, such as a Positron machine
+without a network, then set <code>UV_OFFLINE=1</code> in
+<code>~/.Renviron</code> and restart R. greta won’t turn offline mode on
+by itself while packages other than its own are required, but the cache
+now holds them.</li>
+</ol>
+<p>If another package starts Python first, or packages are required
+after Python has started, set <code>UV_OFFLINE=0</code> before loading
+greta, since greta turns its offline mode back off only before a Python
+start it makes itself.</p>
+</li>
+</ul>
 <p><strong>I used <code><a href="../reference/install_greta_deps.html">install_greta_deps()</a></code> and want to see what
 happened, or it seems to have failed.</strong></p>
 <ul>
