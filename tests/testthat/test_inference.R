@@ -725,6 +725,27 @@ test_that("a numerical error stops mcmc() with the one_by_one advice", {
   )
 })
 
+test_that("stashed_samples() has no draws when several chains stop before one", {
+  skip_if_not(check_tf_version())
+  local_greta_seed()
+  r <- normal(0, 1)
+  m <- singular_at_one_model(r)
+
+  expect_error(
+    mcmc(
+      m,
+      sampler = rwmh(epsilon = 1),
+      warmup = 0,
+      n_samples = 40,
+      chains = 2,
+      initial_values = list(initials(r = 0.2), initials(r = -0.2)),
+      verbose = FALSE
+    ),
+    "one_by_one = TRUE"
+  )
+  expect_identical(stashed_samples(), list(NULL))
+})
+
 test_that("a numerical error with one_by_one repeats the draw before it", {
   skip_if_not(check_tf_version())
   local_greta_seed()

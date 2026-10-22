@@ -68,6 +68,7 @@
 * `mcmc()` gives its error suggesting `one_by_one = TRUE` when a numerical error stops sampling before its first draw, which with `verbose = FALSE` is any numerical error, rather than "subscript out of bounds" (#577).
 * `mcmc()`'s progress bar reaches its total when `pb_update` does not divide the number of iterations, and fills in step with the iterations run; a bar could read 1010/1010 while still empty (#318).
 * `opt()`'s `convergence` comes from the optimiser: `bfgs()` and `nelder_mead()` report it, and a Keras optimiser such as `adam()` has converged when its last step changed the objective by no more than `tolerance`, rather than being guessed from whether it stopped before `max_iterations - 1` (#569).
+* `stashed_samples()` returns no draws when `mcmc()` with more than one chain stopped before its first draw, rather than erroring with "length of 'dimnames' [2] not equal to array extent" (#577).
 
 ## Deprecated and defunct
 
