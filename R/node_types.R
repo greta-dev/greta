@@ -3,11 +3,7 @@ unbatched_tf_name <- function(tf_name) {
   sprintf("%s_unbatched", tf_name)
 }
 
-# the tensor an operation that can use unbatched data reads from one parent: a
-# data parent's single copy if it has one, otherwise the parent's own tensor. A
-# data node stores its single copy only when it is defined as a constant or a
-# variable; one that arrives batched (drawn data, fixed values with nsim above 1
-# or in hybrid mode, an as_tf_function() input) has none
+# a data parent's single copy, if it stored one; otherwise its batched tensor
 operand_tensor <- function(node, tf_name, tfe) {
   unbatched_name <- unbatched_tf_name(tf_name)
   has_single_copy <- is.data_node(node) &&

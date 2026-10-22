@@ -122,16 +122,11 @@ NULL
 #' @export %*%
 NULL
 
-# base R's own %*%, exported so that packages importing %*% from greta (such
-# as greta.gp) still find it
+# re-exported for packages that import %*% from greta, such as greta.gp
 `%*%` <- base::`%*%`
 
-# R's matrixOps group generic dispatches here when either operand is a greta
-# array, so the other may be an R matrix or vector. The method is registered
-# against base's %*% because greta's own %*% binding above, there for packages
-# such as greta.gp that import %*% from greta, would make a plain S3method()
-# file it in greta's S3 table, where base R's %*% called from outside greta
-# does not look
+# registered on base's %*%: a plain S3method() would file it under greta's own
+# %*% above, where base R doesn't look
 #' @rawNamespace S3method(base::"%*%", greta_array)
 #' @exportS3Method NULL
 `%*%.greta_array` <- function(x, y) {
@@ -164,9 +159,7 @@ NULL
   )
 }
 
-# the call that reached %*%.greta_array, as x %*% y: R's dispatch calls the
-# method by its own name. Passed as a check's `call`, it is built only when the
-# check fails
+# x %*% y as the call errors name, rather than the method's own name
 matmul_error_call <- function() {
   error_call <- rlang::caller_call()
   error_call[[1]] <- as.name("%*%")

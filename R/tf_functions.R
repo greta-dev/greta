@@ -526,10 +526,8 @@ tf_rbind <- function(...) {
   tf$concat(elem_list, axis = 1L)
 }
 
-# multiply a matrix by data. A data operand handed over as its single copy has
-# a leading dimension of 1, so einsum shares that one matrix across the batch
-# of the other operand. Data that arrives batched (drawn data, fixed values with
-# nsim above 1 or in hybrid mode, an as_tf_function() input) goes to tf$matmul.
+# einsum shares data's single copy across the other operand's batch; data that
+# arrives batched goes to tf$matmul
 tf_matmul_data <- function(x, y, data_side) {
   data <- switch(data_side, left = x, right = y)
   data_is_single_copy <- isTRUE(dim(data)[[1]] == 1L)
