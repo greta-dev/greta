@@ -247,6 +247,26 @@ beta_binomial_distribution <- R6Class(
   )
 )
 
+# Sample from `constructor(parameters)`, giving NaN where `valid` is FALSE.
+# Invalid elements are swapped for placeholders first, as TFP's Poisson sampler
+# never returns for a NaN rate on the CPU.
+tf_sample_where_valid <- function(
+  constructor,
+  parameters,
+  placeholders,
+  valid,
+  seed
+) {
+  safe_parameters <- Map(
+    \(parameter, placeholder) tf$where(valid, parameter, placeholder),
+    parameters,
+    placeholders
+  )
+  distribution <- do.call(constructor, safe_parameters)
+  draws <- distribution$sample(seed = seed)
+  tf$where(valid, draws, fl(NaN))
+}
+
 poisson_distribution <- R6Class(
   "poisson_distribution",
   inherit = distribution_node,
@@ -272,7 +292,24 @@ poisson_distribution <- R6Class(
         log_lambda <- tf$math$log(parameters$lambda)
       }
 
-      tfp$distributions$Poisson(log_rate = log_lambda)
+      distribution <- tfp$distributions$Poisson(log_rate = log_lambda)
+
+      sample <- function(seed) {
+        # the log of a negative lambda is NaN too
+        lambda_is_valid <- !tf$math$is_nan(log_lambda)
+        tf_sample_where_valid(
+          constructor = tfp$distributions$Poisson,
+          parameters = list(log_rate = log_lambda),
+          placeholders = list(log_rate = fl(0)),
+          valid = lambda_is_valid,
+          seed = seed
+        )
+      }
+
+      list(
+        log_prob = distribution$log_prob,
+        sample = sample
+      )
     }
   )
 )
@@ -294,9 +331,31 @@ negative_binomial_distribution <- R6Class(
 
     # nolint start
     tf_distrib = function(parameters, dag) {
-      tfp$distributions$NegativeBinomial(
-        total_count = parameters$size,
-        probs = fl(1) - parameters$prob
+      size <- parameters$size
+      probs <- fl(1) - parameters$prob
+      distribution <- tfp$distributions$NegativeBinomial(
+        total_count = size,
+        probs = probs
+      )
+
+      sample <- function(seed) {
+        # TFP's Poisson rate, a gamma draw times probs / (1 - probs), is NaN
+        # for a NaN or negative size, probs outside [0, 1), or Inf times 0
+        size_is_valid <- size >= fl(0)
+        probs_is_valid <- probs >= fl(0) & probs < fl(1)
+        rate_is_inf_times_zero <- tf$math$is_inf(size) & probs == fl(0)
+        tf_sample_where_valid(
+          constructor = tfp$distributions$NegativeBinomial,
+          parameters = list(total_count = size, probs = probs),
+          placeholders = list(total_count = fl(1), probs = fl(0.5)),
+          valid = size_is_valid & probs_is_valid & !rate_is_inf_times_zero,
+          seed = seed
+        )
+      }
+
+      list(
+        log_prob = distribution$log_prob,
+        sample = sample
       )
     }
     # nolint end

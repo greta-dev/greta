@@ -109,8 +109,9 @@ local_install_stash <- function(..., .local_envir = parent.frame()) {
 
 # run func(...) in a fresh R session with the greta under test: the source tree
 # under devtools::test(), the installed build under R CMD check. A bare
-# library(greta) would load whatever was last installed
-in_fresh_greta <- function(func, ...) {
+# library(greta) would load whatever was last installed. The session is killed,
+# and in_fresh_greta() errors, if it runs for longer than timeout seconds
+in_fresh_greta <- function(func, ..., timeout = Inf) {
   # so callr does not serialise the caller's environment, and the greta arrays
   # in it. func therefore sees only its arguments, not the caller's variables
   environment(func) <- globalenv()
@@ -128,7 +129,8 @@ in_fresh_greta <- function(func, ...) {
       args = list(...),
       greta_path = getNamespaceInfo("greta", "path"),
       dev = pkgload::is_dev_package("greta")
-    )
+    ),
+    timeout = timeout
   )
 }
 
