@@ -306,7 +306,10 @@ poisson_distribution <- R6Class(
         )
       }
 
-      list(log_prob = distribution$log_prob, sample = sample)
+      list(
+        log_prob = distribution$log_prob,
+        sample = sample
+      )
     }
   )
 )
@@ -350,7 +353,10 @@ negative_binomial_distribution <- R6Class(
         )
       }
 
-      list(log_prob = distribution$log_prob, sample = sample)
+      list(
+        log_prob = distribution$log_prob,
+        sample = sample
+      )
     }
     # nolint end
   )
