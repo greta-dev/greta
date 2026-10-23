@@ -8,7 +8,11 @@ inference can be performed on `greta_model` objects with
 ## Usage
 
 ``` r
-model(..., precision = c("double", "single"), compile = TRUE)
+model(
+  ...,
+  precision = c("double", "single"),
+  compile = lifecycle::deprecated()
+)
 
 # S3 method for class 'greta_model'
 print(x, ...)
@@ -36,9 +40,10 @@ plot(x, y, colour = "#996bc7", ...)
 
 - compile:
 
-  whether to apply [XLA JIT compilation](https://openxla.org/xla) to the
-  TensorFlow graph representing the model. This may slow down model
-  definition, and speed up model evaluation.
+  **\[deprecated\]** has no effect: greta has not applied [XLA JIT
+  compilation](https://openxla.org/xla) to models since greta 0.5.0.,
+  and exploring it's usage didn't lead to reasonable improvements. It
+  will be removed in a later release.
 
 - x:
 
@@ -66,9 +71,7 @@ object used to create it as an attribute `"dgr_graph"`.
 
 `model()` takes greta arrays as arguments, and defines a statistical
 model by finding all of the other greta arrays on which they depend, or
-which depend on them. Further arguments to `model` can be used to
-configure the TensorFlow graph representing the model, to tweak
-performance.
+which depend on them.
 
 The plot method produces a visual representation of the defined model.
 It uses the `DiagrammeR` package, which must be installed first. Here's

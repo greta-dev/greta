@@ -149,6 +149,8 @@
 <div class="section level3">
 <h3 id="deprecated-and-defunct-development-version">Deprecated and defunct<a class="anchor" aria-label="anchor" href="#deprecated-and-defunct-development-version"></a></h3>
 <ul><li>The <code>greta_deps_tf_tfp</code> dataset is deprecated and will be removed. It is a fixed snapshot that stops at TensorFlow 2.15.1, so it gives the wrong answer about which versions work; greta instead tests a range of TensorFlow versions weekly on Linux, macOS and Windows (<a href="https://github.com/greta-dev/greta/issues/633" class="external-link">#633</a>).</li>
+<li>
+<code><a href="../reference/model.html">model()</a></code>’s <code>compile</code> argument is deprecated and warns when supplied: it has had no effect since greta 0.5.0, which stopped applying XLA JIT compilation, and it will be removed in a later release (<a href="https://github.com/greta-dev/greta/issues/857" class="external-link">#857</a>).</li>
 </ul></div>
 <div class="section level3">
 <h3 id="internal-changes-development-version">Internal changes<a class="anchor" aria-label="anchor" href="#internal-changes-development-version"></a></h3>

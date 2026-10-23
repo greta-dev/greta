@@ -306,6 +306,11 @@
   wrong answer about which versions work; greta instead tests a range of
   TensorFlow versions weekly on Linux, macOS and Windows
   ([\#633](https://github.com/greta-dev/greta/issues/633)).
+- [`model()`](https://greta-dev.github.io/greta/dev/reference/model.md)’s
+  `compile` argument is deprecated and warns when supplied: it has had
+  no effect since greta 0.5.0, which stopped applying XLA JIT
+  compilation, and it will be removed in a later release
+  ([\#857](https://github.com/greta-dev/greta/issues/857)).
 
 ### Internal changes
 
