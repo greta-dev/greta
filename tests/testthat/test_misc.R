@@ -60,6 +60,20 @@ test_that("greta_model objects print", {
   expect_identical(message, "greta model")
 })
 
+test_that("model() warns that compile is deprecated, whatever its value", {
+  skip_if_not(check_tf_version())
+  # warn on every call, not once per session
+  withr::local_options(lifecycle_verbosity = "warning")
+
+  x <- normal(0, 1)
+  expect_snapshot_warning(
+    model(x, compile = TRUE),
+    class = "lifecycle_warning_deprecated"
+  )
+  lifecycle::expect_deprecated(model(x, compile = FALSE))
+  expect_no_warning(model(x))
+})
+
 test_that("define and mcmc error informatively", {
   skip_if_not(check_tf_version())
 

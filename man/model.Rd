@@ -6,7 +6,11 @@
 \alias{plot.greta_model}
 \title{greta model objects}
 \usage{
-model(..., precision = c("double", "single"), compile = TRUE)
+model(
+  ...,
+  precision = c("double", "single"),
+  compile = lifecycle::deprecated()
+)
 
 \method{print}{greta_model}(x, ...)
 
@@ -25,10 +29,10 @@ model. Switching from \code{"double"} (the default) to \code{"single"} may
 decrease the computation time but increase the risk of numerical
 instability during sampling.}
 
-\item{compile}{whether to apply
-\href{https://openxla.org/xla}{XLA JIT compilation} to
-the TensorFlow graph representing the model. This may slow down model
-definition, and speed up model evaluation.}
+\item{compile}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}} has no effect: greta has
+not applied \href{https://openxla.org/xla}{XLA JIT compilation} to models since
+greta 0.5.0., and exploring it's usage didn't lead to reasonable
+improvements. It will be removed in a later release.}
 
 \item{x}{a \code{greta_model} object}
 
@@ -54,9 +58,7 @@ with \code{\link[=mcmc]{mcmc()}}
 \details{
 \code{model()} takes greta arrays as arguments, and defines a
 statistical model by finding all of the other greta arrays on which they
-depend, or which depend on them. Further arguments to \code{model} can be
-used to configure the TensorFlow graph representing the model, to tweak
-performance.
+depend, or which depend on them.
 
 The plot method produces a visual representation of the defined
 model. It uses the \code{DiagrammeR} package, which must be installed

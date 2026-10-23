@@ -29,6 +29,11 @@
       i Run `greta::greta_sitrep()` to check your installation.
       i For offline and conda installs, see the installation vignette (`vignette(greta::installation)`).
 
+# model() warns that compile is deprecated, whatever its value
+
+    The `compile` argument of `model()` is deprecated as of greta 0.7.0.
+    i It has had no effect since greta 0.5.0, which stopped applying XLA JIT compilation to models.
+
 # define and mcmc error informatively
 
     Code
