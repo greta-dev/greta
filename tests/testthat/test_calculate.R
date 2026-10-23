@@ -167,6 +167,17 @@ test_that("calculate with greta_mcmc_list doesn't lose track of new nodes", {
   expect_identical(as.matrix(y_draws)[, 1], as.matrix(draws)[, 1] * 2)
 })
 
+test_that("calculate() with greta_mcmc_list objects leaves no graph behind", {
+  skip_if_not(check_tf_version())
+
+  z <- normal(0, 1)
+  m <- model(z)
+  draws <- mcmc(m, warmup = 10, n_samples = 10, chains = 1, verbose = FALSE)
+
+  calculate_doubled <- \() calculate(z * 2, values = draws)
+  expect_lte(live_instance_growth(tf$Graph, calculate_doubled), 0)
+})
+
 test_that("stochastic calculate works with greta_mcmc_list objects", {
   skip_if_not(check_tf_version())
 
