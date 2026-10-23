@@ -25,7 +25,8 @@ NULL
 #'
 #' @param compile `r lifecycle::badge("deprecated")` has no effect: greta has
 #'   not applied [XLA JIT compilation](https://openxla.org/xla) to models since
-#'   greta 0.5.0. It will be removed in a later release.
+#'   greta 0.5.0., and exploring it's usage didn't lead to reasonable
+#'   improvements. It will be removed in a later release.
 #'
 #' @details `model()` takes greta arrays as arguments, and defines a
 #'   statistical model by finding all of the other greta arrays on which they

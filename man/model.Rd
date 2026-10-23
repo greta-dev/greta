@@ -31,7 +31,8 @@ instability during sampling.}
 
 \item{compile}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}} has no effect: greta has
 not applied \href{https://openxla.org/xla}{XLA JIT compilation} to models since
-greta 0.5.0. It will be removed in a later release.}
+greta 0.5.0., and exploring it's usage didn't lead to reasonable
+improvements. It will be removed in a later release.}
 
 \item{x}{a \code{greta_model} object}
 
