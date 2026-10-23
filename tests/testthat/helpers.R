@@ -474,6 +474,20 @@ singular_at_one_model <- function(r) {
   model(r)
 }
 
+# put back the samplers and TensorFlow error that an aborted mcmc() stashes,
+# when the caller exits
+local_sampler_stash <- function(.local_envir = parent.frame()) {
+  fields <- c("samplers", "tf_num_error")
+  old <- mget(intersect(fields, ls(greta_stash)), envir = greta_stash)
+  withr::defer(
+    {
+      rm(list = intersect(fields, ls(greta_stash)), envir = greta_stash)
+      list2env(old, envir = greta_stash)
+    },
+    envir = .local_envir
+  )
+}
+
 # random lkj draws, code from the rethinking package (can't load the package
 # because of stan*Travis*compiler issues)
 rlkjcorr <- function(n, eta = 1, dimension = 2) {

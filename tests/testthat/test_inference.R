@@ -708,6 +708,7 @@ test_that("a numerical error at the end of warmup still tunes", {
 test_that("a numerical error stops mcmc() with the one_by_one advice", {
   skip_if_not(check_tf_version())
   local_greta_seed()
+  local_sampler_stash()
   r <- normal(0, 1)
   m <- singular_at_one_model(r)
 
@@ -728,6 +729,7 @@ test_that("a numerical error stops mcmc() with the one_by_one advice", {
 test_that("stashed_samples() has no draws when several chains stop before one", {
   skip_if_not(check_tf_version())
   local_greta_seed()
+  local_sampler_stash()
   r <- normal(0, 1)
   m <- singular_at_one_model(r)
 
