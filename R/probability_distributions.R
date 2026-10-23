@@ -247,11 +247,9 @@ beta_binomial_distribution <- R6Class(
   )
 )
 
-# Sample from the TFP distribution that `constructor` builds from `parameters`,
-# giving NaN wherever `valid` is FALSE. TFP samples a Poisson on the CPU, and a
-# negative binomial on any device, with tf.random.stateless_poisson(), which on
-# the CPU never returns when a rate is NaN, so the invalid elements of each
-# parameter are swapped for its placeholder before they reach the sampler.
+# Sample from `constructor(parameters)`, giving NaN where `valid` is FALSE.
+# Invalid elements are swapped for placeholders first, as TFP's Poisson sampler
+# never returns for a NaN rate on the CPU.
 tf_sample_where_valid <- function(
   constructor,
   parameters,
@@ -338,9 +336,8 @@ negative_binomial_distribution <- R6Class(
       )
 
       sample <- function(seed) {
-        # TFP draws a Poisson whose rate is a gamma draw times
-        # probs / (1 - probs). That rate can be NaN for a NaN or negative size,
-        # probs outside [0, 1), or an infinite size with probs of 0
+        # TFP's Poisson rate, a gamma draw times probs / (1 - probs), is NaN
+        # for a NaN or negative size, probs outside [0, 1), or Inf times 0
         size_is_valid <- size >= fl(0)
         probs_is_valid <- probs >= fl(0) & probs < fl(1)
         rate_is_inf_times_zero <- tf$math$is_inf(size) & probs == fl(0)
