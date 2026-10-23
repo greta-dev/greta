@@ -66,8 +66,10 @@
 * `[<-` on a greta array fills a matrix or array replacement column by column, as R does (#844).
 * `calculate()` and `simulate()` draw `NaN` when sampling and given invalid parameters. Applies to `poisson()` and `negative_binomial()`, because TensorFlow's Poisson sampler on the CPU never returns for a NaN rate (#617).
 * `mcmc()` and `extra_samples()` keep `n_samples %/% thin` draws, regardless of values of `pb_update` and `one_by_one`. A burst shorter than `thin` used to error, as in a final partial burst, `one_by_one = TRUE` with `thin` above 1, or `extra_samples()` with `pb_update` at or below `thin`. They run all `n_samples` iterations even when `thin` does not divide it, `one_by_one = TRUE` rejects only the proposal that caused a numerical error, and a `thin` larger than `n_samples` is an informative error (#241, #318, #567, #609).
+* `mcmc()` gives its error suggesting `one_by_one = TRUE` when a numerical error stops sampling before its first draw, which with `verbose = FALSE` is any numerical error, rather than "subscript out of bounds" (#577).
 * `mcmc()`'s progress bar reaches its total when `pb_update` does not divide the number of iterations, and fills in step with the iterations run; a bar could read 1010/1010 while still empty (#318).
 * `opt()`'s `convergence` comes from the optimiser: `bfgs()` and `nelder_mead()` report it, and a Keras optimiser such as `adam()` has converged when its last step changed the objective by no more than `tolerance`, rather than being guessed from whether it stopped before `max_iterations - 1` (#569).
+* `stashed_samples()` returns no draws when `mcmc()` with more than one chain stopped before its first draw, rather than erroring with "length of 'dimnames' [2] not equal to array extent" (#577).
 
 ## Deprecated and defunct
 

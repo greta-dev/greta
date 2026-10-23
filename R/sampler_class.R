@@ -516,13 +516,21 @@ sampler <- R6Class(
           "This will slow down the sampler slightly.",
           "The error encountered can be recovered and viewed with:",
           "{.code greta_notes_tf_num_error()}"
-        )
+        ),
+        # the methods this is raised from mean nothing to the user
+        call = NULL
       )
     },
 
     # convert traced free state to the traced values, accounting for
     # chain dimension
     trace_values = function(trace_batch_size) {
+      # dag$trace_values() fails on a trace with no rows, and on.exit() calls
+      # this after an error too, where failing would replace that error
+      no_draws <- nrow(self$traced_free_state[[1]]) == 0
+      if (no_draws) {
+        return(NULL)
+      }
       self$traced_values <- lapply(
         self$traced_free_state,
         self$model$dag$trace_values,

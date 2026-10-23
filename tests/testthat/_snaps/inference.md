@@ -229,6 +229,19 @@
       ! `Lmin` must not be larger than `Lmax`
       x `Lmin` is 10 and `Lmax` is 5
 
+# a numerical error stops mcmc() with the one_by_one advice
+
+    Code
+      mcmc(m, sampler = rwmh(epsilon = 1), warmup = 0, n_samples = 40, chains = 1,
+      initial_values = initials(r = 0.2), verbose = FALSE)
+    Condition
+      Error:
+      ! TensorFlow hit a numerical problem that caused it to error
+      greta can handle these as bad proposals if you rerun `mcmc()` with the argument `one_by_one = TRUE`.
+      This will slow down the sampler slightly.
+      The error encountered can be recovered and viewed with:
+      `greta_notes_tf_num_error()`
+
 # thin larger than n_samples is an informative error
 
     Code

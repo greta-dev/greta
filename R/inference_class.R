@@ -43,7 +43,7 @@ inference <- R6Class(
       self$set_initial_values(initial_values)
       # maybe inefficient-  potentially speed up?
 
-      self$n_traced <- length(model$dag$trace_values(self$free_state))
+      self$n_traced <- ncol(model$dag$trace_values(self$free_state))
       self$seed <- seed
     },
 
