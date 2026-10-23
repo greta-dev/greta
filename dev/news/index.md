@@ -267,6 +267,14 @@
 - `[<-` on a greta array fills a matrix or array replacement column by
   column, as R does
   ([\#844](https://github.com/greta-dev/greta/issues/844)).
+- [`calculate()`](https://greta-dev.github.io/greta/dev/reference/calculate.md)
+  and [`simulate()`](https://rdrr.io/r/stats/simulate.html) draw `NaN`
+  when sampling and given invalid parameters. Applies to
+  [`poisson()`](https://greta-dev.github.io/greta/dev/reference/distributions.md)
+  and
+  [`negative_binomial()`](https://greta-dev.github.io/greta/dev/reference/distributions.md),
+  because TensorFlow’s Poisson sampler on the CPU never returns for a
+  NaN rate ([\#617](https://github.com/greta-dev/greta/issues/617)).
 - [`mcmc()`](https://greta-dev.github.io/greta/dev/reference/inference.md)
   and
   [`extra_samples()`](https://greta-dev.github.io/greta/dev/reference/inference.md)
