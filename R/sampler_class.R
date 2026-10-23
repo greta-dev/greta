@@ -529,7 +529,7 @@ sampler <- R6Class(
       # this after an error too, where failing would replace that error
       no_draws <- nrow(self$traced_free_state[[1]]) == 0
       if (no_draws) {
-        return()
+        return(NULL)
       }
       self$traced_values <- lapply(
         self$traced_free_state,
