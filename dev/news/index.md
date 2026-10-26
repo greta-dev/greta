@@ -290,6 +290,11 @@
   [\#318](https://github.com/greta-dev/greta/issues/318),
   [\#567](https://github.com/greta-dev/greta/issues/567),
   [\#609](https://github.com/greta-dev/greta/issues/609)).
+- [`mcmc()`](https://greta-dev.github.io/greta/dev/reference/inference.md)
+  gives its error suggesting `one_by_one = TRUE` when a numerical error
+  stops sampling before its first draw, which with `verbose = FALSE` is
+  any numerical error, rather than “subscript out of bounds”
+  ([\#577](https://github.com/greta-dev/greta/issues/577)).
 - [`mcmc()`](https://greta-dev.github.io/greta/dev/reference/inference.md)’s
   progress bar reaches its total when `pb_update` does not divide the
   number of iterations, and fills in step with the iterations run; a bar
@@ -306,6 +311,12 @@
   `tolerance`, rather than being guessed from whether it stopped before
   `max_iterations - 1`
   ([\#569](https://github.com/greta-dev/greta/issues/569)).
+- [`stashed_samples()`](https://greta-dev.github.io/greta/dev/reference/inference.md)
+  returns no draws when
+  [`mcmc()`](https://greta-dev.github.io/greta/dev/reference/inference.md)
+  with more than one chain stopped before its first draw, rather than
+  erroring with “length of ‘dimnames’ \[2\] not equal to array extent”
+  ([\#577](https://github.com/greta-dev/greta/issues/577)).
 
 ### Deprecated and defunct
 
