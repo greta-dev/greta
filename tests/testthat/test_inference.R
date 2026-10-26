@@ -705,15 +705,54 @@ test_that("a numerical error at the end of warmup still tunes", {
   expect_equal(sampler$parameters$epsilon, exp(log_epsilon_bar))
 })
 
+test_that("a numerical error stops mcmc() with the one_by_one advice", {
+  skip_if_not(check_tf_version())
+  local_greta_seed()
+  local_sampler_stash()
+  r <- normal(0, 1)
+  m <- singular_at_one_model(r)
+
+  expect_snapshot(
+    error = TRUE,
+    mcmc(
+      m,
+      sampler = rwmh(epsilon = 1),
+      warmup = 0,
+      n_samples = 40,
+      chains = 1,
+      initial_values = initials(r = 0.2),
+      verbose = FALSE
+    )
+  )
+})
+
+test_that("stashed_samples() has no draws when several chains stop before one", {
+  skip_if_not(check_tf_version())
+  local_greta_seed()
+  local_sampler_stash()
+  r <- normal(0, 1)
+  m <- singular_at_one_model(r)
+
+  expect_error(
+    mcmc(
+      m,
+      sampler = rwmh(epsilon = 1),
+      warmup = 0,
+      n_samples = 40,
+      chains = 2,
+      initial_values = list(initials(r = 0.2), initials(r = -0.2)),
+      verbose = FALSE
+    ),
+    "one_by_one = TRUE"
+  )
+  expect_identical(stashed_samples(), list(NULL))
+})
+
 test_that("a numerical error with one_by_one repeats the draw before it", {
   skip_if_not(check_tf_version())
   local_greta_seed()
-  # solve() errors on the singular matrix whenever round(r) is 1 or -1
   r <- normal(0, 1)
-  singular_at_one <- diag(2) + (1 - diag(2)) * round(r)
-  y <- as_data(0.5)
-  distribution(y) <- normal(sum(solve(singular_at_one)), 1)
-  m <- model(r)
+  m <- singular_at_one_model(r)
 
   draws <- mcmc(
     m,
@@ -727,6 +766,7 @@ test_that("a numerical error with one_by_one repeats the draw before it", {
   )
   sampler <- get_model_info(draws)$samplers[[1]]
   expect_gt(sampler$numerical_rejections, 0)
+  expect_equal(coda::niter(draws), 40)
 
   chain <- as.numeric(draws[[1]])
   repeated <- which(duplicated(chain))
@@ -736,12 +776,8 @@ test_that("a numerical error with one_by_one repeats the draw before it", {
 test_that("numerical errors in warmup with one_by_one still tune", {
   skip_if_not(check_tf_version())
   local_greta_seed()
-  # solve() errors on the singular matrix whenever round(r) is 1 or -1
   r <- normal(0, 1)
-  singular_at_one <- diag(2) + (1 - diag(2)) * round(r)
-  y <- as_data(0.5)
-  distribution(y) <- normal(sum(solve(singular_at_one)), 1)
-  m <- model(r)
+  m <- singular_at_one_model(r)
 
   warmup <- 30
   chains <- 2
