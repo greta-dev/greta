@@ -1349,3 +1349,58 @@ batch_crossprods <- function(inputs) {
   crossprods <- apply(inputs, 1, \(a) t(a) %*% a)
   aperm(array(crossprods, c(n_col, n_col, n_batch)), c(3, 1, 2))
 }
+
+# R's garbage collector then Python's, twice: freeing an R object can free a
+# Python object, and freeing that can free R objects
+collect_garbage <- function() {
+  python_gc <- reticulate::import("gc")
+  for (pass in 1:2) {
+    gc()
+    python_gc$collect()
+  }
+}
+
+# how many instances of a Python class are alive once both R's and Python's
+# garbage collectors have run
+count_live_instances <- function(python_class) {
+  collect_garbage()
+  builtins <- reticulate::import_builtins(convert = FALSE)
+  python_gc <- reticulate::import("gc", convert = FALSE)
+  # python_class.__instancecheck__(o) is isinstance(o, python_class); mapping it
+  # in Python avoids converting every live Python object to R
+  is_instance <- reticulate::py_get_attr(python_class, "__instancecheck__")
+  is_each_instance <- builtins$map(is_instance, python_gc$get_objects())
+  reticulate::py_to_r(builtins$sum(is_each_instance))
+}
+
+# how many more instances of a Python class are alive after three more calls
+# of run() than after its first; objects earlier tests left can be freed in the
+# meantime, so this can be negative
+live_instance_growth <- function(python_class, run) {
+  run()
+  before <- count_live_instances(python_class)
+  for (i in 1:3) {
+    run()
+  }
+  count_live_instances(python_class) - before
+}
+
+# fit() on a model of a new greta array, which is dropped afterwards; returns
+# what fit() returns
+fit_fresh_model <- function(fit) {
+  x <- normal(0, 1, dim = 2)
+  fit(model(x))
+}
+
+# whether a model's dag is freed once fit() has used it and the model is
+# dropped
+dag_freed_after <- function(fit) {
+  # a weak reference to the dag doesn't keep it alive, and is emptied once the
+  # dag is freed
+  dag_reference <- fit_fresh_model(function(m) {
+    fit(m)
+    rlang::new_weakref(m$dag)
+  })
+  collect_garbage()
+  is.null(rlang::wref_key(dag_reference))
+}

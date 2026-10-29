@@ -47,6 +47,75 @@ fl <- function(x) {
   tf$constant(x, dtype = tf_float())
 }
 
+# tensorflow::tf_function(), holding f weakly: the traced function reaches f
+# through a weak reference, which keeps f alive only while the handle this
+# returns is kept. tf_function() keeps f alive for as long as the traced
+# function, so a method traced and stored on its own object kept that object,
+# and the model, for the rest of the session (greta-dev/greta#279). Call
+# through the returned handle: another handle to the same traced function
+# doesn't keep f alive. Each trace also clears TFP's bijector cache.
+tf_function_weakly <- function(f, ...) {
+  reference <- new.env(parent = emptyenv())
+  traced <- tensorflow::tf_function(
+    f = call_weakly_held(reference, formals(f)),
+    autograph = FALSE,
+    ...
+  )
+  # f is autographed itself, not the wrapper: autograph rewrites only the body
+  # of the function it is given, and tfautograph's on.exit() errors on a second
+  # on.exit() call, whatever its `add`, so f registers at most one and the
+  # wrapper, left alone, registers the bijector cache's clearing
+  autographed_f <- tfautograph::autograph(f)
+  reference$f <- rlang::new_weakref(environment(traced), value = autographed_f)
+  traced
+}
+
+# a function with the given arguments that calls the function held by the weak
+# reference in reference$f, made here so that its enclosure holds nothing that
+# reaches f
+call_weakly_held <- function(reference, arguments) {
+  # left as a promise, reference would hold on to the frame of
+  # tf_function_weakly(), and f with it, until the first call
+  force(reference)
+  # character() rather than the NULL names() gives a function with no
+  # arguments, which mget() rejects
+  argument_names <- as.character(names(arguments))
+  call_f <- function() {
+    f <- rlang::wref_value(reference$f)
+    # greta calls a traced function only through the handle that keeps f alive
+    if (is.null(f)) {
+      cli::cli_abort(
+        "A traced function was called after the R function it traces was freed",
+        .internal = TRUE
+      )
+    }
+    # TensorFlow calls this only to trace f, so the cache is cleared each time
+    # f has been traced; for f traced inside another traced function, that is
+    # partway through the outer trace
+    on.exit(clear_bijector_cache(), add = TRUE)
+    do.call(f, mget(argument_names, envir = environment()))
+  }
+  formals(call_f) <- arguments
+  call_f
+}
+
+# TFP keeps every bijector's results in one cache for the session, keyed weakly
+# on tensors but holding them strongly. In a traced function they all belong to
+# one graph, so the entries keep the graph alive for the rest of the session.
+# Clearing the cache frees the graph, and drops other bijectors' results, which
+# they compute again if asked. greta-dev/greta#279
+clear_bijector_cache <- function() {
+  # an unsupported TFP version, which GRETA_ALLOW_UNSUPPORTED_DEPS permits, may
+  # keep no such cache, and failing here would fail every graph build
+  if (!reticulate::py_has_attr(tfp$bijectors$Bijector, "_cache")) {
+    return(invisible())
+  }
+  inspect <- reticulate::import("inspect")
+  # the cache every bijector shares, not the view bound to one class
+  shared_cache <- inspect$getattr_static(tfp$bijectors$Bijector, "_cache")
+  shared_cache$clear()
+}
+
 # get the tensor for the batch size in the dag recently defined (since it's
 # not always possible to pass the dag in)
 get_batch_size <- function() {

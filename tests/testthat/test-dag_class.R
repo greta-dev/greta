@@ -29,3 +29,11 @@ test_that("opt() traces only a log-density function for one row", {
   expect_identical(trace_count(one_row), 1L)
   expect_identical(trace_count(m$dag$tf_log_prob_function), 0L)
 })
+
+test_that("a model's traced log density leaves no graph once it is dropped", {
+  skip_if_not(check_tf_version())
+  trace_log_prob <- function() {
+    fit_fresh_model(\(m) adjusted_log_prob(m, matrix(0, 1, 2)))
+  }
+  expect_lte(live_instance_growth(tf$Graph, trace_log_prob), 0)
+})

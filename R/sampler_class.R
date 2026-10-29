@@ -106,7 +106,7 @@ sampler <- R6Class(
     new_tf_iterations = function() {
       float <- tf_float()
       scalar_integer <- tf$TensorSpec(shape = list(), dtype = tf$int32)
-      tensorflow::tf_function(
+      tf_function_weakly(
         f = self$define_iterations,
         input_signature = list(
           # free_state
