@@ -1338,15 +1338,13 @@ collect_garbage <- function() {
 # garbage collectors have run
 count_live_instances <- function(python_class) {
   collect_garbage()
-  python <- reticulate::py_run_string(
-    "
-def count_instances(python_class):
-    import gc
-    return sum(isinstance(o, python_class) for o in gc.get_objects())
-",
-    local = TRUE
-  )
-  python$count_instances(python_class)
+  builtins <- reticulate::import_builtins(convert = FALSE)
+  python_gc <- reticulate::import("gc", convert = FALSE)
+  # python_class.__instancecheck__(o) is isinstance(o, python_class); mapping it
+  # in Python avoids converting every live Python object to R
+  is_instance <- reticulate::py_get_attr(python_class, "__instancecheck__")
+  is_each_instance <- builtins$map(is_instance, python_gc$get_objects())
+  reticulate::py_to_r(builtins$sum(is_each_instance))
 }
 
 # how many more instances of a Python class are alive after three more calls
