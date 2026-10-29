@@ -47,16 +47,13 @@ fl <- function(x) {
   tf$constant(x, dtype = tf_float())
 }
 
-# tensorflow::tf_function(), holding f weakly. reticulate keeps the R function
-# a Python function wraps alive for as long as the Python function, by a
-# reference R's garbage collector cannot see past, so a dag or sampler method
-# whose object keeps the traced function would keep both, and the model,
-# alive for the rest of the session (greta-dev/greta#279). The Python function
-# wraps one that finds f through a weak reference keyed on the R handle to the
-# traced function instead, so f lives as long as that handle. Keep the handle
-# this returns and call through it: a handle reticulate makes afresh from the
-# same Python function does not keep f alive. Each trace also clears TFP's
-# bijector cache, which would otherwise keep the graph (clear_bijector_cache()).
+# tensorflow::tf_function(), holding f weakly: the traced function reaches f
+# through a weak reference, which keeps f alive only while the handle this
+# returns is kept. tf_function() keeps f alive for as long as the traced
+# function, so a method traced and stored on its own object kept that object,
+# and the model, for the rest of the session (greta-dev/greta#279). Call
+# through the returned handle: another handle to the same traced function
+# doesn't keep f alive. Each trace also clears TFP's bijector cache.
 tf_function_weakly <- function(f, ...) {
   reference <- new.env(parent = emptyenv())
   traced <- tensorflow::tf_function(
