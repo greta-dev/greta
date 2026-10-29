@@ -1361,21 +1361,22 @@ live_instance_growth <- function(python_class, run) {
   count_live_instances(python_class) - before
 }
 
-# fit() on a model of a new greta array, which is dropped afterwards
+# fit() on a model of a new greta array, which is dropped afterwards; returns
+# what fit() returns
 fit_fresh_model <- function(fit) {
   x <- normal(0, 1, dim = 2)
   fit(model(x))
-  invisible()
 }
 
 # whether a model's dag is freed once fit() has used it and the model is
 # dropped
 dag_freed_after <- function(fit) {
-  freed <- FALSE
-  fit_fresh_model(function(m) {
-    reg.finalizer(m$dag, \(dag) freed <<- TRUE)
+  # a weak reference to the dag doesn't keep it alive, and is emptied once the
+  # dag is freed
+  dag_reference <- fit_fresh_model(function(m) {
     fit(m)
+    rlang::new_weakref(m$dag)
   })
   collect_garbage()
-  freed
+  is.null(rlang::wref_key(dag_reference))
 }

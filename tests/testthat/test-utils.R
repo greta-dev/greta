@@ -19,22 +19,22 @@ test_that("tf_function_weakly() traces a function with no arguments", {
 
 test_that("tf_function_weakly() keeps f for as long as its handle, no longer", {
   skip_if_not(check_tf_version())
-  freed <- FALSE
-  # f reaches the handle, as a dag method reaches the dag that keeps it
-  traced <- local({
-    held_by_f <- new.env()
-    reg.finalizer(held_by_f, \(env) freed <<- TRUE)
+  # a stand-in for a dag: it keeps the handle, and f reaches back to it, as a
+  # dag method does
+  dag <- local({
+    dag <- new.env()
     twice <- \(x) x * 2
-    held_by_f$traced <- tf_function_weakly(twice)
+    dag$traced <- tf_function_weakly(twice)
+    dag
   })
+  dag_reference <- rlang::new_weakref(dag)
 
   collect_garbage()
-  expect_false(freed)
-  expect_equal(as.numeric(traced(tf$constant(2))), 4)
+  expect_equal(as.numeric(dag$traced(tf$constant(2))), 4)
 
-  rm(traced)
+  rm(dag)
   collect_garbage()
-  expect_true(freed)
+  expect_null(rlang::wref_key(dag_reference))
 })
 
 test_that("a traced function whose R function was freed errors clearly", {
