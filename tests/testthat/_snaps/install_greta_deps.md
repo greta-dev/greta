@@ -9,7 +9,7 @@
       i Installing can take a few minutes.
       i Creating conda environment (Python 3.12)
       x Creating conda environment (Python 3.12) ... failed
-      
+
     Condition
       Error in `new_install_process()`:
       ! Stopping as installation of greta dependencies took longer than 0.001 minutes
@@ -67,7 +67,7 @@
       cat(other_install_fail_msg("could not resolve env", env_exists = FALSE))
     Output
       Stopping as installation of greta dependencies failed
-      An error occured:
+      An error occurred:
       > could not resolve env
       You can perform the installation manually by doing the following:
       Restarting R, then running:
@@ -89,7 +89,7 @@
         env_exists = FALSE, log_written = TRUE))
     Output
       Stopping as installation of greta dependencies failed
-      An error occured:
+      An error occurred:
       > ERROR: Could not find an activated virtualenv (required).
       ! pip is set to refuse installs outside a virtualenv, with `PIP_REQUIRE_VIRTUALENV`. greta installs into a conda environment, which pip does not count as one.
       i For this session, run `Sys.setenv(PIP_REQUIRE_VIRTUALENV = "false")` and install again. To make it permanent, turn it off where it is set: in a shell startup file such as '~/.bashrc' or '~/.zshrc', or in pip's own configuration, which `pip config list` shows.
@@ -105,4 +105,3 @@
       If this does not work, read through installation vignette (`vignette(greta::installation)`), or install a conda environment with `install_greta_deps()`.
       Also feel free to lodge an issue on github at:
       <https://github.com/greta-dev/greta/issues/new>
-

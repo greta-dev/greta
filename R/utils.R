@@ -749,7 +749,7 @@ other_install_fail_msg <- function(
   cli::format_error(
     message = c(
       "Stopping as installation of {.pkg greta} dependencies failed",
-      "An error occured:",
+      "An error occurred:",
       install_output_excerpt(error_passed, output_notes),
       install_failure_advice(output),
       reinstall_advice,
